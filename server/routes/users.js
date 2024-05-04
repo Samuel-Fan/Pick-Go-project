@@ -3,9 +3,22 @@ const User = require("../models/index").user;
 const passport = require("passport");
 const registerValidation = require("../validation").registerValidation;
 
+const authCheck = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    next();
+  } else {
+    return res.status(401).send({ message: "您需要先登入系統" });
+  }
+};
+
 router.use((req, res, next) => {
   console.log("正在接收一個跟'使用者'有關的請求");
   next();
+});
+
+// test
+router.get("/test", authCheck, (req, res) => {
+  return res.send("hello");
 });
 
 // 得到所有使用者資料
@@ -13,6 +26,31 @@ router.get("/", async (req, res) => {
   let dataFound = await User.find({}).exec();
   return res.send(dataFound);
 });
+
+// 登出系統
+router.get("/logout", (req, res) => {
+  req.logOut((err) => {
+    if (err) {
+      return res.status(500).send(err);
+    } else {
+      return res.send({ message: "您已登出系統" });
+    }
+  });
+});
+
+// google登入會員
+router.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+router.get(
+  "/auth/google/redirect",
+  passport.authenticate("google"),
+  (req, res) => {
+    return res.send("登入成功");
+  }
+);
 
 // 登入會員
 router.post("/login", passport.authenticate("local"), (req, res) => {
