@@ -5,10 +5,12 @@ const bcrypt = require("bcrypt");
 const User = require("../models/index").user;
 
 passport.serializeUser(function (user, done) {
+  console.log("serializeUser");
   done(null, user._id);
 });
 
 passport.deserializeUser(async function (_id, done) {
+  console.log("deserializeUser");
   let foundUser = await User.findOne({ _id }).exec();
   done(null, foundUser);
 });
@@ -40,7 +42,9 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "http://localhost:8080/api/users/auth/google/redirect",
+      // callbackURL: "http://localhost:8080/api/users/auth/google/redirect",
+      callbackURL:
+        "https://8080-samuelfan-pickgoproject-063jy55okjc.ws-us110.gitpod.io/api/users/auth/google/redirect",
     },
     async function (accessToken, refreshToken, profile, cb) {
       try {

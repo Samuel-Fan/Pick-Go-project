@@ -2,12 +2,13 @@ const router = require("express").Router();
 const User = require("../models/index").user;
 const passport = require("passport");
 const registerValidation = require("../validation").registerValidation;
+const loginValidation = require("../validation").loginValidation;
 
 const authCheck = (req, res, next) => {
   if (req.isAuthenticated()) {
     next();
   } else {
-    return res.status(401).send({ message: "您需要先登入系統" });
+    return res.status(401).send("您需要先登入系統");
   }
 };
 
@@ -18,13 +19,16 @@ router.use((req, res, next) => {
 
 // test
 router.get("/test", authCheck, (req, res) => {
-  return res.send("hello");
+  return res.send(req.user);
 });
 
 // 得到所有使用者資料
-router.get("/", async (req, res) => {
-  let dataFound = await User.find({}).exec();
-  return res.send(dataFound);
+router.get("/", authCheck, async (req, res) => {
+  try {
+    return res.send(req.user);
+  } catch (e) {
+    return res.status(500).send("伺服器發生問題");
+  }
 });
 
 // 登出系統
@@ -33,7 +37,7 @@ router.get("/logout", (req, res) => {
     if (err) {
       return res.status(500).send(err);
     } else {
-      return res.send({ message: "您已登出系統" });
+      return res.send("您已登出系統");
     }
   });
 });
@@ -53,9 +57,21 @@ router.get(
 );
 
 // 登入會員
-router.post("/login", passport.authenticate("local"), (req, res) => {
-  return res.send(req.user);
-});
+router.post(
+  "/login",
+  (req, res, next) => {
+    let { error } = loginValidation(req.body);
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    } else {
+      next();
+    }
+  },
+  passport.authenticate("local"),
+  (req, res) => {
+    return res.send(req.user);
+  }
+);
 
 // 註冊會員
 router.post("/register", async (req, res) => {
@@ -71,7 +87,7 @@ router.post("/register", async (req, res) => {
     // 查看 email 是否已經註冊過
     let isExisted = await User.findOne({ email }).exec();
     if (isExisted) {
-      return res.status(400).send({ message: "此帳號已註冊過" });
+      return res.status(400).send("此帳號已註冊過");
     }
 
     // 創建新資料
@@ -99,7 +115,7 @@ router.patch("/modify/basic/:_id", async (req, res) => {
     console.log(_id);
     let foundUser = await User.findOne({ _id }).exec();
     if (!foundUser) {
-      return res.status(400).send({ message: "無搜尋到此用戶" });
+      return res.status(400).send("無搜尋到此用戶");
     }
 
     let { email, password } = foundUser;
@@ -126,7 +142,7 @@ router.patch("/modify/basic/:_id", async (req, res) => {
     });
     return res.send({ message: "成功更新資料", savedUser });
   } catch (e) {
-    return res.status(500).send({ message: e.message });
+    return res.status(500).send(e.message);
   }
 });
 
@@ -138,7 +154,7 @@ router.patch("/modify/password/:_id", async (req, res) => {
     console.log(_id);
     let foundUser = await User.findOne({ _id }).exec();
     if (!foundUser) {
-      return res.status(400).send({ message: "無搜尋到此用戶" });
+      return res.status(400).send("無搜尋到此用戶");
     }
 
     let { email } = foundUser;
@@ -159,7 +175,7 @@ router.patch("/modify/password/:_id", async (req, res) => {
     let savedUser = await foundUser.save();
     return res.send({ message: "成功更新資料", savedUser });
   } catch (e) {
-    return res.status(500).send({ message: e.message });
+    return res.status(500).send(e.message);
   }
 });
 
@@ -171,13 +187,13 @@ router.delete("/:_id", async (req, res) => {
     console.log(_id);
     let foundUser = await User.findOne({ _id }).exec();
     if (!foundUser) {
-      return res.status(400).send({ message: "無搜尋到此用戶" });
+      return res.status(400).send("無搜尋到此用戶");
     }
 
     await User.deleteOne({ _id }).exec();
     return res.send({ message: "成功刪除會員" });
   } catch (e) {
-    return res.status(500).send({ message: e.message });
+    return res.status(500).send(e.message);
   }
 });
 

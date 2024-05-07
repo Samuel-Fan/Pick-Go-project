@@ -20,7 +20,12 @@ const registerValidation = (data) => {
         "any.required": "請填寫'確認密碼'",
         "any.only": "您輸入的兩個密碼並不相符，請再試一次",
       }),
-    username: Joi.string(),
+    username: Joi.string().min(3).max(10).required().messages({
+      "any.required": "'暱稱'為必須填寫的項目",
+      "string.empty": "'暱稱'為必須填寫的項目",
+      "string.min": "'暱稱'最少長度為 3 個字",
+      "string.max": "'暱稱'最長長度為 10 個字",
+    }),
     gender: Joi.string().valid("男", "女", "其他").messages({
       "any.only": "性別必須為男、女、其他",
     }),
@@ -36,4 +41,21 @@ const registerValidation = (data) => {
   return Schema.validate(data);
 };
 
-module.exports = { registerValidation };
+const loginValidation = (data) => {
+  const Schema = Joi.object({
+    username: Joi.string().lowercase().required().email().messages({
+      "any.required": "'Email'為必須填寫的項目",
+      "string.empty": "'Email'為必須填寫的項目",
+      "string.email": "請提供一個有效的'Email'",
+    }),
+    password: Joi.string().min(6).required().messages({
+      "any.required": "'密碼'為必須填寫的項目",
+      "string.empty": "'密碼'為必須填寫的項目",
+      "string.min": "'密碼'長度最少長度為 6",
+    }),
+  });
+
+  return Schema.validate(data);
+};
+
+module.exports = { registerValidation, loginValidation };

@@ -25,11 +25,16 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false },
+    cookie: { secure: false, expires: 3600000 },
   })
 );
-
-app.use(cors());
+app.use(
+  cors({
+    origin:
+      "https://3000-samuelfan-pickgoproject-063jy55okjc.ws-us113.gitpod.io",
+    credentials: true,
+  })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());

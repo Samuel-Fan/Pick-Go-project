@@ -1,9 +1,18 @@
-import React from 'react'
+import React from "react";
+import authService from "../service/auth";
 
 const HomeComponent = () => {
-  return (
-    <div>home-component</div>
-  )
-}
+  const test = async () => {
+    try {
+      let result = await authService.get_auth_test();
+      console.log(result);
+      return result;
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
-export default HomeComponent
+  return <button onClick={test}>123</button>;
+};
+
+export default HomeComponent;

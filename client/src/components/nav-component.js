@@ -1,9 +1,24 @@
 import React from "react";
+import authService from "../service/auth";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-const NavComponent = () => {
+const NavComponent = ({ currentUser, setCurrentUser }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      let result = await authService.get_logout();
+      alert(result.data);
+      setCurrentUser("");
+      navigate("/");
+    } catch (e) {
+      alert("某些錯誤發生: " + e);
+    }
+  };
+
   return (
-    <nav className="navbar navbar-expand-lg bg-body-tertiary">
+    <nav className="navbar navbar-expand-lg bg-body-tertiary bg-info-subtle">
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">
           首頁
@@ -44,7 +59,7 @@ const NavComponent = () => {
               Search
             </button>
           </form>
-          <ul className="navbar-nav mb-2 mb-lg-0 ms-auto me-2 ">
+          <ul className="navbar-nav mb-2 mb-lg-0 ms-auto me-5 ">
             <li className="nav-item dropdown">
               <Link
                 className="nav-link dropdown-toggle active"
@@ -53,38 +68,55 @@ const NavComponent = () => {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                我的帳號
+                {currentUser ? currentUser.data.username + " 的" : "我的"}帳號
               </Link>
               <ul className="dropdown-menu ">
-                <li>
-                  <Link className="dropdown-item" to="/login">
-                    登入
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" to="/">
-                    登出
-                  </Link>
-                </li>
-                <li>
-                  <Link className="dropdown-item" href="/">
-                    設定
-                  </Link>
-                </li>
-                <li>
-                  <hr className="dropdown-divider" />
-                </li>
-                <li>
-                  <Link className="dropdown-item " href="/">
-                    檢視我的旅程
-                  </Link>
-                </li>
+                {!currentUser && (
+                  <li>
+                    <Link className="dropdown-item" to="/login">
+                      登入
+                    </Link>
+                  </li>
+                )}
+
+                {currentUser && (
+                  <li>
+                    <Link className="dropdown-item" to="/">
+                      檢視我的旅程
+                    </Link>
+                  </li>
+                )}
+                {currentUser && (
+                  <li>
+                    <Link className="dropdown-item" href="/">
+                      設定
+                    </Link>
+                  </li>
+                )}
+                {currentUser && (
+                  <li>
+                    <hr className="dropdown-divider" />
+                  </li>
+                )}
+                {currentUser && (
+                  <li>
+                    <Link
+                      className="dropdown-item "
+                      href="/"
+                      onClick={handleLogout}
+                    >
+                      登出
+                    </Link>
+                  </li>
+                )}
               </ul>
             </li>
             <li className="nav-item me-2">
-              <Link className="nav-link active" to="/">
-                註冊
-              </Link>
+              {!currentUser && (
+                <Link className="nav-link active" to="/signup">
+                  註冊
+                </Link>
+              )}
             </li>
           </ul>
         </div>
