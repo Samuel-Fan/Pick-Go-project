@@ -1,5 +1,5 @@
 import React from "react";
-import authService from "../service/auth";
+import authService from "../../service/auth";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
@@ -12,6 +12,7 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
       alert(result.data);
       setCurrentUser("");
       navigate("/");
+      navigate(0); // 刷新頁面
     } catch (e) {
       alert("某些錯誤發生: " + e);
     }
@@ -81,16 +82,16 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
 
                 {currentUser && (
                   <li>
-                    <Link className="dropdown-item" to="/">
+                    <a className="dropdown-item" href="/users">
                       檢視我的旅程
-                    </Link>
+                    </a>
                   </li>
                 )}
                 {currentUser && (
                   <li>
-                    <Link className="dropdown-item" href="/">
+                    <a className="dropdown-item" href="/users">
                       設定
-                    </Link>
+                    </a>
                   </li>
                 )}
                 {currentUser && (

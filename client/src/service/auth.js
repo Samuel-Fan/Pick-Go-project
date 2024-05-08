@@ -2,7 +2,7 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 
 const apiURL =
-  "https://8080-samuelfan-pickgoproject-063jy55okjc.ws-us113.gitpod.io";
+  "https://8080-samuelfan-pickgoproject-063jy55okjc.ws-us110.gitpod.io";
 
 // 負責使用者相關與server的互動
 class AuthService {

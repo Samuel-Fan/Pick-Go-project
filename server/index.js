@@ -31,7 +31,7 @@ app.use(
 app.use(
   cors({
     origin:
-      "https://3000-samuelfan-pickgoproject-063jy55okjc.ws-us113.gitpod.io",
+      "https://3000-samuelfan-pickgoproject-063jy55okjc.ws-us110.gitpod.io",
     credentials: true,
   })
 );

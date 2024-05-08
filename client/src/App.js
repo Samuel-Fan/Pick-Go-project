@@ -2,13 +2,14 @@ import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, useEffect } from "react";
 import authService from "./service/auth";
-import Layout from "./components/Layout";
-import HomeComponent from "./components/home-component";
+import Layout from "./components/homePageComponents/Layout";
+import HomeComponent from "./components/homePageComponents/home-component";
 import AppExample from "./AppExample";
-import LoginComponent from "./components/login-component";
-import SignupComponent from "./components/signup-component";
+import LoginComponent from "./components/homePageComponents/login-component";
+import SignupComponent from "./components/homePageComponents/signup-component";
 import Test from "./components/test";
 import MyPageLayout from "./components/myPageComponents/MyPageLayout";
+import Profile from "./components/myPageComponents/profile";
 
 function App() {
   let [currentUser, setCurrentUser] = useState("");
@@ -55,8 +56,18 @@ function App() {
               />
             }
           ></Route>
-          <Route path="myPage" element={<MyPageLayout />}></Route>
           <Route path="test" element={<Test />}></Route>
+        </Route>
+        <Route
+          path="/users"
+          element={
+            <MyPageLayout
+              currentUser={currentUser}
+              setCurrentUser={setCurrentUser}
+            />
+          }
+        >
+          <Route index element={<Profile />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>

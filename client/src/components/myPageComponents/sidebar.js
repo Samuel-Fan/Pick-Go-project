@@ -1,107 +1,93 @@
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
+import authService from "../../service/auth";
 
-const Sidebar = () => {
+const Sidebar = ({ currentUser, setCurrentUser }) => {
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      let result = await authService.get_logout();
+      alert(result.data);
+      setCurrentUser("");
+      navigate("/");
+      navigate(0); // 刷新頁面
+    } catch (e) {
+      alert("某些錯誤發生: " + e);
+    }
+  };
+
   return (
-    // <!--Main Navigation-->
-    <div className="d-flex">
-      <div>
-        {/* <!-- Sidebar --> */}
-        <nav
-          id="sidebarMenu"
-          className="collapse d-lg-block sidebar collapse bg-white"
-        >
-          <div className="position-sticky">
-            <div className="list-group list-group-flush mx-3 mt-4">
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-                aria-current="true"
-              >
-                <i class="fas fa-tachometer-alt fa-fw me-3"></i>
-                <span>Main dashboard</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple active"
-              >
-                <i class="fas fa-chart-area fa-fw me-3"></i>
-                <span>Webiste traffic</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-              >
-                <i className="fas fa-lock fa-fw me-3"></i>
-                <span>Password</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-              >
-                <i className="fas fa-chart-line fa-fw me-3"></i>
-                <span>Analytics</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-              >
-                <i className="fas fa-chart-pie fa-fw me-3"></i>
-                <span>SEO</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-              >
-                <i className="fas fa-chart-bar fa-fw me-3"></i>
-                <span>Orders</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-              >
-                <i className="fas fa-globe fa-fw me-3"></i>
-                <span>International</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-              >
-                <i className="fas fa-building fa-fw me-3"></i>
-                <span>Partners</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-              >
-                <i className="fas fa-calendar fa-fw me-3"></i>
-                <span>Calendar</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-              >
-                <i className="fas fa-users fa-fw me-3"></i>
-                <span>Users</span>
-              </a>
-              <a
-                href="#"
-                className="list-group-item list-group-item-action py-2 ripple"
-              >
-                <i className="fas fa-money-bill fa-fw me-3"></i>
-                <span>Sales</span>
-              </a>
-            </div>
+    <div className="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
+      <a
+        href="/"
+        className="d-flex align-items-center pb-3 mb-md-0 mt-md-3 me-md-auto text-white text-decoration-none white-nav-link"
+      >
+        <i className="fs-4 fa-solid fa-house"></i>{" "}
+        <span className="fs-5 d-none d-sm-inline ms-md-2">回到首頁</span>
+      </a>
+      <ul
+        className="nav nav-pills flex-column mb-sm-auto mb-0 align-items-center align-items-sm-start"
+        id="menu"
+      >
+        <li className="nav-item">
+          <div class="nav-link align-middle px-0 text-white">
+            <span className="ms-1 d-none d-sm-inline ">
+              {currentUser ? currentUser.data.username + " 的" : "我的"}
+              頁面
+            </span>
           </div>
-        </nav>
-        {/* <!-- Sidebar --> */}
-      </div>
-      {/* // <!--Main Navigation--> */}
-      {/* // <!--Main layout--> */}
-      <div style={{ marginTop: "58px" }}>
-        <div class="container pt-4">123</div>
-      </div>
+        </li>
+        <li>
+          <hr />
+          <Link
+            to="/users"
+            data-bs-toggle="collapse"
+            className="nav-link px-0 align-middle"
+          >
+            <i className="fs-4 fa-solid fa-user"></i>{" "}
+            <span className="ms-1 d-none d-sm-inline">個人資訊</span>{" "}
+          </Link>
+        </li>
+        <li>
+          <a href="#" className="nav-link px-0 align-middle">
+            <i className="fs-4 fa-solid fa-location-dot"></i>{" "}
+            <span className="ms-1 d-none d-sm-inline">我的景點</span>
+          </a>
+        </li>
+        <li>
+          <a
+            href="#submenu2"
+            data-bs-toggle="collapse"
+            className="nav-link px-0 align-middle "
+          >
+            <i className="fs-4 fa-solid fa-plane"></i>{" "}
+            <span className="ms-1 d-none d-sm-inline">我的旅程</span>
+          </a>
+          <hr />
+        </li>
+        <li>
+          <a
+            href="#submenu3"
+            data-bs-toggle="collapse"
+            className="nav-link px-0 align-middle white-nav-link"
+          >
+            <i className="fs-4 fa-solid fa-gear"></i>{" "}
+            <span className="ms-1 d-none d-sm-inline ">設定</span>{" "}
+          </a>
+        </li>
+        <li>
+          <a
+            href="/"
+            data-bs-toggle="collapse"
+            className="nav-link px-0 align-middle white-nav-link"
+            onClick={handleLogout}
+          >
+            <i className="fs-4 fa-solid fa-arrow-up-right-from-square"></i>{" "}
+            <span className="ms-1 d-none d-sm-inline ">登出系統</span>{" "}
+          </a>
+        </li>
+      </ul>
     </div>
-    // <!--Main layout-->
   );
 };
 

@@ -1,5 +1,5 @@
 import React from "react";
-import authService from "../service/auth";
+import authService from "../../service/auth";
 
 const HomeComponent = () => {
   const test = async () => {

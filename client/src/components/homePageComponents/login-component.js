@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import authService from "../service/auth";
+import authService from "../../service/auth";
 import { useNavigate } from "react-router-dom";
 
 const LoginComponent = ({ currentUser, setCurrentUser }) => {
@@ -15,6 +15,7 @@ const LoginComponent = ({ currentUser, setCurrentUser }) => {
       setCurrentUser(result);
       alert("成功登入");
       navigate("/");
+      navigate(0); // 刷新頁面
     } catch (e) {
       console.log(e);
       if (e.response && e.response.status === 401) {

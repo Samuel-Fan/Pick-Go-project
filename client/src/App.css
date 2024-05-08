@@ -48,3 +48,12 @@
   background-position: right center;
   background-size: auto 100%;
 }
+
+.white-nav-link {
+  color: white;
+}
+
+.white-nav-link:hover {
+  color: white;
+  opacity: 0.8;
+}
