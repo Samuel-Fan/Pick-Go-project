@@ -10,6 +10,7 @@ import SignupComponent from "./components/homePageComponents/signup-component";
 import Test from "./components/test";
 import MyPageLayout from "./components/myPageComponents/MyPageLayout";
 import Profile from "./components/myPageComponents/profile";
+import EditProfile from "./components/myPageComponents/editProfile";
 
 function App() {
   let [currentUser, setCurrentUser] = useState("");
@@ -19,7 +20,7 @@ function App() {
     authService
       .get_auth_user()
       .then((data) => {
-        setCurrentUser(data);
+        setCurrentUser(data.data);
       })
       .catch((e) => {
         console.log(e);
@@ -40,22 +41,9 @@ function App() {
           <Route path="react" element={<AppExample />}></Route>
           <Route
             path="login"
-            element={
-              <LoginComponent
-                currentUser={currentUser}
-                setCurrentUser={setCurrentUser}
-              />
-            }
+            element={<LoginComponent setCurrentUser={setCurrentUser} />}
           ></Route>
-          <Route
-            path="signup"
-            element={
-              <SignupComponent
-                currentUser={currentUser}
-                setCurrentUser={setCurrentUser}
-              />
-            }
-          ></Route>
+          <Route path="signup" element={<SignupComponent />}></Route>
           <Route path="test" element={<Test />}></Route>
         </Route>
         <Route
@@ -67,7 +55,16 @@ function App() {
             />
           }
         >
-          <Route index element={<Profile />}></Route>
+          <Route index element={<Profile currentUser={currentUser} />}></Route>
+          <Route
+            path="/users/edit"
+            element={
+              <EditProfile
+                currentUser={currentUser}
+                setCurrentUser={setCurrentUser}
+              />
+            }
+          ></Route>
         </Route>
       </Routes>
     </BrowserRouter>

@@ -3,13 +3,13 @@ import { useState, useEffect } from "react";
 import authService from "../../service/auth";
 import { useNavigate } from "react-router-dom";
 
-const SignupComponent = ({ currentUser, setCurrentUser }) => {
+const SignupComponent = () => {
   const navigate = useNavigate();
-  let [username, setUsername] = useState("");
-  let [email, setEmail] = useState("");
-  let [password, setPassword] = useState("");
-  let [confirmPassword, setConfirmPassword] = useState("");
-  let [message, setMessage] = useState("");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleRegister = async () => {
     try {
@@ -23,7 +23,7 @@ const SignupComponent = ({ currentUser, setCurrentUser }) => {
       if (e.response && e.response.status === 400) {
         setMessage(e.response.data);
       } else {
-        // setMessage("伺服器發生問題，請稍後再試");
+        setMessage("伺服器發生問題，請稍後再試");
       }
     }
   };
@@ -52,7 +52,7 @@ const SignupComponent = ({ currentUser, setCurrentUser }) => {
 
   return (
     // Section: Design Block
-    <section class="">
+    <section>
       {/*  Jumbotron */}
       <div
         className="px-4 py-5 px-md-5 text-center text-lg-start"
@@ -86,13 +86,13 @@ const SignupComponent = ({ currentUser, setCurrentUser }) => {
                         onChange={handleEmailInput}
                         onKeyUp={handleEnter}
                       />
-                      <label className="form-label" for="signup-email">
+                      <label className="form-label" htmlFor="signup-email">
                         Email address
                       </label>
                     </div>
 
                     {/*  Password input */}
-                    <div data-mdb-input-init class="form-outline mb-4">
+                    <div data-mdb-input-init className="form-outline mb-4">
                       <input
                         type="password"
                         id="signup-password"
@@ -101,7 +101,7 @@ const SignupComponent = ({ currentUser, setCurrentUser }) => {
                         onChange={handlePasswordInput}
                         onKeyUp={handleEnter}
                       />
-                      <label className="form-label" for="signup-password">
+                      <label className="form-label" htmlFor="signup-password">
                         Password
                       </label>
                     </div>
@@ -117,7 +117,7 @@ const SignupComponent = ({ currentUser, setCurrentUser }) => {
                       />
                       <label
                         className="form-label"
-                        for="signup-confirmpassword"
+                        htmlFor="signup-confirmpassword"
                       >
                         confirmPassword
                       </label>
@@ -131,7 +131,7 @@ const SignupComponent = ({ currentUser, setCurrentUser }) => {
                         onChange={handleUsernameInput}
                         onKeyUp={handleEnter}
                       />
-                      <label className="form-label" for="signup-username">
+                      <label className="form-label" htmlFor="signup-username">
                         username
                       </label>
                     </div>

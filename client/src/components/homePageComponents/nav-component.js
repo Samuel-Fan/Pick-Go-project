@@ -38,12 +38,12 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link active " aria-current="page" to="/">
+              <Link className="nav-link" aria-current="page" to="/">
                 行程瀏覽
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link active" to="/">
+              <Link className="nav-link " to="/">
                 景點瀏覽
               </Link>
             </li>
@@ -63,13 +63,13 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
           <ul className="navbar-nav mb-2 mb-lg-0 ms-auto me-5 ">
             <li className="nav-item dropdown">
               <Link
-                className="nav-link dropdown-toggle active"
+                className="nav-link dropdown-toggle"
                 to="/"
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                {currentUser ? currentUser.data.username + " 的" : "我的"}帳號
+                {currentUser ? currentUser.username + " 的" : "我的"}帳號
               </Link>
               <ul className="dropdown-menu ">
                 {!currentUser && (
@@ -114,7 +114,7 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
             </li>
             <li className="nav-item me-2">
               {!currentUser && (
-                <Link className="nav-link active" to="/signup">
+                <Link className="nav-link" to="/signup">
                   註冊
                 </Link>
               )}

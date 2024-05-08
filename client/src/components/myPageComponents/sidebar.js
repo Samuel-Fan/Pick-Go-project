@@ -22,7 +22,7 @@ const Sidebar = ({ currentUser, setCurrentUser }) => {
         href="/"
         className="d-flex align-items-center pb-3 mb-md-0 mt-md-3 me-md-auto text-white text-decoration-none white-nav-link"
       >
-        <i className="fs-4 fa-solid fa-house"></i>{" "}
+        <i className="fs-4 fa-solid fa-house"></i>
         <span className="fs-5 d-none d-sm-inline ms-md-2">回到首頁</span>
       </a>
       <ul
@@ -30,22 +30,18 @@ const Sidebar = ({ currentUser, setCurrentUser }) => {
         id="menu"
       >
         <li className="nav-item">
-          <div class="nav-link align-middle px-0 text-white">
+          <div className="nav-link align-middle px-0 text-white">
             <span className="ms-1 d-none d-sm-inline ">
-              {currentUser ? currentUser.data.username + " 的" : "我的"}
+              {currentUser ? currentUser.username + " 的" : "我的"}
               頁面
             </span>
           </div>
         </li>
         <li>
           <hr />
-          <Link
-            to="/users"
-            data-bs-toggle="collapse"
-            className="nav-link px-0 align-middle"
-          >
+          <Link to="/users" className="nav-link px-0 align-middle">
             <i className="fs-4 fa-solid fa-user"></i>{" "}
-            <span className="ms-1 d-none d-sm-inline">個人資訊</span>{" "}
+            <span className="ms-1 d-none d-sm-inline">個人資訊</span>
           </Link>
         </li>
         <li>
@@ -55,11 +51,7 @@ const Sidebar = ({ currentUser, setCurrentUser }) => {
           </a>
         </li>
         <li>
-          <a
-            href="#submenu2"
-            data-bs-toggle="collapse"
-            className="nav-link px-0 align-middle "
-          >
+          <a href="#submenu2" className="nav-link px-0 align-middle ">
             <i className="fs-4 fa-solid fa-plane"></i>{" "}
             <span className="ms-1 d-none d-sm-inline">我的旅程</span>
           </a>
@@ -67,18 +59,7 @@ const Sidebar = ({ currentUser, setCurrentUser }) => {
         </li>
         <li>
           <a
-            href="#submenu3"
-            data-bs-toggle="collapse"
-            className="nav-link px-0 align-middle white-nav-link"
-          >
-            <i className="fs-4 fa-solid fa-gear"></i>{" "}
-            <span className="ms-1 d-none d-sm-inline ">設定</span>{" "}
-          </a>
-        </li>
-        <li>
-          <a
             href="/"
-            data-bs-toggle="collapse"
             className="nav-link px-0 align-middle white-nav-link"
             onClick={handleLogout}
           >

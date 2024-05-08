@@ -3,11 +3,11 @@ import { useState } from "react";
 import authService from "../../service/auth";
 import { useNavigate } from "react-router-dom";
 
-const LoginComponent = ({ currentUser, setCurrentUser }) => {
+const LoginComponent = ({ setCurrentUser }) => {
   const navigate = useNavigate();
-  let [username, setUsername] = useState("");
-  let [password, setPassword] = useState("");
-  let [message, setMessage] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleLogin = async () => {
     try {
@@ -65,13 +65,13 @@ const LoginComponent = ({ currentUser, setCurrentUser }) => {
                   onChange={handleUsernameInput}
                   onKeyUp={handleEnter}
                 />
-                <label className="form-label" for="signIn-email">
+                <label className="form-label" htmlFor="signIn-email">
                   Email address
                 </label>
               </div>
 
               {/* <!-- Password input --> */}
-              <div data-mdb-input-init class="form-outline mb-4">
+              <div data-mdb-input-init className="form-outline mb-4">
                 <input
                   type="password"
                   id="signin-password"
@@ -80,7 +80,7 @@ const LoginComponent = ({ currentUser, setCurrentUser }) => {
                   onChange={handlePasswordInput}
                   onKeyUp={handleEnter}
                 />
-                <label className="form-label" for="signin-password">
+                <label className="form-label" htmlFor="signin-password">
                   Password
                 </label>
               </div>

@@ -35,7 +35,7 @@ const registerValidation = (data) => {
       "number.min": "年齡須介於0-120歲",
       "number.max": "年齡須介於0-120歲",
     }),
-    description: Joi.string(),
+    description: Joi.string().allow(null, ""),
   });
 
   return Schema.validate(data);

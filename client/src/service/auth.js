@@ -7,8 +7,8 @@ const apiURL =
 // 負責使用者相關與server的互動
 class AuthService {
   // 登入系統
-  async post_login(username, password) {
-    return await axios.post(apiURL + "/api/users/login", {
+  post_login(username, password) {
+    return axios.post(apiURL + "/api/users/login", {
       username,
       password,
     });
@@ -16,22 +16,27 @@ class AuthService {
 
   // 登出系統
 
-  async get_logout() {
-    return await axios.get(apiURL + "/api/users/logout");
+  get_logout() {
+    return axios.get(apiURL + "/api/users/logout");
   }
 
   // 得到使用者資訊
-  async get_auth_user() {
-    return await axios.get(apiURL + "/api/users");
+  get_auth_user() {
+    return axios.get(apiURL + "/api/users");
   }
 
   // 註冊系統
-  async post_signup(data) {
-    return await axios.post(apiURL + "/api/users/register", data);
+  post_signup(data) {
+    return axios.post(apiURL + "/api/users/register", data);
   }
 
-  async get_auth_test() {
-    return await axios.get(apiURL + "/api/users/test");
+  // 更改用戶資料
+  patch_modify(_id, data) {
+    return axios.patch(apiURL + "/api/users/modify/basic/" + _id, data);
+  }
+
+  get_auth_test() {
+    return axios.get(apiURL + "/api/users/test");
   }
 }
 
