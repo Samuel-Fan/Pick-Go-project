@@ -1,14 +1,14 @@
 const router = require("express").Router();
 const User = require("../models/index").user;
 const passport = require("passport");
-const registerValidation = require("../validation").registerValidation;
-const loginValidation = require("../validation").loginValidation;
+const valid = require("../validation");
+const bcrypt = require("bcrypt");
 
 const authCheck = (req, res, next) => {
   if (req.isAuthenticated()) {
     next();
   } else {
-    return res.status(401).send("您需要先登入系統");
+    return res.status(401).send("您需要先重新登入系統");
   }
 };
 
@@ -45,14 +45,19 @@ router.get("/logout", (req, res) => {
 // google登入會員
 router.get(
   "/auth/google",
-  passport.authenticate("google", { scope: ["profile", "email"] })
+  passport.authenticate("google", {
+    scope: ["profile", "email"],
+    prompt: "select_account",
+  })
 );
 
 router.get(
   "/auth/google/redirect",
   passport.authenticate("google"),
   (req, res) => {
-    return res.send("登入成功");
+    res.redirect(
+      "https://3000-samuelfan-pickgoproject-063jy55okjc.ws-us110.gitpod.io/googleLogin"
+    );
   }
 );
 
@@ -60,7 +65,7 @@ router.get(
 router.post(
   "/login",
   (req, res, next) => {
-    let { error } = loginValidation(req.body);
+    let { error } = valid.loginValidation(req.body);
     if (error) {
       return res.status(400).send(error.details[0].message);
     } else {
@@ -76,7 +81,7 @@ router.post(
 // 註冊會員
 router.post("/register", async (req, res) => {
   // 驗證填入資料的正確性，如果不合規範則 return 錯誤
-  let { error } = registerValidation(req.body);
+  let { error } = valid.registerValidation(req.body);
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
@@ -110,6 +115,7 @@ router.post("/register", async (req, res) => {
 // 修改會員資料(密碼以外)
 router.patch("/modify/basic", authCheck, async (req, res) => {
   let { _id } = req.user;
+
   try {
     // 確認有無此人
     let foundUser = await User.findOne({ _id }).exec();
@@ -117,19 +123,8 @@ router.patch("/modify/basic", authCheck, async (req, res) => {
       return res.status(400).send("無搜尋到此用戶");
     }
 
-    let { email, password } = foundUser;
-    let { username, gender, age, description } = req.body;
-
     // 驗證填入資料的正確性，如果不合規範則 return 錯誤
-    let { error } = registerValidation({
-      email,
-      password,
-      confirmPassword: password,
-      username,
-      gender,
-      age,
-      description,
-    });
+    let { error } = valid.editBasicValidation(req.body);
     if (error) {
       return res.status(400).send(error.details[0].message);
     }
@@ -146,8 +141,8 @@ router.patch("/modify/basic", authCheck, async (req, res) => {
 });
 
 // 修改會員密碼
-router.patch("/modify/password/:_id", async (req, res) => {
-  let { _id } = req.params;
+router.patch("/modify/password", authCheck, async (req, res) => {
+  let { _id } = req.user;
   try {
     // 確認有無此人
     console.log(_id);
@@ -156,12 +151,19 @@ router.patch("/modify/password/:_id", async (req, res) => {
       return res.status(400).send("無搜尋到此用戶");
     }
 
-    let { email } = foundUser;
-    let { password, confirmPassword } = req.body;
+    let { oldPassword, password, confirmPassword } = req.body;
+
+    // 比較舊密碼
+    if (foundUser.password) {
+      // Google註冊的沒有舊密碼
+      let result = await bcrypt.compare(oldPassword, foundUser.password);
+      if (!result) {
+        return res.status(401).send("舊密碼輸入不正確!");
+      }
+    }
 
     // 驗證填入資料的正確性，如果不合規範則 return 錯誤
-    let { error } = registerValidation({
-      email,
+    let { error } = valid.editPasswordValidation({
       password,
       confirmPassword,
     });
@@ -171,8 +173,8 @@ router.patch("/modify/password/:_id", async (req, res) => {
 
     // 更新資料
     foundUser.password = password;
-    let savedUser = await foundUser.save();
-    return res.send({ message: "成功更新資料", savedUser });
+    await foundUser.save();
+    return res.send("成功更新資料");
   } catch (e) {
     return res.status(500).send(e.message);
   }

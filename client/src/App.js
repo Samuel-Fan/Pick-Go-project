@@ -10,22 +10,26 @@ import SignupComponent from "./components/homePageComponents/signup-component";
 import MyPageLayout from "./components/myPageComponents/MyPageLayout";
 import Profile from "./components/myPageComponents/profile";
 import EditProfile from "./components/myPageComponents/editProfile";
+import EditPassword from "./components/myPageComponents/editPassword";
+import GoogleLogin from "./components/homePageComponents/googleLogin";
 
 function App() {
-  let [currentUser, setCurrentUser] = useState("");
+  let [currentUser, setCurrentUser] = useState(
+    JSON.parse(localStorage.getItem("user"))
+  );
 
-  useEffect(() => {
-    // 如果登入仍然有效，currentUser state 存入使用者資料
-    authService
-      .get_auth_user()
-      .then((data) => {
-        setCurrentUser(data.data);
-      })
-      .catch((e) => {
-        window.localStorage.removeItem("auth");
-        setCurrentUser("");
-      });
-  }, []);
+  // useEffect(() => {
+  //   // 如果登入仍然有效，currentUser state 存入使用者資料
+  //   authService
+  //     .get_auth_user()
+  //     .then((data) => {
+  //       setCurrentUser(data.data);
+  //     })
+  //     .catch((e) => {
+  //       window.localStorage.removeItem("auth");
+  //       setCurrentUser("");
+  //     });
+  // }, []);
 
   return (
     <BrowserRouter>
@@ -47,10 +51,11 @@ function App() {
           ></Route>
           <Route path="signup" element={<SignupComponent />}></Route>
         </Route>
+        <Route path="googleLogin" element={<GoogleLogin />}></Route>
         <Route
           path="/users"
           element={
-            !window.localStorage.getItem("auth") ? (
+            !window.localStorage.getItem("user") ? (
               <Navigate to="/login" />
             ) : (
               <MyPageLayout
@@ -69,6 +74,10 @@ function App() {
                 setCurrentUser={setCurrentUser}
               />
             }
+          ></Route>
+          <Route
+            path="/users/editPassword"
+            element={<EditPassword currentUser={currentUser} />}
           ></Route>
         </Route>
       </Routes>

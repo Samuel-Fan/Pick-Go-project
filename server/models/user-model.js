@@ -29,7 +29,7 @@ const userSchema = new Schema({
 
 userSchema.pre("save", async function (next) {
   // 給 google 授權登入繞過用的
-  if (!this.password) {
+  if (!this.password && this.googleID) {
     next();
   }
 

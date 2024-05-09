@@ -10,7 +10,7 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
     try {
       let result = await authService.get_logout();
       alert(result.data);
-      window.localStorage.removeItem("auth");
+      window.localStorage.removeItem("user");
       navigate("/");
       navigate(0); // 刷新頁面
     } catch (e) {

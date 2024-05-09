@@ -33,12 +33,12 @@ const EditProfile = ({ currentUser, setCurrentUser }) => {
     let data = { username, age, gender, description };
     try {
       let result = await authService.patch_modify(data);
-      console.log(result);
+      localStorage.setItem("user", JSON.stringify(result.data.savedUser));
       navigate("/users");
       navigate(0); // 刷新頁面
     } catch (e) {
       if (e.response && e.response.status === 401) {
-        setMessage("請登入後再嘗試");
+        setMessage("請重新登入後再嘗試");
       } else if (e.response && e.response.status === 400) {
         setMessage(e.response.data);
       } else {
@@ -48,27 +48,40 @@ const EditProfile = ({ currentUser, setCurrentUser }) => {
   };
 
   useEffect(() => {
-    // setState
-    setUsername(currentUser.username);
-    setAge(currentUser.age);
-    setGender(currentUser.gender);
-    setDescription(currentUser.description);
+    // 重新取得資料，避免cookie被亂改
+    authService
+      .get_auth_user()
+      .then((data) => {
+        let user = data.data;
+        localStorage.setItem("user", JSON.stringify(user));
+        setCurrentUser(user);
 
-    // 選取預設性別
-    if (currentUser) {
-      switch (currentUser.gender) {
-        case "男":
-          document.querySelector("#gender_male").checked = true;
-          break;
-        case "女":
-          document.querySelector("#gender_female").checked = true;
-          break;
-        case "其他":
-          document.querySelector("#gender_other").checked = true;
-          break;
-      }
-    }
-  }, [currentUser]);
+        // setState
+        setUsername(user.username);
+        setAge(user.age);
+        setGender(user.gender);
+        setDescription(user.description);
+
+        // 選取預設性別
+
+        switch (user.gender) {
+          case "男":
+            document.querySelector("#gender_male").checked = true;
+            break;
+          case "女":
+            document.querySelector("#gender_female").checked = true;
+            break;
+          case "其他":
+            document.querySelector("#gender_other").checked = true;
+            break;
+        }
+      })
+      .catch((e) => {
+        localStorage.removeItem("user");
+        navigate("/login");
+        navigate(0);
+      });
+  }, []);
 
   return (
     <div className="container">

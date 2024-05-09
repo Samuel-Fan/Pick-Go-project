@@ -3,9 +3,6 @@ import { useNavigate } from "react-router-dom";
 
 const Profile = ({ currentUser }) => {
   const navigate = useNavigate();
-  const navigateToEditProfile = () => {
-    navigate("/users/edit");
-  };
 
   // 客製化日期
   const timeConvert = (date) => {
@@ -20,17 +17,20 @@ const Profile = ({ currentUser }) => {
     <div className="container">
       <div className="d-flex flex-wrap">
         <h2 className="me-4 my-2">個人資料頁面</h2>
-        <button
-          type="button"
-          className="mybtn me-4 my-2"
-          data-mdb-ripple-init
-          onClick={navigateToEditProfile}
-        >
-          編輯個人檔案
-        </button>
-        <button type="button" className="mybtn my-2" data-mdb-ripple-init>
-          變更密碼
-        </button>
+        <a href="/users/edit">
+          <button
+            type="button"
+            className="mybtn me-4 my-2"
+            data-mdb-ripple-init
+          >
+            編輯個人檔案
+          </button>
+        </a>
+        <a href="/users/editPassword">
+          <button type="button" className="mybtn my-2" data-mdb-ripple-init>
+            變更密碼
+          </button>
+        </a>
       </div>
       <hr />
       <table className="table" style={{ marginBottom: "0" }}>

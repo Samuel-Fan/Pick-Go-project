@@ -1,8 +1,7 @@
 import axios from "axios";
 axios.defaults.withCredentials = true;
 
-const apiURL =
-  "https://8080-samuelfan-pickgoproject-063jy55okjc.ws-us110.gitpod.io";
+const apiURL = process.env.REACT_APP_API_URL;
 
 // 負責使用者相關與server的互動
 class AuthService {
@@ -17,6 +16,7 @@ class AuthService {
   // 登出系統
 
   get_logout() {
+    console.log(apiURL);
     return axios.get(apiURL + "/api/users/logout");
   }
 
@@ -32,7 +32,12 @@ class AuthService {
 
   // 更改用戶資料
   patch_modify(data) {
-    return axios.patch(apiURL + "/api/users/modify/basic/", data);
+    return axios.patch(apiURL + "/api/users/modify/basic", data);
+  }
+
+  // 更改用戶密碼
+  patch_modify_password(data) {
+    return axios.patch(apiURL + "/api/users/modify/password", data);
   }
 
   get_auth_test() {

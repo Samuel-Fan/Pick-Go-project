@@ -8,7 +8,7 @@ const Sidebar = ({ currentUser, setCurrentUser }) => {
     try {
       let result = await authService.get_logout();
       alert(result.data);
-      window.localStorage.removeItem("auth");
+      window.localStorage.removeItem("user");
       navigate("/");
       navigate(0); // 刷新頁面
     } catch (e) {
@@ -40,32 +40,32 @@ const Sidebar = ({ currentUser, setCurrentUser }) => {
         <li>
           <hr />
           <Link to="/users" className="nav-link px-0 align-middle">
-            <i className="fs-4 fa-solid fa-user"></i>{" "}
+            <i className="fs-4 fa-solid fa-user"></i>
             <span className="ms-1 d-none d-sm-inline">個人資訊</span>
           </Link>
         </li>
         <li>
           <a href="#" className="nav-link px-0 align-middle">
-            <i className="fs-4 fa-solid fa-location-dot"></i>{" "}
+            <i className="fs-4 fa-solid fa-location-dot"></i>
             <span className="ms-1 d-none d-sm-inline">我的景點</span>
           </a>
         </li>
         <li>
           <a href="#submenu2" className="nav-link px-0 align-middle ">
-            <i className="fs-4 fa-solid fa-plane"></i>{" "}
+            <i className="fs-4 fa-solid fa-plane"></i>
             <span className="ms-1 d-none d-sm-inline">我的旅程</span>
           </a>
           <hr />
         </li>
         <li>
-          <a
+          <button
             href="/"
             className="nav-link px-0 align-middle white-nav-link"
             onClick={handleLogout}
           >
-            <i className="fs-4 fa-solid fa-arrow-up-right-from-square"></i>{" "}
-            <span className="ms-1 d-none d-sm-inline ">登出系統</span>{" "}
-          </a>
+            <i className="fs-4 fa-solid fa-arrow-up-right-from-square"></i>
+            <span className="ms-1 d-none d-sm-inline ">登出系統</span>
+          </button>
         </li>
       </ul>
     </div>

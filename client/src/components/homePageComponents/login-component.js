@@ -12,8 +12,7 @@ const LoginComponent = ({ setCurrentUser }) => {
   const handleLogin = async () => {
     try {
       let result = await authService.post_login(username, password);
-      setCurrentUser(result);
-      window.localStorage.setItem("auth", true);
+      window.localStorage.setItem("user", JSON.stringify(result.data));
       alert("成功登入");
       navigate("/");
       navigate(0);
@@ -106,7 +105,8 @@ const LoginComponent = ({ setCurrentUser }) => {
               <div className="divider d-flex align-items-center my-4">
                 <p className="text-center fw-bold mx-3 mb-0 text-muted">OR</p>
               </div>
-
+            </form>
+            <a href={`${process.env.REACT_APP_API_URL}/api/users/auth/google`}>
               <button
                 className="btn btn-lg btn-block btn-primary"
                 style={{ backgroundColor: "#dd4b39" }}
@@ -114,7 +114,7 @@ const LoginComponent = ({ setCurrentUser }) => {
               >
                 <i className="fab fa-google me-2"></i> Continue with google
               </button>
-            </form>
+            </a>
           </div>
         </div>
       </div>

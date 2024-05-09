@@ -154,16 +154,20 @@ const SignupComponent = () => {
                       Sign up
                     </button>
 
-                    {/* <!-- Register buttons --> */}
+                    {/* <!-- Google register buttons --> */}
                     <div className="text-center">
-                      <button
-                        className="btn btn-lg btn-block btn-primary"
-                        style={{ backgroundColor: "#dd4b39" }}
-                        type="submit"
+                      <a
+                        href={`${process.env.REACT_APP_API_URL}/api/users/auth/google`}
                       >
-                        <i className="fab fa-google me-2"></i> Sign up with
-                        google
-                      </button>
+                        <button
+                          className="btn btn-lg btn-block btn-primary"
+                          style={{ backgroundColor: "#dd4b39" }}
+                          type="button"
+                        >
+                          <i className="fab fa-google me-2"></i> Sign up with
+                          google
+                        </button>
+                      </a>
                     </div>
                   </form>
                 </div>
