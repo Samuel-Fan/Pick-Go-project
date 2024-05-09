@@ -108,11 +108,10 @@ router.post("/register", async (req, res) => {
 });
 
 // 修改會員資料(密碼以外)
-router.patch("/modify/basic/:_id", async (req, res) => {
-  let { _id } = req.params;
+router.patch("/modify/basic", authCheck, async (req, res) => {
+  let { _id } = req.user;
   try {
     // 確認有無此人
-    console.log(_id);
     let foundUser = await User.findOne({ _id }).exec();
     if (!foundUser) {
       return res.status(400).send("無搜尋到此用戶");

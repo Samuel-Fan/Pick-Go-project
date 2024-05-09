@@ -13,9 +13,10 @@ const LoginComponent = ({ setCurrentUser }) => {
     try {
       let result = await authService.post_login(username, password);
       setCurrentUser(result);
+      window.localStorage.setItem("auth", true);
       alert("成功登入");
       navigate("/");
-      navigate(0); // 刷新頁面
+      navigate(0);
     } catch (e) {
       console.log(e);
       if (e.response && e.response.status === 401) {

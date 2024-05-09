@@ -31,8 +31,8 @@ class AuthService {
   }
 
   // 更改用戶資料
-  patch_modify(_id, data) {
-    return axios.patch(apiURL + "/api/users/modify/basic/" + _id, data);
+  patch_modify(data) {
+    return axios.patch(apiURL + "/api/users/modify/basic/", data);
   }
 
   get_auth_test() {

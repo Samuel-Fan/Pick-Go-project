@@ -31,14 +31,15 @@ const EditProfile = ({ currentUser, setCurrentUser }) => {
   const handleEditProfile = async (e) => {
     e.preventDefault();
     let data = { username, age, gender, description };
-    let _id = currentUser._id;
     try {
-      let result = await authService.patch_modify(_id, data);
+      let result = await authService.patch_modify(data);
       console.log(result);
       navigate("/users");
       navigate(0); // 刷新頁面
     } catch (e) {
-      if (e.response && e.response.status === 400) {
+      if (e.response && e.response.status === 401) {
+        setMessage("請登入後再嘗試");
+      } else if (e.response && e.response.status === 400) {
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");

@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import authService from "./service/auth";
 import Layout from "./components/homePageComponents/Layout";
@@ -7,7 +7,6 @@ import HomeComponent from "./components/homePageComponents/home-component";
 import AppExample from "./AppExample";
 import LoginComponent from "./components/homePageComponents/login-component";
 import SignupComponent from "./components/homePageComponents/signup-component";
-import Test from "./components/test";
 import MyPageLayout from "./components/myPageComponents/MyPageLayout";
 import Profile from "./components/myPageComponents/profile";
 import EditProfile from "./components/myPageComponents/editProfile";
@@ -23,7 +22,7 @@ function App() {
         setCurrentUser(data.data);
       })
       .catch((e) => {
-        console.log(e);
+        window.localStorage.removeItem("auth");
         setCurrentUser("");
       });
   }, []);
@@ -37,22 +36,28 @@ function App() {
             <Layout currentUser={currentUser} setCurrentUser={setCurrentUser} />
           }
         >
-          <Route index element={<HomeComponent />}></Route>
+          <Route
+            index
+            element={<HomeComponent currentUser={currentUser} />}
+          ></Route>
           <Route path="react" element={<AppExample />}></Route>
           <Route
             path="login"
             element={<LoginComponent setCurrentUser={setCurrentUser} />}
           ></Route>
           <Route path="signup" element={<SignupComponent />}></Route>
-          <Route path="test" element={<Test />}></Route>
         </Route>
         <Route
           path="/users"
           element={
-            <MyPageLayout
-              currentUser={currentUser}
-              setCurrentUser={setCurrentUser}
-            />
+            !window.localStorage.getItem("auth") ? (
+              <Navigate to="/login" />
+            ) : (
+              <MyPageLayout
+                currentUser={currentUser}
+                setCurrentUser={setCurrentUser}
+              />
+            )
           }
         >
           <Route index element={<Profile currentUser={currentUser} />}></Route>

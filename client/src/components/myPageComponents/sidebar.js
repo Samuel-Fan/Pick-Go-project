@@ -8,7 +8,7 @@ const Sidebar = ({ currentUser, setCurrentUser }) => {
     try {
       let result = await authService.get_logout();
       alert(result.data);
-      setCurrentUser("");
+      window.localStorage.removeItem("auth");
       navigate("/");
       navigate(0); // 刷新頁面
     } catch (e) {
