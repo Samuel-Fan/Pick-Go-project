@@ -1,1 +1,4 @@
-module.exports = { user: require("./user-model") };
+module.exports = {
+  user: require("./user-model"),
+  site: require("./site-model"),
+};

@@ -103,9 +103,22 @@ const editPasswordValidation = (data) => {
   return Schema.validate(data);
 };
 
+// 驗證"景點"的資料格式
+const sitesValidation = (data) => {
+  const Schema = Joi.object({
+    photoBinData: Joi.binary(),
+    photoSize: Joi.number().max(1000000).messages({
+      "number.max": "圖片最大只能 1MB ",
+    }),
+  });
+
+  return Schema.validate(data);
+};
+
 module.exports = {
   registerValidation,
   loginValidation,
   editBasicValidation,
   editPasswordValidation,
+  sitesValidation,
 };
