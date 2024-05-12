@@ -34,8 +34,7 @@ app.use(
 );
 app.use(
   cors({
-    origin:
-      "https://3000-samuelfan-pickgoproject-063jy55okjc.ws-us110.gitpod.io",
+    origin: process.env.REDIRECT_URI,
     credentials: true,
   })
 );

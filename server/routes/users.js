@@ -55,9 +55,7 @@ router.get(
   "/auth/google/redirect",
   passport.authenticate("google"),
   (req, res) => {
-    res.redirect(
-      "https://3000-samuelfan-pickgoproject-063jy55okjc.ws-us110.gitpod.io/googleLogin"
-    );
+    res.redirect(process.env.REDIRECT_URI + "/googleLogin");
   }
 );
 
@@ -158,7 +156,7 @@ router.patch("/modify/password", authCheck, async (req, res) => {
       // Google註冊的沒有舊密碼
       let result = await bcrypt.compare(oldPassword, foundUser.password);
       if (!result) {
-        return res.status(401).send("舊密碼輸入不正確!");
+        return res.status(400).send("舊密碼輸入不正確!");
       }
     }
 

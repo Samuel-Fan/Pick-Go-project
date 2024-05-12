@@ -20,6 +20,7 @@ const EditPassword = ({ currentUser }) => {
       navigate("/users");
     } catch (e) {
       if (e.response && e.response.status === 401) {
+        console.log(e.response.data);
         alert("請重新登入後再嘗試");
         localStorage.removeItem("user");
         navigate("/login");

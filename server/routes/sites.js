@@ -1,6 +1,22 @@
 const router = require("express").Router();
 const Site = require("../models/index").site;
 const valid = require("../validation");
+const multer = require("multer");
+const path = require("path");
+const { ImgurClient } = require("imgur");
+
+const upload = multer({
+  limits: {
+    fileSize: 1 * 1024 * 1024,
+  },
+  fileFilter(req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext !== ".jpg" && ext !== ".png" && ext !== ".jpeg") {
+      cb("檔案格式錯誤，僅限上傳 jpg、jpeg 與 png 格式。");
+    }
+    cb(null, true);
+  },
+}).any();
 
 router.get("/", async (req, res) => {
   try {
@@ -12,19 +28,32 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
-  // 驗證填入資料的正確性，如果不合規範則 return 錯誤
-  let { error } = valid.sitesValidation(req.body);
-  if (error) {
-    console.log(error);
-    return res.status(400).send(error.details[0].message);
-  }
+router.post("/", function (req, res, next) {
   try {
-    let { photoBinData } = req.body;
-    let site = new Site({ photoBinData });
-    let result = await site.save();
-    return res.send(result);
+    upload(req, res, async (err) => {
+      if (err) {
+        console.log(err);
+        return res.status(400).send(err);
+      }
+
+      const client = new ImgurClient({
+        clientId: process.env.IMGUR_CLIENTID,
+        clientSecret: process.env.IMGUR_CLIENT_SECRET,
+        refreshToken: process.env.IMGUR_REFRESH_TOKEN,
+      });
+
+      const response = await client.upload({
+        image: req.files[0].buffer.toString("base64"),
+        type: "base64",
+        album: process.env.IMGUR_ALBUM_ID,
+      });
+
+      let site = new Site({ link: response.data.link });
+      await site.save();
+      res.send({ url: response.data.link });
+    });
   } catch (e) {
+    console.log(e);
     res.status(500).send("伺服器發生問題");
   }
 });

@@ -20,14 +20,17 @@ const HomeComponent = ({ currentUser }) => {
   };
 
   const handleUpload = async (file) => {
-    let data = { photoBinData: file.imgCode, photoSize: file.size };
+    const formData = new FormData();
+    formData.append("file-to-upload", file);
+
     try {
-      let result = await siteService.post_site_test(data);
+      let result = await siteService.post_site_test(formData);
       console.log(result);
     } catch (e) {
       console.log(e);
       if (e.response && e.response.status === 400) {
-        setMessage(e.response.data);
+        console.log(e.response.data);
+        setMessage(e.response.data.message || e.response.data); // 前者處理multer file too large 訊息
       } else {
         setMessage("伺服器發生問題，請稍後再試");
       }
@@ -38,13 +41,12 @@ const HomeComponent = ({ currentUser }) => {
     let file = e.target.files[0];
     let size = file.size;
     let type = file.type;
-
     console.log(file);
 
-    if (type !== "image/jpeg" && type !== "image/png") {
+    if (type !== "image/jpeg" && type !== "image/png" && type !== "image/jpg") {
       // 只允許上傳 jpeg 或 png 檔
 
-      setMessage("只能上傳 jpeg 或 png 檔!");
+      setMessage("只能上傳 jpeg, jpg 或 png 檔!");
       document.querySelector("#image-upload").value = null;
     } else if (size > 1000000) {
       // 如果檔案大小大於 1 MB，不允許上傳
@@ -53,15 +55,7 @@ const HomeComponent = ({ currentUser }) => {
       document.querySelector("#image-upload").value = null;
     } else {
       setMessage("");
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = function (e) {
-        // 讀取到的圖片base64 數據編碼 將此編碼字符串傳給後臺即可
-        const imgCode = e.target.result;
-
-        // 上傳照片數據
-        handleUpload({ imgCode, size });
-      };
+      handleUpload(file);
     }
   };
 
@@ -82,9 +76,8 @@ const HomeComponent = ({ currentUser }) => {
       {testState.length !== 0 &&
         testState.map((image) => {
           return (
-            <div className="container" style={{ width: "100px" }}>
-              123
-              <img src={image} className="img-thumbnail" alt="..." />
+            <div className="container" style={{ width: "500px" }}>
+              <img src={image.link} className="img-thumbnail" alt="..." />
             </div>
           );
         })}

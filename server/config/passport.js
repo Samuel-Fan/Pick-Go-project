@@ -43,8 +43,7 @@ passport.use(
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       // callbackURL: "http://localhost:8080/api/users/auth/google/redirect",
-      callbackURL:
-        "https://8080-samuelfan-pickgoproject-063jy55okjc.ws-us110.gitpod.io/api/users/auth/google/redirect",
+      callbackURL: process.env.SERVER_URI + "/api/users/auth/google/redirect",
     },
     async function (accessToken, refreshToken, profile, cb) {
       try {
