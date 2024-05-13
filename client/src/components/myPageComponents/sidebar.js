@@ -2,13 +2,13 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import authService from "../../service/auth";
 
-const Sidebar = ({ currentUser, setCurrentUser }) => {
+const Sidebar = ({ currentUser }) => {
   const navigate = useNavigate();
   const handleLogout = async () => {
     try {
       let result = await authService.get_logout();
       alert(result.data);
-      window.localStorage.removeItem("user");
+      window.localStorage.removeItem("auth");
       navigate("/");
       navigate(0); // 刷新頁面
     } catch (e) {

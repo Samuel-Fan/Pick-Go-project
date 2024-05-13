@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import authService from "../../service/auth";
 import { useNavigate } from "react-router-dom";
 
-const EditPassword = ({ currentUser }) => {
+const EditPassword = ({ currentUser, setCurrentUser }) => {
   const navigate = useNavigate();
 
   const [oldPassword, setOldPassword] = useState("");
@@ -22,7 +22,7 @@ const EditPassword = ({ currentUser }) => {
       if (e.response && e.response.status === 401) {
         console.log(e.response.data);
         alert("請重新登入後再嘗試");
-        localStorage.removeItem("user");
+        localStorage.removeItem("auth");
         navigate("/login");
         navigate(0);
       } else if (e.response && e.response.status === 400) {
@@ -44,6 +44,21 @@ const EditPassword = ({ currentUser }) => {
   const handleConfirmPasswordInput = (e) => {
     setConfirmPassword(e.target.value);
   };
+
+  // 取得使用者資料
+  useEffect(() => {
+    authService
+      .get_auth_user()
+      .then((data) => {
+        let user = data.data;
+        console.log(user);
+        setCurrentUser(user);
+      })
+      .catch((e) => {
+        navigate("/login");
+        navigate(0);
+      });
+  }, []);
 
   return (
     <div className="container">

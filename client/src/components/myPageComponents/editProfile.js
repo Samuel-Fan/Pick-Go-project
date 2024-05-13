@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import authService from "../../service/auth";
 import { useNavigate } from "react-router-dom";
 
-const EditProfile = ({ currentUser, setCurrentUser }) => {
+const EditProfile = () => {
   const navigate = useNavigate();
 
   const [username, setUsername] = useState();
@@ -53,8 +53,6 @@ const EditProfile = ({ currentUser, setCurrentUser }) => {
       .get_auth_user()
       .then((data) => {
         let user = data.data;
-        localStorage.setItem("user", JSON.stringify(user));
-        setCurrentUser(user);
 
         // setState
         setUsername(user.username);
@@ -77,7 +75,6 @@ const EditProfile = ({ currentUser, setCurrentUser }) => {
         }
       })
       .catch((e) => {
-        localStorage.removeItem("user");
         navigate("/login");
         navigate(0);
       });

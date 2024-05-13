@@ -3,7 +3,7 @@ import authService from "../../service/auth";
 import siteService from "../../service/site";
 import { useState } from "react";
 
-const HomeComponent = ({ currentUser }) => {
+const HomeComponent = ({ auth }) => {
   const [image, setImage] = useState("");
   const [testState, setTest] = useState([]);
   const [message, setMessage] = useState("");
@@ -12,7 +12,7 @@ const HomeComponent = ({ currentUser }) => {
     try {
       let result = await authService.get_auth_test();
       console.log(result);
-      console.log(currentUser);
+      console.log(auth);
       return result;
     } catch (e) {
       console.log(e);

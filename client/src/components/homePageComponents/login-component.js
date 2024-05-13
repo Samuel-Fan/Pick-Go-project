@@ -3,7 +3,7 @@ import { useState } from "react";
 import authService from "../../service/auth";
 import { useNavigate } from "react-router-dom";
 
-const LoginComponent = ({ setCurrentUser }) => {
+const LoginComponent = ({ setAuth }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -12,7 +12,10 @@ const LoginComponent = ({ setCurrentUser }) => {
   const handleLogin = async () => {
     try {
       let result = await authService.post_login(username, password);
-      window.localStorage.setItem("user", JSON.stringify(result.data));
+      localStorage.setItem(
+        "auth",
+        JSON.stringify({ _id: result.data._id, username: result.data.username })
+      );
       alert("成功登入");
       navigate("/");
       navigate(0);

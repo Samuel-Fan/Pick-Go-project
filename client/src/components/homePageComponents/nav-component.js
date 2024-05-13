@@ -3,14 +3,14 @@ import authService from "../../service/auth";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
-const NavComponent = ({ currentUser, setCurrentUser }) => {
+const NavComponent = ({ auth }) => {
   const navigate = useNavigate();
-
+  console.log(auth);
   const handleLogout = async () => {
     try {
       let result = await authService.get_logout();
       alert(result.data);
-      window.localStorage.removeItem("user");
+      window.localStorage.removeItem("auth");
       navigate("/");
       navigate(0); // 刷新頁面
     } catch (e) {
@@ -69,10 +69,10 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                {currentUser ? currentUser.username + " 的" : "我的"}帳號
+                {auth ? auth.username + " 的" : "我的"}帳號
               </Link>
               <ul className="dropdown-menu ">
-                {!currentUser && (
+                {!auth && (
                   <li>
                     <Link className="dropdown-item" to="/login">
                       登入
@@ -80,26 +80,26 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
                   </li>
                 )}
 
-                {currentUser && (
+                {auth && (
                   <li>
                     <a className="dropdown-item" href="/users">
                       檢視我的旅程
                     </a>
                   </li>
                 )}
-                {currentUser && (
+                {auth && (
                   <li>
                     <a className="dropdown-item" href="/users">
                       設定
                     </a>
                   </li>
                 )}
-                {currentUser && (
+                {auth && (
                   <li>
                     <hr className="dropdown-divider" />
                   </li>
                 )}
-                {currentUser && (
+                {auth && (
                   <li>
                     <Link
                       className="dropdown-item "
@@ -113,7 +113,7 @@ const NavComponent = ({ currentUser, setCurrentUser }) => {
               </ul>
             </li>
             <li className="nav-item me-2">
-              {!currentUser && (
+              {!auth && (
                 <Link className="nav-link" to="/signup">
                   註冊
                 </Link>

@@ -14,10 +14,9 @@ import EditPassword from "./components/myPageComponents/editPassword";
 import GoogleLogin from "./components/homePageComponents/googleLogin";
 
 function App() {
-  let [currentUser, setCurrentUser] = useState(
-    JSON.parse(localStorage.getItem("user"))
-  );
-
+  let [auth, setAuth] = useState(JSON.parse(localStorage.getItem("auth")));
+  let [currentUser, setCurrentUser] = useState("");
+  console.log(auth);
   // useEffect(() => {
   //   // 如果登入仍然有效，currentUser state 存入使用者資料
   //   authService
@@ -34,20 +33,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <Layout currentUser={currentUser} setCurrentUser={setCurrentUser} />
-          }
-        >
-          <Route
-            index
-            element={<HomeComponent currentUser={currentUser} />}
-          ></Route>
+        <Route path="/" element={<Layout auth={auth} />}>
+          <Route index element={<HomeComponent auth={auth} />}></Route>
           <Route path="react" element={<AppExample />}></Route>
           <Route
             path="login"
-            element={<LoginComponent setCurrentUser={setCurrentUser} />}
+            element={<LoginComponent setAuth={setAuth} />}
           ></Route>
           <Route path="signup" element={<SignupComponent />}></Route>
         </Route>
@@ -55,7 +46,7 @@ function App() {
         <Route
           path="/users"
           element={
-            !window.localStorage.getItem("user") ? (
+            !window.localStorage.getItem("auth") ? (
               <Navigate to="/login" />
             ) : (
               <MyPageLayout
@@ -65,19 +56,24 @@ function App() {
             )
           }
         >
-          <Route index element={<Profile currentUser={currentUser} />}></Route>
           <Route
-            path="/users/edit"
+            index
             element={
-              <EditProfile
+              <Profile
                 currentUser={currentUser}
                 setCurrentUser={setCurrentUser}
               />
             }
           ></Route>
+          <Route path="/users/edit" element={<EditProfile />}></Route>
           <Route
             path="/users/editPassword"
-            element={<EditPassword currentUser={currentUser} />}
+            element={
+              <EditPassword
+                currentUser={currentUser}
+                setCurrentUser={setCurrentUser}
+              />
+            }
           ></Route>
         </Route>
       </Routes>

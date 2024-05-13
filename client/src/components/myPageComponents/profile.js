@@ -1,7 +1,9 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import authService from "../../service/auth";
 
-const Profile = ({ currentUser }) => {
+const Profile = ({ currentUser, setCurrentUser }) => {
   const navigate = useNavigate();
 
   // 客製化日期
@@ -12,6 +14,21 @@ const Profile = ({ currentUser }) => {
     let day = date.getDate();
     return `${year}-${month}-${day}`;
   };
+
+  useEffect(() => {
+    // 重新取得資料，避免cookie被亂改
+    authService
+      .get_auth_user()
+      .then((data) => {
+        let user = data.data;
+        console.log(user);
+        setCurrentUser(user);
+      })
+      .catch((e) => {
+        navigate("/login");
+        navigate(0);
+      });
+  }, []);
 
   return (
     <div className="container">
@@ -26,11 +43,11 @@ const Profile = ({ currentUser }) => {
             編輯個人檔案
           </button>
         </a>
-        <a href="/users/editPassword">
+        <Link to="/users/editPassword">
           <button type="button" className="mybtn my-2" data-mdb-ripple-init>
             變更密碼
           </button>
-        </a>
+        </Link>
       </div>
       <hr />
       <table className="table" style={{ marginBottom: "0" }}>
