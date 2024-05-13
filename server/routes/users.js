@@ -133,7 +133,7 @@ router.patch("/modify/basic", authCheck, async (req, res) => {
       new: true,
       runValidators: true,
     });
-    return res.send({ message: "成功更新資料", savedUser });
+    return res.send(savedUser);
   } catch (e) {
     return res.status(500).send(e.message);
   }
@@ -191,7 +191,7 @@ router.delete("/:_id", async (req, res) => {
     }
 
     await User.deleteOne({ _id }).exec();
-    return res.send({ message: "成功刪除會員" });
+    return res.send("成功刪除會員");
   } catch (e) {
     return res.status(500).send(e.message);
   }

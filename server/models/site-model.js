@@ -9,7 +9,7 @@ const siteSchema = new Schema({
   type: { type: String, enum: ["餐廳", "景點", "購物", "其他"] },
   content: { type: String },
   author: { type: Schema.Types.ObjectId, ref: "User" }, // User 的 primary key
-  photoLink: { type: String }, // 儲存 imgur 網址
+  photo: { url: String, deleteHash: String }, // 儲存 imgur 網址
   createdDate: { type: Date, default: Date.now },
   updateDate: { type: Date, default: Date.now },
   public: { type: Boolean, default: false }, // 公開或不公開

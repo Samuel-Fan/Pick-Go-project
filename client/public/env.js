@@ -21,7 +21,7 @@ window.env = {
   "BROWSER": "/ide/bin/helpers/browser.sh",
   "npm_config_noproxy": "",
   "HOME": "/home/gitpod",
-  "OLDPWD": "/workspace/Pick-Go-project/server",
+  "OLDPWD": "/workspace/Pick-Go-project",
   "TERM_PROGRAM_VERSION": "1.89.0",
   "VSCODE_IPC_HOOK_CLI": "/tmp/vscode-ipc-e34fd629-eeb0-4346-82f5-8de11371ed20.sock",
   "npm_package_json": "/workspace/Pick-Go-project/client/package.json",

@@ -6,6 +6,14 @@ const multer = require("multer");
 const path = require("path");
 const { ImgurClient } = require("imgur");
 
+// imgur 設定
+const client = new ImgurClient({
+  clientId: process.env.IMGUR_CLIENTID,
+  clientSecret: process.env.IMGUR_CLIENT_SECRET,
+  refreshToken: process.env.IMGUR_REFRESH_TOKEN,
+});
+
+// 檢查有無登入
 const authCheck = (req, res, next) => {
   if (req.isAuthenticated()) {
     next();
@@ -14,6 +22,7 @@ const authCheck = (req, res, next) => {
   }
 };
 
+// 照片檔案上傳格式設定
 const upload = multer({
   limits: {
     fileSize: 1 * 1024 * 1024,
@@ -29,9 +38,8 @@ const upload = multer({
 
 router.get("/", async (req, res) => {
   try {
-    let foundData = await Site.find().exec();
-    console.log(foundData);
-    return res.send(foundData);
+    let foundSite = await Site.find({}).populate("author", ["username"]);
+    return res.send(foundSite);
   } catch (e) {
     res.status(500).send("伺服器發生問題");
   }
@@ -40,7 +48,7 @@ router.get("/", async (req, res) => {
 // 測試用 得到全部景點
 router.get("/all", async (req, res) => {
   let foundSite = await Site.find({}).populate("author", ["username"]);
-  res.send(foundSite);
+  return res.send(foundSite);
 });
 
 // 找尋特定景點
@@ -57,19 +65,28 @@ router.get("/:_id", async (req, res) => {
   }
 });
 
-router.post("/", function (req, res, next) {
+// 景點的圖片上傳
+router.post("/:_id", async (req, res, next) => {
+  let { _id } = req.params;
+
   try {
+    // 確認有無此景點
+    let foundSite = await Site.findOne({ _id }).exec();
+    if (!foundSite) {
+      return res.status(400).send("無景點存在");
+    }
+
     upload(req, res, async (err) => {
+      console.log(req);
       if (err) {
         console.log(err);
         return res.status(400).send(err);
       }
 
-      const client = new ImgurClient({
-        clientId: process.env.IMGUR_CLIENTID,
-        clientSecret: process.env.IMGUR_CLIENT_SECRET,
-        refreshToken: process.env.IMGUR_REFRESH_TOKEN,
-      });
+      // 如果原本有圖片，先把舊的刪掉，再更新成新的
+      if (foundSite.photo) {
+        await client.deleteImage(foundSite.photo.deleteHash);
+      }
 
       const response = await client.upload({
         image: req.files[0].buffer.toString("base64"),
@@ -77,9 +94,15 @@ router.post("/", function (req, res, next) {
         album: process.env.IMGUR_ALBUM_ID,
       });
 
-      let site = new Site({ link: response.data.link });
-      await site.save();
-      res.send({ url: response.data.link });
+      foundSite.photo.url = response.data.link;
+      foundSite.photo.deleteHash = response.data.deletehash;
+      let result = await foundSite.save();
+
+      res.send({
+        url: response.data.link,
+        deleteHash: response.data.deletehash,
+        result,
+      });
     });
   } catch (e) {
     console.log(e);
@@ -98,6 +121,8 @@ router.post("/new", authCheck, async (req, res) => {
     if (!foundUser) {
       return res.status(400).send("請重新登入");
     }
+
+    console.log(req.body);
 
     let { title, country, region, type, content } = req.body;
     let site = new Site({
@@ -118,6 +143,77 @@ router.post("/new", authCheck, async (req, res) => {
   } catch (e) {
     console.log(e);
     res.status(500).send("伺服器發生問題");
+  }
+});
+
+// 編輯景點 (照片另外處理)
+router.patch("/:_id", authCheck, async (req, res) => {
+  let { _id } = req.params;
+  try {
+    let foundSite = await Site.findOne({ _id }).exec();
+
+    // 確認有無此景點
+    if (!foundSite) {
+      return res.status(400).send("無此景點存在");
+    }
+
+    let author = foundSite.author;
+
+    // 確認是作者本人
+    if (!author.equals(req.user._id)) {
+      return res.status(401).send("必須是本人才能編輯");
+    }
+
+    // 確認修改資料的格式是否正確
+    let { error } = valid.sitesValidation(req.body); // req.body 應含 title, country, region, type, content
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+    let { title, country, region, type, content } = req.body;
+    let newData = {
+      title,
+      country,
+      region,
+      type,
+      content,
+      updateDate: Date.now(),
+    };
+
+    let savedSite = await Site.findOneAndUpdate({ _id }, newData, {
+      new: true,
+      runValidators: true,
+    });
+
+    return res.send({ message: "成功更新資料", savedSite });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("伺服器發生問題");
+  }
+});
+
+router.delete("/:_id", async (req, res) => {
+  let { _id } = req.params;
+  try {
+    let foundSite = await Site.findOne({ _id }).exec();
+
+    // 確認有無此景點
+    if (!foundSite) {
+      return res.status(400).send("無此景點存在");
+    }
+
+    let author = foundSite.author;
+
+    // 確認是作者本人
+    if (!author.equals(req.user._id)) {
+      return res.status(401).send("必須是本人才能編輯");
+    }
+
+    await Site.findOneAndDelete({ _id });
+
+    return res.send("成功刪除資料");
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("伺服器發生問題");
   }
 });
 

@@ -33,13 +33,16 @@ const EditProfile = () => {
     let data = { username, age, gender, description };
     try {
       let result = await authService.patch_modify(data);
-      localStorage.setItem("user", JSON.stringify(result.data.savedUser));
+      localStorage.setItem("user", JSON.stringify(result.data));
       navigate("/users");
       navigate(0); // 刷新頁面
     } catch (e) {
       if (e.response && e.response.status === 401) {
         setMessage("請重新登入後再嘗試");
-      } else if (e.response && e.response.status === 400) {
+        localStorage.removeItem("auth");
+        navigate("/login");
+        navigate(0);
+      } else if (e.response && e.response.status !== 401) {
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");

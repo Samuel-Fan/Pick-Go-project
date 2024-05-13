@@ -25,7 +25,7 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
         localStorage.removeItem("auth");
         navigate("/login");
         navigate(0);
-      } else if (e.response && e.response.status === 400) {
+      } else if (e.response && e.response.status !== 401) {
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");
