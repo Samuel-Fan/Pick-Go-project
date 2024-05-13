@@ -23,7 +23,6 @@ passport.use(
       if (!foundUser) {
         return done(null, false);
       }
-
       let result = await bcrypt.compare(password, foundUser.password);
       if (!result) {
         return done(null, false);

@@ -77,7 +77,7 @@ const HomeComponent = ({ currentUser }) => {
         testState.map((image) => {
           return (
             <div className="container" style={{ width: "500px" }}>
-              <img src={image.link} className="img-thumbnail" alt="..." />
+              <img src={image.photoLink} className="img-thumbnail" alt="..." />
             </div>
           );
         })}
@@ -90,6 +90,7 @@ const HomeComponent = ({ currentUser }) => {
           )}
         </div>
       )}
+      <img src="https://i.imgur.com/Ceu52iD.png" />
     </div>
   );
 };

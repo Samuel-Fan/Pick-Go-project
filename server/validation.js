@@ -8,10 +8,11 @@ const registerValidation = (data) => {
       "string.empty": "'Email'為必須填寫的項目",
       "string.email": "請提供一個有效的'Email'",
     }),
-    password: Joi.string().min(6).required().messages({
+    password: Joi.string().min(6).max(20).required().messages({
       "any.required": "'密碼'為必須填寫的項目",
       "string.empty": "'密碼'為必須填寫的項目",
       "string.min": "'密碼'長度最少長度為 6",
+      "string.max": "'密碼'長度最長長度為 20",
     }),
     confirmPassword: Joi.string()
       .required()
@@ -86,10 +87,11 @@ const editBasicValidation = (data) => {
 // 驗證會員修改資料(密碼)
 const editPasswordValidation = (data) => {
   const Schema = Joi.object({
-    password: Joi.string().min(6).required().messages({
+    password: Joi.string().min(6).max(20).required().messages({
       "any.required": "'新密碼'為必須填寫的項目",
       "string.empty": "'新密碼'為必須填寫的項目",
       "string.min": "'新密碼'長度最少長度為 6",
+      "string.max": "'密碼'長度最長長度為 20",
     }),
     confirmPassword: Joi.string()
       .required()
@@ -106,9 +108,22 @@ const editPasswordValidation = (data) => {
 // 驗證"景點"的資料格式
 const sitesValidation = (data) => {
   const Schema = Joi.object({
-    photoBinData: Joi.binary(),
-    photoSize: Joi.number().max(1000000).messages({
-      "number.max": "圖片最大只能 1MB ",
+    title: Joi.string().max(20).required().messages({
+      "any.required": "'標題'為必須填寫的項目",
+      "string.empty": "'標題'為必須填寫的項目",
+      "string.max": "'標題'最長長度為 20 個字",
+    }),
+    country: Joi.string().required().valid("日本").messages({
+      "any.only": "'國家'必須為日本",
+      "any.required": "'國家'為必須填寫的項目",
+      "string.empty": "'國家'為必須填寫的項目",
+    }),
+    region: Joi.string(),
+    type: Joi.string().valid("餐廳", "景點", "購物", "其他").messages({
+      "any.only": "類別必須為餐廳、景點、購物或其他",
+    }),
+    content: Joi.string().max(100).messages({
+      "string.max": "'內文'最長長度為 100 個字",
     }),
   });
 

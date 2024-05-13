@@ -18,11 +18,12 @@ router.use((req, res, next) => {
 });
 
 // test
-router.get("/test", authCheck, (req, res) => {
-  return res.send(req.user);
+router.get("/test", async (req, res) => {
+  let user = await User.find({}).populate("mySite").exec();
+  return res.send(user);
 });
 
-// 得到所有使用者資料
+// 得到使用者資料
 router.get("/", authCheck, async (req, res) => {
   try {
     return res.send(req.user);
@@ -42,7 +43,7 @@ router.get("/logout", (req, res) => {
   });
 });
 
-// google登入會員
+// google登入、註冊會員
 router.get(
   "/auth/google",
   passport.authenticate("google", {
@@ -59,11 +60,11 @@ router.get(
   }
 );
 
-// 登入會員
+// local 登入會員
 router.post(
   "/login",
   (req, res, next) => {
-    let { error } = valid.loginValidation(req.body);
+    let { error } = valid.loginValidation(req.body); //req.body 中應有 username, email
     if (error) {
       return res.status(400).send(error.details[0].message);
     } else {
@@ -76,10 +77,10 @@ router.post(
   }
 );
 
-// 註冊會員
+// local 註冊會員
 router.post("/register", async (req, res) => {
   // 驗證填入資料的正確性，如果不合規範則 return 錯誤
-  let { error } = valid.registerValidation(req.body);
+  let { error } = valid.registerValidation(req.body); // req.body 中應至少有 email, password, confirmPassword, username
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
@@ -122,7 +123,7 @@ router.patch("/modify/basic", authCheck, async (req, res) => {
     }
 
     // 驗證填入資料的正確性，如果不合規範則 return 錯誤
-    let { error } = valid.editBasicValidation(req.body);
+    let { error } = valid.editBasicValidation(req.body); // req.body 應有 username, age, gender, description
     if (error) {
       return res.status(400).send(error.details[0].message);
     }

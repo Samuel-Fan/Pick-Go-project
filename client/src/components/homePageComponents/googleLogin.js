@@ -16,8 +16,8 @@ const GoogleLogin = () => {
       })
       .catch((e) => {
         localStorage.removeItem("user");
-        navigate("/login");
-        navigate(0);
+        // navigate("/login");
+        // navigate(0);
       });
   }, []);
   return <div></div>;
