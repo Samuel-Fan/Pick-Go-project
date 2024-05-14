@@ -45,10 +45,10 @@ const Sidebar = ({ currentUser }) => {
           </Link>
         </li>
         <li>
-          <a href="#" className="nav-link px-0 align-middle">
+          <Link to="/users/sites" className="nav-link px-0 align-middle">
             <i className="fs-4 fa-solid fa-location-dot"></i>
             <span className="ms-1 d-none d-sm-inline">我的景點</span>
-          </a>
+          </Link>
         </li>
         <li>
           <a href="#submenu2" className="nav-link px-0 align-middle ">

@@ -102,13 +102,13 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
             onChange={handleConfirmPasswordInput}
           />
         </div>
-        <p className="small mb-2 pb-lg-2">
+        <div className="small mb-2 pb-lg-2">
           {message && (
             <div className="alert alert-danger" role="alert">
               {message}
             </div>
           )}
-        </p>
+        </div>
         <button
           type="button"
           className="btn btn-primary"

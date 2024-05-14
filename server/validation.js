@@ -113,8 +113,8 @@ const sitesValidation = (data) => {
       "string.empty": "'標題'為必須填寫的項目",
       "string.max": "'標題'最長長度為 20 個字",
     }),
-    country: Joi.string().required().valid("日本").messages({
-      "any.only": "'國家'必須為日本",
+    country: Joi.string().required().valid("日本", "臺灣").messages({
+      "any.only": "'國家'必須為日本或臺灣",
       "any.required": "'國家'為必須填寫的項目",
       "string.empty": "'國家'為必須填寫的項目",
     }),
@@ -122,9 +122,7 @@ const sitesValidation = (data) => {
     type: Joi.string().valid("餐廳", "景點", "購物", "其他").messages({
       "any.only": "類別必須為餐廳、景點、購物或其他",
     }),
-    content: Joi.string().max(100).messages({
-      "string.max": "'內文'最長長度為 100 個字",
-    }),
+    content: Joi.string(),
   });
 
   return Schema.validate(data);

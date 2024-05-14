@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 
 const siteSchema = new Schema({
   title: { type: String },
-  country: { type: String, enum: ["日本"] }, // 之後可以再新增
+  country: { type: String, enum: ["日本", "臺灣"] }, // 之後可以再新增
   region: { type: String },
   type: { type: String, enum: ["餐廳", "景點", "購物", "其他"] },
   content: { type: String },

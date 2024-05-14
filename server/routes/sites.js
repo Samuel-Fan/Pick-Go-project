@@ -64,17 +64,28 @@ router.post("/test/upload", async (req, res) => {
   });
 });
 
-// 找尋特定景點
-router.get("/:_id", async (req, res) => {
-  let { _id } = req.params;
-  console.log(_id);
+// // 找尋特定景點
+// router.get("/:_id", async (req, res) => {
+//   let { _id } = req.params;
+//   console.log(_id);
+//   try {
+//     let foundSite = await Site.findOne({ _id })
+//       .populate("author", ["username", "email"])
+//       .exec();
+//     res.send(foundSite);
+//   } catch (e) {
+//     console.log(e, 123);
+//   }
+// });
+
+// 找尋登入使用者建立的景點
+router.get("/mySite", authCheck, async (req, res) => {
+  let { _id } = req.user;
   try {
-    let foundSite = await Site.findOne({ _id })
-      .populate("author", ["username", "email"])
-      .exec();
-    res.send(foundSite);
+    let foundSite = await Site.find({ author: _id }).exec();
+    return res.send(foundSite);
   } catch (e) {
-    console.log(e);
+    return res.status(500).send("伺服器發生問題");
   }
 });
 

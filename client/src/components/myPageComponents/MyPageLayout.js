@@ -1,5 +1,5 @@
 import React from "react";
-import Sidebar from "./sidebar";
+import Sidebar from "./sidebar-component";
 import { Outlet } from "react-router-dom";
 
 const MyPageLayout = ({ currentUser, setCurrentUser }) => {

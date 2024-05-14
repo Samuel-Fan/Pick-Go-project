@@ -17,11 +17,11 @@ const Profile = ({ currentUser, setCurrentUser }) => {
 
   useEffect(() => {
     // 重新取得資料，避免cookie被亂改
+    console.log(currentUser);
     authService
       .get_auth_user()
       .then((data) => {
         let user = data.data;
-        console.log(user);
         setCurrentUser(user);
       })
       .catch((e) => {

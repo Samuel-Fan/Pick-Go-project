@@ -51,7 +51,7 @@ const EditProfile = () => {
   };
 
   useEffect(() => {
-    // 重新取得資料，避免cookie被亂改
+    // 取得使用者資料
     authService
       .get_auth_user()
       .then((data) => {
@@ -175,13 +175,13 @@ const EditProfile = () => {
             onChange={handleDescription}
           ></textarea>
         </div>
-        <p className="small mb-2 pb-lg-2">
+        <div className="small mb-2 pb-lg-2">
           {message && (
             <div className="alert alert-danger" role="alert">
               {message}
             </div>
           )}
-        </p>
+        </div>
         <button type="submit" className="btn btn-primary">
           Submit
         </button>

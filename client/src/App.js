@@ -7,28 +7,17 @@ import HomeComponent from "./components/homePageComponents/home-component";
 import AppExample from "./AppExample";
 import LoginComponent from "./components/homePageComponents/login-component";
 import SignupComponent from "./components/homePageComponents/signup-component";
-import MyPageLayout from "./components/myPageComponents/MyPageLayout";
-import Profile from "./components/myPageComponents/profile";
-import EditProfile from "./components/myPageComponents/editProfile";
-import EditPassword from "./components/myPageComponents/editPassword";
 import GoogleLogin from "./components/homePageComponents/googleLogin";
+import MyPageLayout from "./components/myPageComponents/MyPageLayout";
+import Profile from "./components/myPageComponents/profile-component";
+import EditProfile from "./components/myPageComponents/editProfile-component";
+import EditPassword from "./components/myPageComponents/editPassword-component";
+import Sites from "./components/myPageComponents/sites-component";
+import AddNewSite from "./components/myPageComponents/addNewSite-component";
 
 function App() {
-  let [auth, setAuth] = useState(JSON.parse(localStorage.getItem("auth")));
-  let [currentUser, setCurrentUser] = useState("");
-  console.log(auth);
-  // useEffect(() => {
-  //   // 如果登入仍然有效，currentUser state 存入使用者資料
-  //   authService
-  //     .get_auth_user()
-  //     .then((data) => {
-  //       setCurrentUser(data.data);
-  //     })
-  //     .catch((e) => {
-  //       window.localStorage.removeItem("auth");
-  //       setCurrentUser("");
-  //     });
-  // }, []);
+  let [auth, setAuth] = useState(JSON.parse(localStorage.getItem("auth"))); // 確認登入狀態
+  let [currentUser, setCurrentUser] = useState(""); // 檢視使用者資料
 
   return (
     <BrowserRouter>
@@ -75,6 +64,8 @@ function App() {
               />
             }
           ></Route>
+          <Route path="/users/sites" element={<Sites />}></Route>
+          <Route path="/users/sites/new" element={<AddNewSite />}></Route>
         </Route>
       </Routes>
     </BrowserRouter>
