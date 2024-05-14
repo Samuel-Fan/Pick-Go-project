@@ -12,7 +12,7 @@ class siteService {
 
   // 建立新景點
   post_site_test(data) {
-    return axios.post(apiURL + "/api/sites", data, {
+    return axios.post(apiURL + "/api/sites/test/upload", data, {
       headers: {
         "Content-Type": "multipart/form-data",
         Authorization: "Client-ID {42dd75588885b5e}",

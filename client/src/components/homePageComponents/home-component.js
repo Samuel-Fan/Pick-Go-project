@@ -22,6 +22,7 @@ const HomeComponent = ({ auth }) => {
   const handleUpload = async (file) => {
     const formData = new FormData();
     formData.append("file-to-upload", file);
+    formData.append("title", "日本");
 
     try {
       let result = await siteService.post_site_test(formData);
@@ -30,7 +31,7 @@ const HomeComponent = ({ auth }) => {
       console.log(e);
       if (e.response && e.response.status === 400) {
         console.log(e.response.data);
-        setMessage(e.response.data.message || e.response.data); // 前者處理multer file too large 訊息
+        setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");
       }
