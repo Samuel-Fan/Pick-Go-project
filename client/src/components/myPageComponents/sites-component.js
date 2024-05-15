@@ -65,6 +65,10 @@ const Sites = () => {
                         : "https://mdbcdn.b-cdn.net/img/new/standard/nature/111.webp"
                     }
                     className="img-fluid"
+                    style={{
+                      height: "12rem",
+                      objectFit: "cover",
+                    }}
                   />
 
                   <a href="#!">
