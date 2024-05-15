@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "echo \"hello world\" && node index.js && redis-cli -u redis://default:*******@redis-19204.c281.us-east-1-2.ec2.redns.redis-cloud.com:19204",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "SamuelFan",
@@ -22,6 +23,7 @@
     "nodemailer": "^6.9.13",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "redis": "^4.6.13"
   }
 }

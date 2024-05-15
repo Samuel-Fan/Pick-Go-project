@@ -88,13 +88,14 @@ const LoginComponent = ({ setAuth }) => {
                 </label>
               </div>
 
-              <p className="small mb-2 pb-lg-2">
+              {/* <!-- error message --> */}
+              <div className="small mb-2 pb-lg-2">
                 {message && (
                   <div className="alert alert-danger" role="alert">
                     {message}
                   </div>
                 )}
-              </p>
+              </div>
 
               {/* <!-- Submit button --> */}
               <button

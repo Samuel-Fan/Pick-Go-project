@@ -5,9 +5,11 @@ const valid = require("../validation");
 const multer = require("multer");
 const path = require("path");
 const { ImgurClient } = require("imgur");
+const redis = require("redis");
+const redisClient = require("../redis");
 
 // imgur 設定
-const client = new ImgurClient({
+const imgurClient = new ImgurClient({
   clientId: process.env.IMGUR_CLIENTID,
   clientSecret: process.env.IMGUR_CLIENT_SECRET,
   refreshToken: process.env.IMGUR_REFRESH_TOKEN,
@@ -82,9 +84,23 @@ router.post("/test/upload", async (req, res) => {
 router.get("/mySite", authCheck, async (req, res) => {
   let { _id } = req.user;
   try {
+    // 先搜尋快取中有無數據
+    let dataFromRedis = await redisClient.get(`Site_of_author:${_id}`);
+    if (dataFromRedis) {
+      console.log("利用快取提供資料");
+      return res.send(JSON.parse(dataFromRedis));
+    }
+
     let foundSite = await Site.find({ author: _id }).exec();
+    console.log("利用資料庫存取資料");
+    // 存入快取，時間設定 30 分鐘
+    await redisClient.set(`Site_of_author:${_id}`, JSON.stringify(foundSite), {
+      EX: 30 * 60 * 1,
+    });
+
     return res.send(foundSite);
   } catch (e) {
+    console.log(e);
     return res.status(500).send("伺服器發生問題");
   }
 });
@@ -124,7 +140,7 @@ router.post("/new", authCheck, (req, res) => {
       let url;
       let deletehash;
       if (req.files.length !== 0) {
-        const response = await client.upload({
+        const response = await imgurClient.upload({
           image: req.files[0].buffer.toString("base64"),
           type: "base64",
           album: process.env.IMGUR_ALBUM_ID,
@@ -149,6 +165,10 @@ router.post("/new", authCheck, (req, res) => {
       });
 
       let savedResult = await site.save();
+
+      // 將快取刪掉
+      await redisClient.del(`Site_of_author:${_id}`);
+
       return res.send(savedResult);
     });
   } catch (e) {
@@ -206,9 +226,9 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
       if (req.files.length !== 0) {
         // 如果原本有圖片，先把舊的刪掉，再更新成新的
         if (foundSite.photo) {
-          await client.deleteImage(foundSite.photo.deletehash);
+          await imgurClient.deleteImage(foundSite.photo.deletehash);
         }
-        const response = await client.upload({
+        const response = await imgurClient.upload({
           image: req.files[0].buffer.toString("base64"),
           type: "base64",
           album: process.env.IMGUR_ALBUM_ID,
@@ -263,7 +283,7 @@ router.delete("/:_id", authCheck, async (req, res) => {
 
     let deletehash = foundSite.photo.deletehash;
     await Site.deleteOne({ _id });
-    await client.deleteImage(deletehash);
+    await imgurClient.deleteImage(deletehash);
 
     return res.send("成功刪除資料");
   } catch (e) {

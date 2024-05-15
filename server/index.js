@@ -10,6 +10,7 @@ require("./config/passport");
 const userRoute = require("./routes").users;
 const siteRoute = require("./routes").sites;
 
+// 連線資料庫
 const mongoose = require("mongoose");
 mongoose
   .connect(process.env.MONGODB_URL)
@@ -18,6 +19,17 @@ mongoose
   })
   .catch((e) => {
     console.log("無法連線至mongodb: " + e);
+  });
+
+// 連線 redis (快取)
+const client = require("./redis");
+client
+  .connect()
+  .then(() => {
+    console.log("redis已連線");
+  })
+  .catch((e) => {
+    console.log("無法連線至redis");
   });
 
 app.set("view engine", "ejs"); // 測試照片上傳
@@ -29,7 +41,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: false, expires: 3600000 },
+    cookie: { secure: false, expires: 60 * 60 * 1000 }, // 一小時候過期
   })
 );
 app.use(
