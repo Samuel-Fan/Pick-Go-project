@@ -1,16 +1,43 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import siteService from "../../service/site";
+import { useNavigate } from "react-router-dom";
 
 const Sites = () => {
-  let [sites, setSites] = useState();
-  let [deleteGoal, setDeleteGoal] = useState(); // 設定即將要刪除的目標
+  const navigate = useNavigate();
 
+  let [sites, setSites] = useState();
+  let [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
+
+  // 處理刪除景點
   const handleDelete = (e) => {
-    setDeleteGoal(e.target.name);
-    document.getElementById("siteDeleteConfirm").style.display = "flex";
+    setDeleteId(e.target.name);
+    document.querySelector("#siteDeleteConfirm").style.display = "flex";
+    document.querySelector("#gray_cover").style.display = "block";
   };
 
+  // 確認後不刪除
+  const cancelDelete = () => {
+    setDeleteId("");
+    document.querySelector("#siteDeleteConfirm").style.display = "none";
+    document.querySelector("#gray_cover").style.display = "none";
+  };
+  // 確認後刪除
+  const deleteIt = async () => {
+    try {
+      console.log(deleteId);
+      let result = await siteService.delete_site(deleteId);
+      alert(result.data);
+      navigate(0);
+    } catch (e) {
+      console.log(e);
+    }
+    document.querySelector("#siteDeleteConfirm").style.display = "none";
+    document.querySelector("#gray_cover").style.display = "none";
+    setDeleteId("");
+  };
+
+  // 進網頁時先讀取資料
   useEffect(() => {
     siteService
       .get_mySite()
@@ -20,7 +47,9 @@ const Sites = () => {
         setSites(result);
       })
       .catch((e) => {
-        console.log(e);
+        if (e.response.status === 401) {
+          navigate("/login");
+        }
       });
   }, []);
   return (
@@ -112,7 +141,7 @@ const Sites = () => {
         id="siteDeleteConfirm"
         className="bg-light-subtle justify-content-center align-items-center rounded"
         style={{
-          display: "flex",
+          display: "none",
           height: "8rem",
           width: "15rem",
           position: "fixed",
@@ -127,22 +156,26 @@ const Sites = () => {
             <button
               type="button"
               className="deleteConfirmButton bg-success-subtle"
+              onClick={cancelDelete}
             >
               取消
             </button>
             <button
               type="button"
               className="deleteConfirmButton bg-danger-subtle"
+              onClick={deleteIt}
             >
               刪除
             </button>
           </div>
         </div>
       </div>
+
       {/* 遮罩 */}
       <div
         id="gray_cover"
         style={{
+          display: "none",
           height: "100vh",
           width: "100vw",
           opacity: "80%",

@@ -24,7 +24,7 @@ const AddNewSiteComponent = () => {
     formData.append("content", content);
 
     try {
-      let result = await siteService.post_site_test(formData);
+      let result = await siteService.post_new_site(formData);
       console.log(result);
       alert("新增完成");
       navigate("/users/sites");

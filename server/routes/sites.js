@@ -265,6 +265,7 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
 });
 
 router.delete("/:_id", authCheck, async (req, res) => {
+  console.log("123");
   let { _id } = req.params;
   try {
     let foundSite = await Site.findOne({ _id }).exec();
@@ -284,6 +285,9 @@ router.delete("/:_id", authCheck, async (req, res) => {
     let deletehash = foundSite.photo.deletehash;
     await Site.deleteOne({ _id });
     await imgurClient.deleteImage(deletehash);
+
+    // 將快取刪掉
+    await redisClient.del(`Site_of_author:${req.user._id}`);
 
     return res.send("成功刪除資料");
   } catch (e) {
