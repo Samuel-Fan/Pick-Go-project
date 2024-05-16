@@ -1,13 +1,15 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import siteService from "../../service/site";
-import { useNavigate } from "react-router-dom";
+import siteService from "../../../service/site";
+import { useNavigate, Link } from "react-router-dom";
 
 const Sites = () => {
   const navigate = useNavigate();
 
   let [sites, setSites] = useState();
   let [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
+
+  // 連結至景點詳細資料
 
   // 處理刪除景點
   const handleDelete = (e) => {
@@ -69,42 +71,40 @@ const Sites = () => {
                   data-mdb-ripple-color="light"
                   style={{ height: "12rem" }}
                 >
-                  <img
-                    src={
-                      site.photo
-                        ? site.photo.url
-                        : "https://mdbcdn.b-cdn.net/img/new/standard/nature/111.webp"
-                    }
-                    className="img-fluid"
-                    style={{
-                      objectFit: "cover",
-                    }}
-                  />
-
-                  <a href="#!">
-                    <div
-                      className="mask"
-                      style={{ backgroundColor: "rgba(251, 251, 251, 0.15)" }}
-                    ></div>
-                  </a>
+                  <Link to={"/users/sites/" + site._id}>
+                    <img
+                      src={
+                        site.photo
+                          ? site.photo.url
+                          : "https://raw.githubusercontent.com/Samuel-Fan/photo/main/%E7%84%A1%E7%9B%B8%E7%89%87.JPG"
+                      }
+                      className="img-fluid"
+                      style={{
+                        objectFit: "cover",
+                        height: "100%",
+                        borderBottom: "1px solid black",
+                      }}
+                    />
+                  </Link>
                 </div>
 
                 <div className="card-body">
                   <h5 className="card-title">{site.title}</h5>
-                  <p className="card-text" style={{ height: "4.5rem" }}>
-                    {site.content.length >= 40
-                      ? site.content.slice(0, 40) + "..."
+                  <p className="card-text" style={{ height: "2.5rem" }}>
+                    {site.content.length >= 30
+                      ? site.content.slice(0, 30) + "..."
                       : site.content}
                   </p>
+                  <Link to={"/users/sites/" + site._id}>顯示更多</Link>
                   <hr />
                   <div className="d-flex align-items-center">
-                    <a
-                      href="#!"
+                    <Link
+                      to="#"
                       className="btn bg-primary-subtle"
                       data-mdb-ripple-init
                     >
                       編輯
-                    </a>
+                    </Link>
                     <button
                       href="#!"
                       className="btn bg-danger-subtle ms-2"

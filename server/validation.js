@@ -122,7 +122,7 @@ const sitesValidation = (data) => {
     type: Joi.string().valid("餐廳", "景點", "購物", "其他").messages({
       "any.only": "類別必須為餐廳、景點、購物或其他",
     }),
-    content: Joi.string(),
+    content: Joi.string().allow(null, ""),
   });
 
   return Schema.validate(data);

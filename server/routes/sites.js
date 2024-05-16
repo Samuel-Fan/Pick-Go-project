@@ -38,47 +38,25 @@ const upload = multer({
   },
 }).any();
 
-router.get("/", async (req, res) => {
-  try {
-    let foundSite = await Site.find({}).populate("author", ["username"]);
-    return res.send(foundSite);
-  } catch (e) {
-    res.status(500).send("伺服器發生問題");
-  }
-});
-
 // <<測試用>> 得到全部景點
 router.get("/all", async (req, res) => {
   let foundSite = await Site.find({}).populate("author", ["username"]);
   return res.send(foundSite);
 });
 
-// <<測試用>> 上傳資料設定
-router.post("/test/upload", async (req, res) => {
-  console.log(req.body);
-  upload(req, res, async (err) => {
-    console.log(req.files);
-    console.log(req.body.title);
-    if (err) {
-      console.log(err);
-      return res.status(400).send(err);
-    }
-  });
+// 找尋特定景點
+router.get("/detail/:_id", async (req, res) => {
+  let { _id } = req.params;
+  console.log(_id);
+  try {
+    let foundSite = await Site.findOne({ _id })
+      .populate("author", ["username", "email"])
+      .exec();
+    return res.send(foundSite);
+  } catch (e) {
+    return res.status(500).send("伺服器發生問題");
+  }
 });
-
-// // 找尋特定景點
-// router.get("/:_id", async (req, res) => {
-//   let { _id } = req.params;
-//   console.log(_id);
-//   try {
-//     let foundSite = await Site.findOne({ _id })
-//       .populate("author", ["username", "email"])
-//       .exec();
-//     res.send(foundSite);
-//   } catch (e) {
-//     console.log(e, 123);
-//   }
-// });
 
 // 找尋登入使用者建立的景點
 router.get("/mySite", authCheck, async (req, res) => {
@@ -265,8 +243,8 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
 });
 
 router.delete("/:_id", authCheck, async (req, res) => {
-  console.log("123");
   let { _id } = req.params;
+  console.log(_id);
   try {
     let foundSite = await Site.findOne({ _id }).exec();
 

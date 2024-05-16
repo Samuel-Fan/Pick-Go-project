@@ -10,6 +10,11 @@ class siteService {
     return axios.get(apiURL + "/api/sites/mySite");
   }
 
+  // 查詢景點詳細資訊
+  get_site_detail(_id) {
+    return axios.get(apiURL + "/api/sites/detail/" + _id);
+  }
+
   // 建立新景點
   post_new_site(data) {
     return axios.post(apiURL + "/api/sites/new", data, {

@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import siteService from "../../service/site";
+import siteService from "../../../service/site";
 import { useNavigate } from "react-router-dom";
 
 const AddNewSiteComponent = () => {
@@ -251,6 +251,7 @@ const AddNewSiteComponent = () => {
           <textarea
             className="form-control"
             id="content_site"
+            style={{whiteSpace: "pre-line"}}
             onChange={handleContent}
           ></textarea>
         </div>

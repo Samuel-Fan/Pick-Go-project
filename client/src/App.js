@@ -9,11 +9,13 @@ import LoginComponent from "./components/homePageComponents/login-component";
 import SignupComponent from "./components/homePageComponents/signup-component";
 import GoogleLogin from "./components/homePageComponents/googleLogin";
 import MyPageLayout from "./components/myPageComponents/MyPageLayout";
-import Profile from "./components/myPageComponents/profile-component";
-import EditProfile from "./components/myPageComponents/editProfile-component";
-import EditPassword from "./components/myPageComponents/editPassword-component";
-import Sites from "./components/myPageComponents/sites-component";
-import AddNewSite from "./components/myPageComponents/addNewSite-component";
+import Profile from "./components/myPageComponents/profile/profile-component";
+import EditProfile from "./components/myPageComponents/profile/editProfile-component";
+import EditPassword from "./components/myPageComponents/profile/editPassword-component";
+import Sites from "./components/myPageComponents/site/sites-component";
+import AddNewSite from "./components/myPageComponents/site/addNewSite-component";
+import SiteDetail from "./components/myPageComponents/site/siteDetail-component";
+import NotFound from "./components/homePageComponents/notFound";
 
 function App() {
   let [auth, setAuth] = useState(JSON.parse(localStorage.getItem("auth"))); // 確認登入狀態
@@ -66,7 +68,9 @@ function App() {
           ></Route>
           <Route path="/users/sites" element={<Sites />}></Route>
           <Route path="/users/sites/new" element={<AddNewSite />}></Route>
+          <Route path="/users/sites/:site_id" element={<SiteDetail />}></Route>
         </Route>
+        <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </BrowserRouter>
   );

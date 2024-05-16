@@ -84,3 +84,7 @@
   width: 6rem;
   border: none;
 }
+
+.deleteConfirmButton:hover {
+  opacity: 0.8;
+}

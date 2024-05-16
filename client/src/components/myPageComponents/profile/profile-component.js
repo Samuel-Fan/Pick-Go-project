@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import authService from "../../service/auth";
+import authService from "../../../service/auth";
 
 const Profile = ({ currentUser, setCurrentUser }) => {
   const navigate = useNavigate();
@@ -37,14 +37,20 @@ const Profile = ({ currentUser, setCurrentUser }) => {
         <a href="/users/edit">
           <button
             type="button"
-            className="mybtn me-4 my-2"
+            className="mybtn me-4"
             data-mdb-ripple-init
+            style={{ marginTop: "0.8rem" }}
           >
             編輯個人檔案
           </button>
         </a>
         <Link to="/users/editPassword">
-          <button type="button" className="mybtn my-2" data-mdb-ripple-init>
+          <button
+            type="button"
+            className="mybtn"
+            data-mdb-ripple-init
+            style={{ marginTop: "0.8rem" }}
+          >
             變更密碼
           </button>
         </Link>
