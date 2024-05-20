@@ -45,11 +45,12 @@ const Sites = () => {
       .get_mySite()
       .then((data) => {
         let result = data.data;
-        console.log(sites);
+        console.log(result);
         setSites(result);
       })
       .catch((e) => {
         if (e.response.status === 401) {
+          localStorage.removeItem("auth");
           navigate("/login");
         }
       });
@@ -99,7 +100,7 @@ const Sites = () => {
                   <hr />
                   <div className="d-flex align-items-center">
                     <Link
-                      to="#"
+                      to={"/users/sites/edit/" + site._id}
                       className="btn bg-primary-subtle"
                       data-mdb-ripple-init
                     >

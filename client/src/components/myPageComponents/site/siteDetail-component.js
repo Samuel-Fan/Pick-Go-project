@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import siteService from "../../../service/site";
 
-const siteDetailComponent = () => {
+const SiteDetailComponent = () => {
   const navigate = useNavigate();
 
   const { site_id } = useParams();
@@ -185,4 +185,4 @@ const siteDetailComponent = () => {
   );
 };
 
-export default siteDetailComponent;
+export default SiteDetailComponent;

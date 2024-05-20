@@ -25,6 +25,16 @@ class siteService {
     });
   }
 
+  // 編輯景點
+  patch_edit_site(_id, data) {
+    return axios.patch(apiURL + "/api/sites/modify/" + _id, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Authorization: "Client-ID {42dd75588885b5e}",
+      },
+    });
+  }
+
   // 刪除景點
   delete_site(_id) {
     return axios.delete(apiURL + "/api/sites/" + _id);

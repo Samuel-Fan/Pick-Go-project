@@ -47,7 +47,6 @@ router.get("/all", async (req, res) => {
 // 找尋特定景點
 router.get("/detail/:_id", async (req, res) => {
   let { _id } = req.params;
-  console.log(_id);
   try {
     let foundSite = await Site.findOne({ _id })
       .populate("author", ["username", "email"])
@@ -85,9 +84,6 @@ router.get("/mySite", authCheck, async (req, res) => {
 
 // 新增新的景點
 router.post("/new", authCheck, (req, res) => {
-  // 取得上傳者_id
-  let { _id } = req.user;
-
   try {
     upload(req, res, async (err) => {
       // req.files 包含 圖片檔案
@@ -117,6 +113,7 @@ router.post("/new", authCheck, (req, res) => {
       // 圖片上傳 imgur ，取得 url 及 deleteHash
       let url;
       let deletehash;
+      let photoName;
       if (req.files.length !== 0) {
         const response = await imgurClient.upload({
           image: req.files[0].buffer.toString("base64"),
@@ -126,6 +123,7 @@ router.post("/new", authCheck, (req, res) => {
 
         url = response.data.link;
         deletehash = response.data.deletehash;
+        photoName = req.files[0].originalname;
       }
 
       // 將景點資訊儲存至資料庫
@@ -135,17 +133,18 @@ router.post("/new", authCheck, (req, res) => {
         region,
         type,
         content,
-        author: _id,
+        author: req.user._id,
         photo: {
           url,
           deletehash,
+          photoName,
         },
       });
 
       let savedResult = await site.save();
 
       // 將快取刪掉
-      await redisClient.del(`Site_of_author:${_id}`);
+      await redisClient.del(`Site_of_author:${req.user._id}`);
 
       return res.send(savedResult);
     });
@@ -184,7 +183,8 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
       }
 
       // 如景點規格不符，則返回客製化錯誤訊息
-      let { title, country, region, type, content } = req.body;
+      let { title, country, region, type, content, removeOriginPhoto } =
+        req.body;
       console.log(title, country, region, type, content);
       let { error } = valid.sitesValidation({
         title,
@@ -201,11 +201,16 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
       // 新圖片上傳 imgur ，取得 url 及 deleteHash
       let url;
       let deletehash;
+      let photoName;
+
+      // 若要求刪除舊照片 or 有更新成新照片
+      if (removeOriginPhoto === "true") {
+        await imgurClient.deleteImage(foundSite.photo.deletehash);
+      }
+
       if (req.files.length !== 0) {
         // 如果原本有圖片，先把舊的刪掉，再更新成新的
-        if (foundSite.photo) {
-          await imgurClient.deleteImage(foundSite.photo.deletehash);
-        }
+
         const response = await imgurClient.upload({
           image: req.files[0].buffer.toString("base64"),
           type: "base64",
@@ -214,6 +219,7 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
 
         url = response.data.link;
         deletehash = response.data.deletehash;
+        photoName = req.files[0].originalname;
       }
 
       // 將景點資訊儲存至資料庫
@@ -224,16 +230,26 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
         type,
         content,
         photo: {
-          url: !url ? foundSite.photo.url : url, // 確認圖片有無更新
-          deletehash: !deletehash ? foundSite.photo.deletehash : deletehash, // 確認圖片有無更新
+          url: removeOriginPhoto === "true" ? url : foundSite.photo.url,
+          deletehash:
+            removeOriginPhoto === "true"
+              ? deletehash
+              : foundSite.photo.deletehash,
+          photoName:
+            removeOriginPhoto === "true"
+              ? photoName
+              : foundSite.photo.photoName,
         },
         updateDate: Date.now(),
       };
-
       let updateResult = await Site.findOneAndUpdate({ _id }, newData, {
         new: true,
         runValidators: true,
       });
+
+      // 將快取刪掉
+      await redisClient.del(`Site_of_author:${req.user._id}`);
+
       return res.send({ message: "成功更新資料", updateResult });
     });
   } catch (e) {

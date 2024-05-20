@@ -63,24 +63,32 @@ const AddNewSiteComponent = () => {
   };
 
   const handleImage = (e) => {
-    let file = e.target.files[0];
-    let size = file.size;
-    let type = file.type;
-    console.log(file);
+    if (e.target.files[0]) {
+      let file = e.target.files[0];
+      let size = file.size;
+      let type = file.type;
+      console.log(file);
 
-    if (type !== "image/jpeg" && type !== "image/png" && type !== "image/jpg") {
-      // 只允許上傳 jpeg 或 png 檔
+      if (
+        type !== "image/jpeg" &&
+        type !== "image/png" &&
+        type !== "image/jpg"
+      ) {
+        // 只允許上傳 jpeg 或 png 檔
 
-      setMessage("只能上傳 jpeg, jpg 或 png 檔!");
-      document.querySelector("#photo_site").value = null;
-    } else if (size > 1000000) {
-      // 如果檔案大小大於 1 MB，不允許上傳
+        setMessage("只能上傳 jpeg, jpg 或 png 檔!");
+        document.querySelector("#photo_site").value = null;
+      } else if (size > 1000000) {
+        // 如果檔案大小大於 1 MB，不允許上傳
 
-      setMessage("圖片過大，請使用其它方式上傳！");
-      document.querySelector("#photo_site").value = null;
+        setMessage("圖片過大，請使用其它方式上傳！");
+        document.querySelector("#photo_site").value = null;
+      } else {
+        setMessage("");
+        setPhoto(file);
+      }
     } else {
-      setMessage("");
-      setPhoto(file);
+      setPhoto("");
     }
   };
 
@@ -251,7 +259,7 @@ const AddNewSiteComponent = () => {
           <textarea
             className="form-control"
             id="content_site"
-            style={{whiteSpace: "pre-line"}}
+            style={{ whiteSpace: "pre-line" }}
             onChange={handleContent}
           ></textarea>
         </div>

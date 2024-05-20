@@ -15,6 +15,8 @@ import EditPassword from "./components/myPageComponents/profile/editPassword-com
 import Sites from "./components/myPageComponents/site/sites-component";
 import AddNewSite from "./components/myPageComponents/site/addNewSite-component";
 import SiteDetail from "./components/myPageComponents/site/siteDetail-component";
+import EditSite from "./components/myPageComponents/site/editSite-component";
+import NoAuth from "./components/myPageComponents/noAuth-component";
 import NotFound from "./components/homePageComponents/notFound";
 
 function App() {
@@ -68,8 +70,13 @@ function App() {
           ></Route>
           <Route path="/users/sites" element={<Sites />}></Route>
           <Route path="/users/sites/new" element={<AddNewSite />}></Route>
+          <Route
+            path="/users/sites/edit/:site_id"
+            element={<EditSite />}
+          ></Route>
           <Route path="/users/sites/:site_id" element={<SiteDetail />}></Route>
         </Route>
+        <Route path="/noAuth" element={<NoAuth />}></Route>
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </BrowserRouter>
