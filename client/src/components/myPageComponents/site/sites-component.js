@@ -70,22 +70,32 @@ const Sites = () => {
                   className="bg-image hover-overlay"
                   data-mdb-ripple-init
                   data-mdb-ripple-color="light"
-                  style={{ height: "12rem" }}
+                  style={{ height: "12rem", borderBottom: "1px solid black" }}
                 >
-                  <Link to={"/users/sites/" + site._id}>
-                    <img
-                      src={
-                        site.photo
-                          ? site.photo.url
-                          : "https://raw.githubusercontent.com/Samuel-Fan/photo/main/%E7%84%A1%E7%9B%B8%E7%89%87.JPG"
-                      }
-                      className="img-fluid"
-                      style={{
-                        objectFit: "cover",
-                        height: "100%",
-                        borderBottom: "1px solid black",
-                      }}
-                    />
+                  <Link
+                    to={"/site/" + site._id}
+                    style={{ textDecoration: "none" }}
+                  >
+                    {site.photo ? (
+                      <img
+                        src={site.photo.url}
+                        className="img-fluid"
+                        style={{
+                          objectFit: "cover",
+                          height: "100%",
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          fontSize: "3rem",
+                          transform: "rotate(20deg) translate(40px,50px)",
+                          color: "black",
+                        }}
+                      >
+                        No photo
+                      </div>
+                    )}
                   </Link>
                 </div>
 

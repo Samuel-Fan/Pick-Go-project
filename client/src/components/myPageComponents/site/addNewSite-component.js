@@ -132,7 +132,7 @@ const AddNewSiteComponent = () => {
                 className="form-check-input"
                 type="radio"
                 name="country"
-                id="japan_country"
+                id="taiwan_country"
                 value="臺灣"
                 onChange={handleCountry}
               />

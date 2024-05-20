@@ -15,6 +15,7 @@ const editSiteComponent = () => {
   const [originPhoto, setOriginPhoto] = useState("");
   const [removeOriginPhoto, setRemoveOriginPhoto] = useState(false);
   const [photo, setPhoto] = useState("");
+  const [sitePublic, setSitePublic] = useState("");
   const [message, setMessage] = useState("");
 
   const handleAddSite = async () => {
@@ -25,6 +26,7 @@ const editSiteComponent = () => {
     formData.append("region", region);
     formData.append("type", type);
     formData.append("content", content);
+    formData.append("public", sitePublic);
     console.log(Boolean(removeOriginPhoto), Boolean(photo));
     if (photo) {
       formData.append("removeOriginPhoto", true);
@@ -107,6 +109,10 @@ const editSiteComponent = () => {
     document.querySelector("#removePhotoButton").style.display = "none";
   };
 
+  const handlePublic = () => {
+    setSitePublic(!sitePublic);
+  };
+
   useEffect(() => {
     siteService
       .get_site_detail(site_id)
@@ -125,10 +131,12 @@ const editSiteComponent = () => {
         setRegion(siteInfo.region);
         setType(siteInfo.type);
         setContent(siteInfo.content);
-        setOriginPhoto(siteInfo.photo.photoName);
+        setSitePublic(siteInfo.public);
+        if (siteInfo.photo) {
+          setOriginPhoto(siteInfo.photo.photoName);
+        }
 
         // 選取國家
-
         switch (siteInfo.country) {
           case "日本":
             document.querySelector("#japan_country").checked = true;
@@ -153,6 +161,11 @@ const editSiteComponent = () => {
           case "其他":
             document.querySelector("#other_type").checked = true;
             break;
+        }
+
+        // 公開設定
+        if (siteInfo.public) {
+          document.querySelector("#publicButton").checked = true;
         }
       })
       .catch((e) => console.log(e));
@@ -199,7 +212,7 @@ const editSiteComponent = () => {
                 className="form-check-input"
                 type="radio"
                 name="country"
-                id="japan_country"
+                id="taiwan_country"
                 value="臺灣"
                 onChange={handleCountry}
               />
@@ -355,6 +368,18 @@ const editSiteComponent = () => {
             id="photo_site"
             onChange={handleImage}
           />
+        </div>
+        <div className="form-check form-switch">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            role="switch"
+            id="publicButton"
+            onChange={handlePublic}
+          />
+          <label className="form-check-label" htmlFor="publicButton">
+            {sitePublic ? "公開" : "不公開"}
+          </label>
         </div>
         <div className="small mb-2 pb-lg-2">
           {message && (
