@@ -1,19 +1,11 @@
 const router = require("express").Router();
 const Site = require("../models/index").site;
 const User = require("../models/index").user;
-const valid = require("../validation");
+const valid = require("../controllers/validation");
 const multer = require("multer");
 const path = require("path");
-const { ImgurClient } = require("imgur");
-const redis = require("redis");
-const redisClient = require("../redis");
-
-// imgur 設定
-const imgurClient = new ImgurClient({
-  clientId: process.env.IMGUR_CLIENTID,
-  clientSecret: process.env.IMGUR_CLIENT_SECRET,
-  refreshToken: process.env.IMGUR_REFRESH_TOKEN,
-});
+const imgurClient = require("../config/imgur");
+const redisClient = require("../config/redis");
 
 // 檢查有無登入
 const authCheck = (req, res, next) => {
@@ -65,7 +57,7 @@ router.get("/mySite", authCheck, async (req, res) => {
     let dataFromRedis = await redisClient.get(`Site_of_author:${_id}`);
     if (dataFromRedis) {
       console.log("利用快取提供資料");
-      return res.send(JSON.parse(dataFromRedis));
+      return res.send(dataFromRedis);
     }
 
     let foundSite = await Site.find({ author: _id }).exec();
@@ -183,9 +175,9 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
       }
 
       // 如景點規格不符，則返回客製化錯誤訊息
-      let { title, country, region, type, content, removeOriginPhoto } =
+      let { title, country, region, type, content, removeOriginPhoto, public } =
         req.body;
-      console.log(title, country, region, type, content);
+      console.log(typeof public, public);
       let { error } = valid.sitesValidation({
         title,
         country,
@@ -240,6 +232,7 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
               ? photoName
               : foundSite.photo.photoName,
         },
+        public: public === "true" ? true : false,
         updateDate: Date.now(),
       };
       let updateResult = await Site.findOneAndUpdate({ _id }, newData, {

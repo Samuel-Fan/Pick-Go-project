@@ -16,8 +16,7 @@ const Profile = ({ currentUser, setCurrentUser }) => {
   };
 
   useEffect(() => {
-    // 重新取得資料，避免cookie被亂改
-    console.log(currentUser);
+    // 取得使用者詳細資料
     authService
       .get_auth_user()
       .then((data) => {

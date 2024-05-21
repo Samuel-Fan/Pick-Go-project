@@ -5,10 +5,10 @@ const passport = require("passport");
 const session = require("express-session");
 
 require("dotenv").config();
-require("./config/passport");
+require("./src/config/passport");
 
-const userRoute = require("./routes").users;
-const siteRoute = require("./routes").sites;
+const userRoute = require("./src/routes").users;
+const siteRoute = require("./src/routes").sites;
 
 // 連線資料庫
 const mongoose = require("mongoose");
@@ -22,7 +22,7 @@ mongoose
   });
 
 // 連線 redis (快取)
-const client = require("./redis");
+const client = require("./src/config/redis");
 client
   .connect()
   .then(() => {
