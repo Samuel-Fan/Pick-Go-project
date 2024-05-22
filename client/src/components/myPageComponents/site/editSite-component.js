@@ -117,7 +117,7 @@ const editSiteComponent = () => {
     siteService
       .get_site_detail(site_id)
       .then((data) => {
-        let siteInfo = data.data;
+        let siteInfo = data.data.site;
         console.log(data.data);
         // 如果作者與編輯人不符，跳轉頁面
         if (
