@@ -6,8 +6,16 @@ const apiURL = process.env.REACT_APP_API_URL;
 // 負責"景點"相關與server的互動
 class siteService {
   // 取得使用者自己建立的景點資訊
-  get_mySite() {
-    return axios.get(apiURL + "/api/sites/mySite");
+  get_mySite_count() {
+    return axios.get(apiURL + "/api/sites/mySite/count");
+  }
+
+  get_mySite(page, numberPerPage) {
+    return axios.get(
+      apiURL +
+        "/api/sites/mySite/" +
+        `?page=${page}&numberPerPage=${numberPerPage}`
+    );
   }
 
   // 查詢景點詳細資訊

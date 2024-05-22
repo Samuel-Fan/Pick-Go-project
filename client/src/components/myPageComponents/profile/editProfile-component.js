@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const EditProfile = () => {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState();
+  const [username, setUsername] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
   const [description, setDescription] = useState("");
@@ -56,7 +56,6 @@ const EditProfile = () => {
       .get_auth_user()
       .then((data) => {
         let user = data.data;
-
         // setState
         setUsername(user.username);
         setAge(user.age);

@@ -24,7 +24,7 @@ const userSchema = new Schema({
   description: { type: String },
   createdDate: { type: Date, default: Date.now },
   email_verified: { type: Boolean, default: false },
-  mySite: { type: [Schema.Types.ObjectId], default: [], ref: "Site" }, // Site 的 primary key
+  // mySite: [{ type: Schema.Types.ObjectId, ref: "Site" }], // Site 的 primary key
   myFollowSite: { type: [Schema.Types.ObjectId], default: [], ref: "Site" },
 });
 

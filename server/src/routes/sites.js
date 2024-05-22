@@ -49,15 +49,57 @@ router.get("/detail/:_id", async (req, res) => {
   }
 });
 
+// // 找尋登入使用者建立的景點
+// router.get("/mySite", authCheck, async (req, res) => {
+//   let { _id } = req.user;
+//   try {
+//     // 先搜尋快取中有無數據
+//     let dataFromRedis = await redisClient.get(`Site_of_author:${_id}`);
+//     if (dataFromRedis) {
+//       console.log("利用快取提供資料");
+//       return res.send(dataFromRedis);
+//     }
+
+//     let foundSite = await Site.find({ author: _id }).exec();
+//     console.log("利用資料庫存取資料");
+//     // 存入快取，時間設定 30 分鐘
+//     await redisClient.set(`Site_of_author:${_id}`, JSON.stringify(foundSite), {
+//       EX: 30 * 60 * 1,
+//     });
+
+//     return res.send(foundSite);
+//   } catch (e) {
+//     console.log(e);
+//     return res.status(500).send("伺服器發生問題");
+//   }
+// });
+
+// 計算使用者的sites總數
+router.get("/mySite/count", authCheck, async (req, res) => {
+  let { _id } = req.user;
+  try {
+    let count = await Site.find({ author: _id }).count().exec();
+    return res.send({ count });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("伺服器發生問題");
+  }
+});
+
 // 找尋登入使用者建立的景點
 router.get("/mySite", authCheck, async (req, res) => {
   let { _id } = req.user;
+  let { page, numberPerPage } = req.query;
   try {
-    // 先搜尋快取中有無數據
+    // 先搜尋快取中有無數據;
     let dataFromRedis = await redisClient.get(`Site_of_author:${_id}`);
     if (dataFromRedis) {
       console.log("利用快取提供資料");
-      return res.send(dataFromRedis);
+      let data = JSON.parse(dataFromRedis).slice(
+        (page - 1) * numberPerPage,
+        page * numberPerPage
+      );
+      return res.send(data);
     }
 
     let foundSite = await Site.find({ author: _id }).exec();
@@ -67,7 +109,9 @@ router.get("/mySite", authCheck, async (req, res) => {
       EX: 30 * 60 * 1,
     });
 
-    return res.send(foundSite);
+    return res.send(
+      foundSite.slice((page - 1) * numberPerPage, page * numberPerPage)
+    );
   } catch (e) {
     console.log(e);
     return res.status(500).send("伺服器發生問題");

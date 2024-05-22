@@ -7,7 +7,7 @@ const editSiteComponent = () => {
   const navigate = useNavigate();
   const { site_id } = useParams();
 
-  const [title, setTitle] = useState();
+  const [title, setTitle] = useState("");
   const [country, setCountry] = useState("");
   const [region, setRegion] = useState("");
   const [type, setType] = useState("");

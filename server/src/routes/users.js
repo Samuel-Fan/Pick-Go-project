@@ -18,8 +18,8 @@ router.use((req, res, next) => {
 });
 
 // test
-router.get("/test", async (req, res) => {
-  let user = await User.find({}).populate("mySite").exec();
+router.get("/test", authCheck, async (req, res) => {
+  let user = await User.find({ _id: req.user._id }).populate("mySite").exec();
   return res.send(user);
 });
 

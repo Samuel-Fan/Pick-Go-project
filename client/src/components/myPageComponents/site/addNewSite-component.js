@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const AddNewSiteComponent = () => {
   const navigate = useNavigate();
 
-  const [title, setTitle] = useState();
+  const [title, setTitle] = useState("");
   const [country, setCountry] = useState("");
   const [region, setRegion] = useState("");
   const [type, setType] = useState("");

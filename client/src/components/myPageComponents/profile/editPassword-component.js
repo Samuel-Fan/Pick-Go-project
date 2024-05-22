@@ -51,7 +51,6 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
       .get_auth_user()
       .then((data) => {
         let user = data.data;
-        console.log(user);
         setCurrentUser(user);
       })
       .catch((e) => {
@@ -77,6 +76,7 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
               className="form-control"
               id="old_password_edit"
               onChange={handleOldPasswordInput}
+              autoComplete="off"
             />
           </div>
         )}
@@ -89,6 +89,7 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
             className="form-control"
             id="password_edit"
             onChange={handlePasswordInput}
+            autoComplete="off"
           />
         </div>
         <div className="mb-3">
@@ -100,6 +101,7 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
             className="form-control"
             id="confirm_password_edit"
             onChange={handleConfirmPasswordInput}
+            autoComplete="off"
           />
         </div>
         <div className="small mb-2 pb-lg-2">

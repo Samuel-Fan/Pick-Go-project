@@ -6,10 +6,25 @@ import { useNavigate, Link } from "react-router-dom";
 const Sites = () => {
   const navigate = useNavigate();
 
+  const numberPerPage = 4; //每頁顯示幾個
+
   let [sites, setSites] = useState();
+  let [count, setCount] = useState(); // 計算有幾個sites 分頁用
+  let [page, setPage] = useState(1);
   let [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
 
-  // 連結至景點詳細資料
+  // 選擇頁數
+  const handlePage = (e) => {
+    console.log(count);
+    console.log(typeof page);
+    if (e.target.value === "previous") {
+      setPage(page - 1);
+    } else if (e.target.value === "next") {
+      setPage(page + 1);
+    } else {
+      setPage(Number(e.target.value));
+    }
+  };
 
   // 處理刪除景點
   const handleDelete = (e) => {
@@ -39,24 +54,116 @@ const Sites = () => {
     setDeleteId("");
   };
 
-  // 進網頁時先讀取資料
+  // 剛進網站時，讀取site總數以設定分頁格式
   useEffect(() => {
     siteService
-      .get_mySite()
+      .get_mySite_count()
+      .then((data) => {
+        console.log(data.data);
+        console.log("讀取sites總數");
+        setCount(Math.ceil(data.data.count / numberPerPage));
+      })
+      .catch((e) => {
+        if (e.response.status === 401) {
+          localStorage.removeItem("auth");
+          navigate("/login");
+          navigate(0);
+        }
+      });
+  }, []);
+
+  // 每次切換頁面讀取一次
+  useEffect(() => {
+    siteService
+      .get_mySite(page, numberPerPage)
       .then((data) => {
         let result = data.data;
-        console.log(result);
+        console.log("讀取sites詳細資料");
         setSites(result);
       })
       .catch((e) => {
         if (e.response.status === 401) {
           localStorage.removeItem("auth");
           navigate("/login");
+          navigate(0);
         }
       });
-  }, []);
+  }, [page]);
+
   return (
     <div className="container">
+      {/* 頁數選擇 */}
+      <div>
+        <nav aria-label="Page navigation example">
+          <ul className="pagination">
+            <li className="page-item">
+              <button
+                className={`page-link ${page == 1 && "disabled"}`}
+                value={"previous"}
+                onClick={handlePage}
+              >
+                Previous
+              </button>
+            </li>
+            {page - 2 > 0 && (
+              <li className="page-item">
+                <button
+                  className="page-link"
+                  value={page - 2}
+                  onClick={handlePage}
+                >
+                  {page - 2}
+                </button>
+              </li>
+            )}
+            {page - 1 > 0 && (
+              <li className="page-item">
+                <button
+                  className="page-link"
+                  value={page - 1}
+                  onClick={handlePage}
+                >
+                  {page - 1}
+                </button>
+              </li>
+            )}
+            <li className="page-item active">
+              <button className="page-link">{page} </button>
+            </li>
+            {count >= page + 1 && (
+              <li className="page-item">
+                <button
+                  className="page-link"
+                  value={page + 1}
+                  onClick={handlePage}
+                >
+                  {page + 1}
+                </button>
+              </li>
+            )}
+            {count >= page + 2 && (
+              <li className="page-item">
+                <button
+                  className="page-link"
+                  value={page + 2}
+                  onClick={handlePage}
+                >
+                  {page + 2}
+                </button>
+              </li>
+            )}
+            <li className="page-item">
+              <button
+                className={`page-link ${count == page && "disabled"}`}
+                value={"next"}
+                onClick={handlePage}
+              >
+                Next
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
       <div className="d-flex flex-wrap">
         {/* 景點圖卡 */}
         {sites &&
@@ -65,6 +172,7 @@ const Sites = () => {
               <div
                 className="card m-2"
                 style={{ width: "18rem", height: "25rem" }}
+                key={site._id}
               >
                 <div
                   className="bg-image hover-overlay"
