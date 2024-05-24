@@ -11,7 +11,13 @@ const Sites = () => {
   let [sites, setSites] = useState();
   let [count, setCount] = useState(); // 計算有幾個sites 分頁用
   let [page, setPage] = useState(1);
+  let [category, setCategory] = useState("mine"); // 設定顯示 我建立的景點 or 我收藏的景點
   let [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
+
+  // 選擇顯示 我建立的景點 or 我收藏的景點
+  const handleCategory = (e) => {
+    setCategory(e.target.value);
+  };
 
   // 選擇頁數
   const handlePage = (e) => {
@@ -47,7 +53,9 @@ const Sites = () => {
       alert(result.data);
       navigate(0);
     } catch (e) {
-      console.log(e);
+      if (e.response) {
+        alert(e.response.data);
+      }
     }
     document.querySelector("#siteDeleteConfirm").style.display = "none";
     document.querySelector("#gray_cover").style.display = "none";
@@ -70,35 +78,58 @@ const Sites = () => {
           navigate(0);
         }
       });
-  }, []);
+  }, [navigate, category]);
 
   // 每次切換頁面讀取一次
   useEffect(() => {
-    siteService
-      .get_mySite(page, numberPerPage)
-      .then((data) => {
-        let result = data.data;
-        console.log("讀取sites詳細資料");
-        setSites(result);
-      })
-      .catch((e) => {
-        if (e.response.status === 401) {
-          localStorage.removeItem("auth");
-          navigate("/login");
-          navigate(0);
-        }
-      });
-  }, [page]);
+    if (category === "mine") {
+      siteService
+        .get_mySite(page, numberPerPage)
+        .then((data) => {
+          let result = data.data;
+          console.log("讀取sites詳細資料");
+          setSites(result);
+        })
+        .catch((e) => {
+          if (e.response.status === 401) {
+            localStorage.removeItem("auth");
+            navigate("/login");
+            navigate(0);
+          }
+        });
+    } else if (category === "collections") {
+    }
+  }, [page, category, navigate]);
 
   return (
     <div className="container">
-      {/* 頁數選擇 */}
-      <div>
+      <div className="d-flex container">
+        {/* 選擇我建立的景點or我收藏的景點 */}
+        <div className="me-5">
+          <button
+            type="button"
+            className="btn btn-outline-primary me-3"
+            value="mine"
+            onClick={handleCategory}
+          >
+            我建立的景點
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            value="collections"
+            onClick={handleCategory}
+          >
+            我收藏的景點
+          </button>
+        </div>
+
+        {/* 頁數選擇 */}
         <nav aria-label="Page navigation example">
           <ul className="pagination">
             <li className="page-item">
               <button
-                className={`page-link ${page == 1 && "disabled"}`}
+                className={`page-link ${page === 1 && "disabled"}`}
                 value={"previous"}
                 onClick={handlePage}
               >
@@ -154,7 +185,7 @@ const Sites = () => {
             )}
             <li className="page-item">
               <button
-                className={`page-link ${count == page && "disabled"}`}
+                className={`page-link ${count === page && "disabled"}`}
                 value={"next"}
                 onClick={handlePage}
               >
@@ -184,9 +215,10 @@ const Sites = () => {
                     to={"/site/" + site._id}
                     style={{ textDecoration: "none" }}
                   >
-                    {site.photo ? (
+                    {site.photo.url ? (
                       <img
                         src={site.photo.url}
+                        alt={site.photo.photoName}
                         className="img-fluid"
                         style={{
                           objectFit: "cover",

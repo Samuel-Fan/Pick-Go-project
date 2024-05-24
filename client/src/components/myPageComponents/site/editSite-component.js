@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import siteService from "../../../service/site";
 import { useNavigate, useParams } from "react-router-dom";
 
-const editSiteComponent = () => {
+const EditSiteComponent = () => {
   const navigate = useNavigate();
   const { site_id } = useParams();
 
@@ -144,6 +144,8 @@ const editSiteComponent = () => {
           case "臺灣":
             document.querySelector("#taiwan_country").checked = true;
             break;
+          default:
+            break;
         }
 
         // 選取類型
@@ -161,6 +163,8 @@ const editSiteComponent = () => {
           case "其他":
             document.querySelector("#other_type").checked = true;
             break;
+          default:
+            break;
         }
 
         // 公開設定
@@ -169,7 +173,7 @@ const editSiteComponent = () => {
         }
       })
       .catch((e) => console.log(e));
-  }, []);
+  }, [navigate, site_id]);
 
   return (
     <div className="container">
@@ -400,4 +404,4 @@ const editSiteComponent = () => {
   );
 };
 
-export default editSiteComponent;
+export default EditSiteComponent;
