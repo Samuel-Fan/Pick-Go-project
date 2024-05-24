@@ -118,11 +118,17 @@ const sitesValidation = (data) => {
       "any.required": "'國家'為必須填寫的項目",
       "string.empty": "'國家'為必須填寫的項目",
     }),
-    region: Joi.string(),
-    type: Joi.string().valid("餐廳", "景點", "購物", "其他").messages({
-      "any.only": "類別必須為餐廳、景點、購物或其他",
+    region: Joi.string().required().messages({
+      "any.required": "'地區'為必須填寫的項目",
+      "string.empty": "'地區'為必須填寫的項目",
     }),
-    content: Joi.string().allow(null, ""),
+    type: Joi.string()
+      .valid("餐廳", "景點", "購物", "其他")
+      .required()
+      .messages({
+        "any.only": "類別必須為餐廳、景點、購物或其他",
+      }),
+    content: Joi.string().required().allow(null, ""),
   });
 
   return Schema.validate(data);

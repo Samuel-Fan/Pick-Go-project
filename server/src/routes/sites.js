@@ -33,8 +33,23 @@ const upload = multer({
 
 // <<測試用>> 得到全部景點
 router.get("/all", async (req, res) => {
-  let foundSite = await Site.find({}).populate("author", ["username"]);
+  let foundSite = await Site.find({})
+    .populate("author", ["username"])
+    .lean()
+    .exec();
   return res.send(foundSite);
+});
+
+// <<測試用>> 得到全部景點
+router.get("/test", (req, res) => {
+  Site.find({ author: req.user._id })
+    .explain("executionStats")
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 });
 
 // 找尋特定景點
@@ -52,7 +67,16 @@ router.get("/detail/:_id", async (req, res) => {
     console.log("利用資料庫提取資料");
     let foundSite = await Site.findOne({ _id })
       .populate("author", ["username"])
+      .lean()
       .exec();
+
+    // 若搜尋到則確認其是否公開，若否則檢察是否為作者本人，非本人則返回403錯誤
+    if (!foundSite.public) {
+      if (!req.user || !foundSite.author._id.equals(req.user._id)) {
+        return res.status(403).send("作者不公開相關頁面");
+      }
+    }
+
     // 搜尋site有幾個讚、收藏
     let like = await Action.find({ site_id: new ObjectId(_id), action: "讚" })
       .count()
@@ -64,17 +88,20 @@ router.get("/detail/:_id", async (req, res) => {
       .count()
       .exec();
 
-    // 存入快取，時間設定 10 分鐘
-    await redisClient.set(
-      `Site:${_id}`,
-      JSON.stringify({ site: foundSite, like, collect }),
-      {
-        EX: 10 * 60 * 1,
-      }
-    );
+    // 若site是公開德，則存入快取，時間設定 10 分鐘
+    if (foundSite.public) {
+      await redisClient.set(
+        `Site:${_id}`,
+        JSON.stringify({ site: foundSite, like, collect }),
+        {
+          EX: 10 * 60 * 1,
+        }
+      );
+    }
 
     return res.send({ site: foundSite, like, collect });
   } catch (e) {
+    console.log(e);
     return res.status(500).send("伺服器發生問題");
   }
 });
@@ -96,114 +123,57 @@ router.get("/mySite", authCheck, async (req, res) => {
   let { _id } = req.user;
   let { page, numberPerPage } = req.query;
   try {
-    // 先搜尋快取中有無數據;
-    let dataFromRedis = await redisClient.get(`Site_of_author:${_id}`);
-    if (dataFromRedis) {
-      console.log("利用快取提供資料");
-      let data = JSON.parse(dataFromRedis).slice(
-        (page - 1) * numberPerPage,
-        page * numberPerPage
-      );
-      return res.send(data);
-    }
+    let foundSite = await Site.find({ author: _id })
+      .select({ title: 1, photo: 1, content: 1, public: 1 })
+      .skip((page - 1) * numberPerPage)
+      .limit(numberPerPage)
+      .lean()
+      .exec();
 
-    let foundSite = await Site.find({ author: _id }).exec();
-    console.log("利用資料庫存取資料");
-    // 存入快取，時間設定 30 分鐘
-    await redisClient.set(`Site_of_author:${_id}`, JSON.stringify(foundSite), {
-      EX: 30 * 60 * 1,
-    });
-
-    return res.send(
-      foundSite.slice((page - 1) * numberPerPage, page * numberPerPage)
-    );
+    return res.send(foundSite);
   } catch (e) {
     console.log(e);
     return res.status(500).send("伺服器發生問題");
   }
 });
 
-// 用戶對景點按讚或收回讚
-router.get("/click/like/:_id", authCheck, async (req, res) => {
-  let site_id = req.params._id; // 景點id
-  let user_id = req.user._id; // 使用者id
+// 計算使用者收藏的sites總數
+router.get("/mySite/count", authCheck, async (req, res) => {
+  let { _id } = req.user;
   try {
-    // 先確認有無點過讚，如有點過，則收回讚
-    let checkLike = await Action.findOne({
-      user_id,
-      site_id,
-      action: "讚",
-    }).exec();
-    if (checkLike) {
-      await Action.deleteOne({ user_id, site_id, action: "讚" }).exec();
-      return res.send("成功收回讚");
-    }
-
-    let dataFromDatabase;
-    // 先從快取中找景點
-
-    let dataFromRedis = await redisClient.get(`Site:${site_id}`);
-    if (!dataFromRedis) {
-      dataFromDatabase = await Site.findOne({ _id: site_id }).exec();
-    }
-
-    let foundSite = dataFromRedis || dataFromDatabase;
-    console.log(dataFromRedis, dataFromDatabase);
-    // 確認景點有無存在
-    // 若景點不存在，返回錯誤
-    if (!foundSite) {
-      return res.status(400).send("此景點不存在");
-    }
-
-    // 存入資料庫
-    let action = new Action({ user_id, site_id, action: "讚" });
-    await action.save();
-    return res.send("成功按讚");
+    let count = await Action.find({
+      user_id: new ObjectId(_id),
+      action: "收藏",
+    })
+      .count()
+      .exec();
+    return res.send({ count });
   } catch (e) {
     console.log(e);
-    res.status(500).send("伺服器發生問題");
+    return res.status(500).send("伺服器發生問題");
   }
 });
 
-// 用戶對景點收藏或取消收藏
-router.get("/click/collect/:_id", authCheck, async (req, res) => {
-  let site_id = req.params._id; // 景點id
-  let user_id = req.user._id; // 使用者id
+// 找到使用者收藏的景點
+router.get("/myCollections", authCheck, async (req, res) => {
+  let user_id = req.user._id;
+  let { page, numberPerPage } = req.query;
   try {
-    // 先確認有無點過收藏，如有點過，則取消收藏
-    let checkCollect = await Action.findOne({
-      user_id,
-      site_id,
-      action: "收藏",
-    }).exec();
-    if (checkCollect) {
-      await Action.deleteOne({ user_id, site_id, action: "收藏" }).exec();
-      return res.send("成功取消收藏");
-    }
-
-    let dataFromDatabase;
-    // 先從快取中找景點
-
-    let dataFromRedis = await redisClient.get(`Site:${site_id}`);
-    if (!dataFromRedis) {
-      dataFromDatabase = await Site.findOne({ _id: site_id }).exec();
-    }
-
-    let foundSite = dataFromRedis || dataFromDatabase;
-    console.log(dataFromRedis, dataFromDatabase);
-    // 確認景點有無存在
-    // 若景點不存在，返回錯誤
-    if (!foundSite) {
-      return res.status(400).send("此景點不存在");
-    }
-
-    // 存入資料庫
-    let action = new Action({ user_id, site_id, action: "收藏" });
-    await action.save();
-    return res.send("成功收藏");
+    let foundSite = await Action.find({ user_id, action: "收藏" })
+      .select(["site_id"])
+      .populate({
+        path: "site_id",
+        select: ["title", "content", "photo", "author"],
+        populate: { path: "author", select: ["username"] },
+      })
+      .skip((page - 1) * numberPerPage)
+      .limit(numberPerPage)
+      .lean()
+      .exec();
+    return res.send(foundSite);
   } catch (e) {
     console.log(e);
-    res.status(500).send("伺服器發生問題");
+    return res.status(500).send("伺服器發生問題");
   }
 });
 
@@ -279,12 +249,94 @@ router.post("/new", authCheck, (req, res) => {
   }
 });
 
+// 用戶對景點按讚或收回讚
+router.post("/click/like/:_id", authCheck, async (req, res) => {
+  let site_id = req.params._id; // 景點id
+  let user_id = req.user._id; // 使用者id
+  try {
+    // 先確認有無點過讚，如有點過，則收回讚
+    let checkLike = await Action.findOne({
+      user_id,
+      site_id,
+      action: "讚",
+    }).exec();
+    if (checkLike) {
+      await Action.deleteOne({ user_id, site_id, action: "讚" }).exec();
+      return res.send("成功收回讚");
+    }
+
+    let dataFromDatabase;
+    // 先從快取中找景點
+
+    let dataFromRedis = await redisClient.get(`Site:${site_id}`);
+    if (!dataFromRedis) {
+      dataFromDatabase = await Site.findOne({ _id: site_id }).exec();
+    }
+
+    let foundSite = dataFromRedis || dataFromDatabase;
+    // 確認景點有無存在
+    // 若景點不存在，返回錯誤
+    if (!foundSite) {
+      return res.status(400).send("此景點不存在");
+    }
+
+    // 存入資料庫
+    let action = new Action({ user_id, site_id, action: "讚" });
+    await action.save();
+    return res.send("成功按讚");
+  } catch (e) {
+    console.log(e);
+    res.status(500).send("伺服器發生問題");
+  }
+});
+
+// 用戶對景點收藏或取消收藏
+router.post("/click/collect/:_id", authCheck, async (req, res) => {
+  let site_id = req.params._id; // 景點id
+  let user_id = req.user._id; // 使用者id
+  try {
+    // 先確認有無點過收藏，如有點過，則取消收藏
+    let checkCollect = await Action.findOne({
+      user_id,
+      site_id,
+      action: "收藏",
+    }).exec();
+    if (checkCollect) {
+      await Action.deleteOne({ user_id, site_id, action: "收藏" }).exec();
+      return res.send("成功取消收藏");
+    }
+
+    let dataFromDatabase;
+    // 先從快取中找景點
+
+    let dataFromRedis = await redisClient.get(`Site:${site_id}`);
+    if (!dataFromRedis) {
+      dataFromDatabase = await Site.findOne({ _id: site_id }).exec();
+    }
+
+    let foundSite = dataFromRedis || dataFromDatabase;
+    console.log(dataFromRedis, dataFromDatabase);
+    // 確認景點有無存在
+    // 若景點不存在，返回錯誤
+    if (!foundSite) {
+      return res.status(400).send("此景點不存在");
+    }
+
+    // 存入資料庫
+    let action = new Action({ user_id, site_id, action: "收藏" });
+    await action.save();
+    return res.send("成功收藏");
+  } catch (e) {
+    console.log(e);
+    res.status(500).send("伺服器發生問題");
+  }
+});
+
 // 更新景點
 router.patch("/modify/:_id", authCheck, async (req, res) => {
   let { _id } = req.params; // 景點id
   try {
-    let foundSite = await Site.findOne({ _id }).exec();
-
+    let foundSite = await Site.findOne({ _id }).lean().exec();
     // 確認有無此景點
     if (!foundSite) {
       return res.status(400).send("無此景點存在");
@@ -294,7 +346,7 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
 
     // 確認是作者本人
     if (!author.equals(req.user._id)) {
-      return res.status(401).send("必須是本人才能編輯");
+      return res.status(403).send("必須是本人才能編輯");
     }
 
     upload(req, res, async (err) => {
@@ -368,16 +420,16 @@ router.patch("/modify/:_id", authCheck, async (req, res) => {
         public: public === "true" ? true : false,
         updateDate: Date.now(),
       };
-      let updateResult = await Site.findOneAndUpdate({ _id }, newData, {
-        new: true,
-        runValidators: true,
-      });
 
-      // 將快取刪掉
-      await redisClient.del(`Site_of_author:${req.user._id}`);
-      await redisClient.del(`Site:${_id}`);
+      await Promise.all([
+        Site.findOneAndUpdate({ _id }, newData, {
+          // 更新資料庫資料
+          runValidators: true,
+        }),
+        redisClient.del(`Site:${_id}`), // 刪快取
+      ]);
 
-      return res.send({ message: "成功更新資料", updateResult });
+      return res.send({ message: "成功更新資料" });
     });
   } catch (e) {
     console.log(e);
@@ -389,7 +441,7 @@ router.delete("/:_id", authCheck, async (req, res) => {
   let { _id } = req.params; // 景點id
 
   try {
-    let foundSite = await Site.findOne({ _id }).exec();
+    let foundSite = await Site.findOne({ _id }).lean().exec();
 
     // 確認有無此景點
     if (!foundSite) {
@@ -400,16 +452,17 @@ router.delete("/:_id", authCheck, async (req, res) => {
 
     // 確認是作者本人
     if (!author.equals(req.user._id)) {
-      return res.status(401).send("必須是本人才能刪除資料");
+      return res.status(403).send("必須是本人才能刪除資料");
     }
 
     let deletehash = foundSite.photo.deletehash;
-    await Site.deleteOne({ _id });
-    await imgurClient.deleteImage(deletehash);
 
-    // 將快取刪掉
-    await redisClient.del(`Site_of_author:${req.user._id}`);
-    await redisClient.del(`Site:${_id}`);
+    await Promise.all([
+      Site.deleteOne({ _id }), // 從景點資料庫移除
+      Action.deleteMany({ site_id: new ObjectId(_id) }), // 從讚、收藏資料庫中移除
+      imgurClient.deleteImage(deletehash), // 刪imgur圖片
+      redisClient.del(`Site:${_id}`), // 刪快取
+    ]);
 
     return res.send("成功刪除資料");
   } catch (e) {
