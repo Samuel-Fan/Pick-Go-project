@@ -38,7 +38,7 @@ const EditSiteComponent = () => {
       let result = await siteService.patch_edit_site(site_id, formData);
       console.log(result);
       alert("修改完成");
-      navigate("/users/sites");
+      navigate("/users/sites/overview/mine");
       navigate(0);
     } catch (e) {
       console.log(e);

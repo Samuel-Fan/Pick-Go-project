@@ -29,6 +29,7 @@ function App() {
         <Route path="/" element={<Layout auth={auth} />}>
           <Route index element={<HomeComponent auth={auth} />}></Route>
           <Route path="react" element={<AppExample />}></Route>
+          <Route path="/site/:site_id" element={<SiteDetail />}></Route>
           <Route
             path="login"
             element={<LoginComponent setAuth={setAuth} />}
@@ -68,13 +69,15 @@ function App() {
               />
             }
           ></Route>
-          <Route path="/users/sites" element={<Sites />}></Route>
+          <Route
+            path="/users/sites/overview/:category"
+            element={<Sites />}
+          ></Route>
           <Route path="/users/sites/new" element={<AddNewSite />}></Route>
           <Route
             path="/users/sites/edit/:site_id"
             element={<EditSite />}
           ></Route>
-          <Route path="/users/sites/:site_id" element={<SiteDetail />}></Route>
         </Route>
         <Route path="/noAuth" element={<NoAuth />}></Route>
         <Route path="*" element={<NotFound />}></Route>

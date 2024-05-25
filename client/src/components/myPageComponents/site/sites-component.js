@@ -1,23 +1,17 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import siteService from "../../../service/site";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 
 const Sites = () => {
   const navigate = useNavigate();
-
-  const numberPerPage = 4; //每頁顯示幾個
+  const { category } = useParams(); // 設定顯示 我建立的景點 or 我收藏的景點
 
   let [sites, setSites] = useState();
   let [count, setCount] = useState(); // 計算有幾個sites 分頁用
   let [page, setPage] = useState(1);
-  let [category, setCategory] = useState("mine"); // 設定顯示 我建立的景點 or 我收藏的景點
+  let [numberPerPage, setNumberPerPage] = useState(4); //每頁顯示幾個
   let [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
-
-  // 選擇顯示 我建立的景點 or 我收藏的景點
-  const handleCategory = (e) => {
-    setCategory(e.target.value);
-  };
 
   // 選擇頁數
   const handlePage = (e) => {
@@ -32,7 +26,12 @@ const Sites = () => {
     }
   };
 
-  // 處理刪除景點
+  // 每頁幾張?
+  const handlePerPage = (e) => {
+    setNumberPerPage(e.target.value);
+  };
+
+  // 處理刪除景點 or 移除收藏
   const handleDelete = (e) => {
     setDeleteId(e.target.name);
     document.querySelector("#siteDeleteConfirm").style.display = "flex";
@@ -45,11 +44,17 @@ const Sites = () => {
     document.querySelector("#siteDeleteConfirm").style.display = "none";
     document.querySelector("#gray_cover").style.display = "none";
   };
+
   // 確認後刪除
   const deleteIt = async () => {
     try {
       console.log(deleteId);
-      let result = await siteService.delete_site(deleteId);
+      let result;
+      if (category === "mine") {
+        result = await siteService.delete_site(deleteId);
+      } else if (category === "collections") {
+        result = await siteService.post_click_collect(deleteId);
+      }
       alert(result.data);
       navigate(0);
     } catch (e) {
@@ -64,21 +69,39 @@ const Sites = () => {
 
   // 剛進網站時，讀取site總數以設定分頁格式
   useEffect(() => {
-    siteService
-      .get_mySite_count()
-      .then((data) => {
-        console.log(data.data);
-        console.log("讀取sites總數");
-        setCount(Math.ceil(data.data.count / numberPerPage));
-      })
-      .catch((e) => {
-        if (e.response.status === 401) {
-          localStorage.removeItem("auth");
-          navigate("/login");
-          navigate(0);
-        }
-      });
-  }, [navigate, category]);
+    if (category === "mine") {
+      siteService
+        .get_mySite_count()
+        .then((data) => {
+          console.log(data.data);
+          console.log("讀取sites總數");
+          setCount(Math.ceil(data.data.count / numberPerPage));
+        })
+        .catch((e) => {
+          if (e.response && e.response.status === 401) {
+            localStorage.removeItem("auth");
+            navigate("/login");
+            navigate(0);
+          }
+        });
+    } else if (category === "collections") {
+      siteService
+        .get_myCollection_count()
+        .then((data) => {
+          console.log(data.data);
+          console.log("讀取sites總數");
+          setCount(Math.ceil(data.data.count / numberPerPage));
+        })
+        .catch((e) => {
+          console.log(e);
+          if (e.response && e.response.status === 401) {
+            localStorage.removeItem("auth");
+            navigate("/login");
+            navigate(0);
+          }
+        });
+    }
+  }, [numberPerPage, navigate, category]);
 
   // 每次切換頁面讀取一次
   useEffect(() => {
@@ -91,41 +114,57 @@ const Sites = () => {
           setSites(result);
         })
         .catch((e) => {
-          if (e.response.status === 401) {
+          if (e.response && e.response.status === 401) {
             localStorage.removeItem("auth");
             navigate("/login");
             navigate(0);
           }
         });
     } else if (category === "collections") {
+      siteService
+        .get_myCollection(page, numberPerPage)
+        .then((data) => {
+          let result = data.data.map((site) => site.site_id);
+          console.log("讀取sites詳細資料");
+          setSites(result);
+        })
+        .catch((e) => {
+          if (e.response && e.response.status === 401) {
+            localStorage.removeItem("auth");
+            navigate("/login");
+            navigate(0);
+          }
+        });
     }
-  }, [page, category, navigate]);
+  }, [page, numberPerPage, category, navigate]);
 
   return (
     <div className="container">
       <div className="d-flex container">
         {/* 選擇我建立的景點or我收藏的景點 */}
         <div className="me-5">
-          <button
-            type="button"
-            className="btn btn-outline-primary me-3"
+          <a
+            href="/users/sites/overview/mine"
+            className={`btn btn-outline-primary me-3 ${
+              category === "mine" && "active"
+            }`}
             value="mine"
-            onClick={handleCategory}
           >
             我建立的景點
-          </button>
-          <button
-            type="button"
-            className="btn btn-outline-primary"
+          </a>
+          <a
+            href="/users/sites/overview/collections"
+            className={`btn btn-outline-primary ${
+              category === "collections" && "active"
+            } `}
             value="collections"
-            onClick={handleCategory}
           >
             我收藏的景點
-          </button>
+          </a>
         </div>
 
         {/* 頁數選擇 */}
-        <nav aria-label="Page navigation example">
+        <nav aria-label="Page navigation example" className="me-5">
           <ul className="pagination">
             <li className="page-item">
               <button
@@ -194,7 +233,30 @@ const Sites = () => {
             </li>
           </ul>
         </nav>
+
+        {/* 每頁顯示幾個? */}
+        <div className="mt-1 me-5">
+          <label htmlFor="set-Number-Per-Page" className="me-2">
+            每頁顯示幾個?
+          </label>
+          <input
+            type="number"
+            id="set-Number-Per-Page"
+            style={{ width: "2rem" }}
+            onChange={handlePerPage}
+          />
+        </div>
+
+        {/* 新增景點按鈕 */}
+        <div style={{ width: "18rem" }}>
+          <a href="/users/sites/new">
+            <button type="button" className="btn btn-outline-primary">
+              新增景點 +{" "}
+            </button>
+          </a>
+        </div>
       </div>
+
       <div className="d-flex flex-wrap">
         {/* 景點圖卡 */}
         {sites &&
@@ -246,45 +308,47 @@ const Sites = () => {
                       ? site.content.slice(0, 30) + "..."
                       : site.content}
                   </p>
-                  <Link to={"/users/sites/" + site._id}>顯示更多</Link>
+                  <Link to={"/site/" + site._id}>顯示更多</Link>
                   <hr />
-                  <div className="d-flex align-items-center">
-                    <Link
-                      to={"/users/sites/edit/" + site._id}
-                      className="btn bg-primary-subtle"
-                      data-mdb-ripple-init
-                    >
-                      編輯
-                    </Link>
-                    <button
-                      href="#!"
-                      className="btn bg-danger-subtle ms-2"
-                      name={site._id}
-                      onClick={handleDelete}
-                      data-mdb-ripple-init
-                    >
-                      刪除
-                    </button>
-                    <div className="ms-3">
-                      狀態：{site.public ? "公開" : "未公開"}
+                  {category === "mine" ? (
+                    <div className="d-flex align-items-center">
+                      <Link
+                        to={"/users/sites/edit/" + site._id}
+                        className="btn bg-primary-subtle"
+                        data-mdb-ripple-init
+                      >
+                        編輯
+                      </Link>
+                      <button
+                        href="#!"
+                        className="btn bg-danger-subtle ms-2"
+                        name={site._id}
+                        onClick={handleDelete}
+                        data-mdb-ripple-init
+                      >
+                        刪除
+                      </button>
+                      <div className="ms-3">
+                        狀態：{site.public ? "公開" : "未公開"}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="d-flex align-items-center">
+                      <button
+                        href="#!"
+                        className="btn bg-danger-subtle ms-2"
+                        name={site._id}
+                        onClick={handleDelete}
+                        data-mdb-ripple-init
+                      >
+                        移除收藏
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             );
           })}
-
-        {/* 新增景點按鈕 */}
-        <div
-          className="m-2 d-flex justify-content-center align-items-center"
-          style={{ width: "18rem" }}
-        >
-          <a href="/users/sites/new">
-            <button type="button" className="btn btn-outline-primary">
-              新增景點 +{" "}
-            </button>
-          </a>
-        </div>
       </div>
 
       {/* 確定刪除按鈕 */}
@@ -302,7 +366,9 @@ const Sites = () => {
         }}
       >
         <div className="container text-center">
-          <p className="mb-3 fs-2">刪除景點?</p>
+          <p className="mb-3 fs-2">
+            {category === "mine" ? "確定刪除景點?" : "確定移除收藏?"}
+          </p>
           <div>
             <button
               type="button"

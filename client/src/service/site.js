@@ -6,8 +6,8 @@ const apiURL = process.env.REACT_APP_API_URL;
 // 負責"景點"相關與server的互動
 class siteService {
   // 取得使用者自己建立的景點資訊
+  // 用來計算幾頁
   get_mySite_count() {
-    // 用來計算幾頁
     return axios.get(apiURL + "/api/sites/mySite/count");
   }
 
@@ -15,16 +15,22 @@ class siteService {
     // 取得資訊
     return axios.get(
       apiURL +
-        "/api/sites/mySite/" +
+        "/api/sites/mySite" +
         `?page=${page}&numberPerPage=${numberPerPage}`
     );
   }
 
   // 取得使用者收藏的景點資訊
+  // 用來計算幾頁
+  get_myCollection_count() {
+    return axios.get(apiURL + "/api/sites/myCollection/count");
+  }
+
+  // 取得資訊
   get_myCollection(page, numberPerPage) {
     return axios.get(
       apiURL +
-        "api/sites/myCollections/" +
+        "/api/sites/myCollections" +
         `?page=${page}&numberPerPage=${numberPerPage}`
     );
   }
@@ -42,6 +48,16 @@ class siteService {
         Authorization: "Client-ID {42dd75588885b5e}",
       },
     });
+  }
+
+  // 收藏 or 取消讚
+  post_click_like(_id) {
+    return axios.post(apiURL + "/api/sites/click/like/" + _id);
+  }
+
+  // 收藏 or 取消收藏
+  post_click_collect(_id) {
+    return axios.post(apiURL + "/api/sites/click/collect/" + _id);
   }
 
   // 編輯景點

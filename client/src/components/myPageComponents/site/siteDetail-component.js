@@ -64,7 +64,7 @@ const SiteDetailComponent = () => {
     siteService
       .get_site_detail(site_id)
       .then((data) => {
-        setSite(data.data);
+        setSite(data.data.site);
         console.log(data.data);
       })
       .catch((e) => {
@@ -78,110 +78,146 @@ const SiteDetailComponent = () => {
   }, []);
 
   return (
-    <div className="container d-flex justify-content-center">
-      {site && (
-        <div className="card" style={{ width: "40rem" }}>
-          <img
-            src="https://mdbcdn.b-cdn.net/img/new/standard/nature/111.webp"
-            className="card-img-top"
-            alt="Chicago Skyscrapers"
-          />
-          <div className="card-body">
-            <div className="d-flex align-items-center justify-content-between">
-              <h4 className="card-title fw-bold">{site.title}</h4>
-              <p className="my-auto">
-                {site.country}--{site.region}地區 || 類型：{site.type}
-              </p>
-            </div>
-            <hr />
-            <p className="card-text" style={{ whiteSpace: "pre-line" }}>
-              {site.content}
-            </p>
-            <hr className="mb-1" />
-            <div className="d-flex justify-content-between">
-              <p className="my-auto">作者：{site.author.username}</p>
-              <p className="my-auto">
-                最後編輯時間:{handleTime(site.updateDate)}
-              </p>
-            </div>
-            <hr className="mt-1" />
-            <div className="d-flex align-items-center">
-              <Link
-                to="#"
-                className="btn bg-primary-subtle"
-                data-mdb-ripple-init
-              >
-                編輯
-              </Link>
-              <button
-                href="#!"
-                className="btn bg-danger-subtle ms-2"
-                name={site._id}
-                onClick={handleDelete}
-                data-mdb-ripple-init
-              >
-                刪除
-              </button>
-              <div className="ms-3">
-                狀態：{site.public ? "公開" : "未公開"}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-      {/* 確定刪除按鈕 */}
-      <div
-        id="siteDeleteConfirm"
-        className="bg-light-subtle justify-content-center align-items-center rounded"
-        style={{
-          display: "none",
-          height: "8rem",
-          width: "15rem",
-          position: "fixed",
-          top: "37%",
-          left: "46%",
-          zIndex: "2",
-        }}
-      >
-        <div className="container text-center">
-          <p className="mb-3 fs-2">刪除景點?</p>
+    <div>
+      <hr
+        className="mx-4 "
+        style={{ border: "2px solid rgb(90, 178, 255)", opacity: "1" }}
+      />
+      <div className="d-flex mt-4 mx-4 flex-wrap">
+        <div
+          className="mx-auto p-4"
+          style={{
+            flex: "0 1 400px",
+          }}
+        >
           <div>
-            <button
-              type="button"
-              className="deleteConfirmButton bg-success-subtle"
-              onClick={cancelDelete}
-            >
-              取消
-            </button>
-            <button
-              type="button"
-              className="deleteConfirmButton bg-danger-subtle"
-              onClick={() => {
-                deleteIt(site);
-              }}
-            >
-              刪除
-            </button>
+            <img
+              src="https://mdbcdn.b-cdn.net/img/new/standard/nature/111.webp"
+              className="card-img-top"
+              alt="Chicago Skyscrapers"
+            />
           </div>
+          <div>
+            <span>地區：{site.country}-</span>
+            <span>{site.region}</span>
+          </div>
+          <div>景點類型:{site.type}</div>
+        </div>
+        <div className="p-4" style={{ flex: "1 1 800px" }}>
+          <h2>景點標題：{site.title}</h2>
+          <h6>作者：{site.author && site.author.username}</h6>
+          <p style={{ whiteSpace: "pre-line" }}>{site.content}</p>
         </div>
       </div>
-
-      {/* 遮罩 */}
-      <div
-        id="gray_cover"
-        style={{
-          display: "none",
-          height: "100vh",
-          width: "100vw",
-          opacity: "80%",
-          backgroundColor: "black",
-          position: "fixed",
-          top: "0",
-          left: "0",
-          zIndex: "1",
-        }}
-      ></div>
+      <hr
+        className="mx-4 "
+        style={{ border: "2px solid rgb(90, 178, 255)", opacity: "1" }}
+      />
     </div>
+    // <div className="container d-flex justify-content-center">
+    //   {site && (
+    //     <div className="card" style={{ width: "40rem" }}>
+    //       <img
+    //         src="https://mdbcdn.b-cdn.net/img/new/standard/nature/111.webp"
+    //         className="card-img-top"
+    //         alt="Chicago Skyscrapers"
+    //       />
+    //       <div className="card-body">
+    //         <div className="d-flex align-items-center justify-content-between">
+    //           <h4 className="card-title fw-bold">{site.title}</h4>
+    //           <p className="my-auto">
+    //             {site.country}--{site.region}地區 || 類型：{site.type}
+    //           </p>
+    //         </div>
+    //         <hr />
+    //         <p className="card-text" style={{ whiteSpace: "pre-line" }}>
+    //           {site.content}
+    //         </p>
+    //         <hr className="mb-1" />
+    //         <div className="d-flex justify-content-between">
+    //           <p className="my-auto">作者：{site.author.username}</p>
+    //           <p className="my-auto">
+    //             最後編輯時間:{handleTime(site.updateDate)}
+    //           </p>
+    //         </div>
+    //         <hr className="mt-1" />
+    //         <div className="d-flex align-items-center">
+    //           <Link
+    //             to="#"
+    //             className="btn bg-primary-subtle"
+    //             data-mdb-ripple-init
+    //           >
+    //             編輯
+    //           </Link>
+    //           <button
+    //             href="#!"
+    //             className="btn bg-danger-subtle ms-2"
+    //             name={site._id}
+    //             onClick={handleDelete}
+    //             data-mdb-ripple-init
+    //           >
+    //             刪除
+    //           </button>
+    //           <div className="ms-3">
+    //             狀態：{site.public ? "公開" : "未公開"}
+    //           </div>
+    //         </div>
+    //       </div>
+    //     </div>
+    //   )}
+    //   {/* 確定刪除按鈕 */}
+    //   <div
+    //     id="siteDeleteConfirm"
+    //     className="bg-light-subtle justify-content-center align-items-center rounded"
+    //     style={{
+    //       display: "none",
+    //       height: "8rem",
+    //       width: "15rem",
+    //       position: "fixed",
+    //       top: "37%",
+    //       left: "46%",
+    //       zIndex: "2",
+    //     }}
+    //   >
+    //     <div className="container text-center">
+    //       <p className="mb-3 fs-2">刪除景點?</p>
+    //       <div>
+    //         <button
+    //           type="button"
+    //           className="deleteConfirmButton bg-success-subtle"
+    //           onClick={cancelDelete}
+    //         >
+    //           取消
+    //         </button>
+    //         <button
+    //           type="button"
+    //           className="deleteConfirmButton bg-danger-subtle"
+    //           onClick={() => {
+    //             deleteIt(site);
+    //           }}
+    //         >
+    //           刪除
+    //         </button>
+    //       </div>
+    //     </div>
+    //   </div>
+
+    //   {/* 遮罩 */}
+    //   <div
+    //     id="gray_cover"
+    //     style={{
+    //       display: "none",
+    //       height: "100vh",
+    //       width: "100vw",
+    //       opacity: "80%",
+    //       backgroundColor: "black",
+    //       position: "fixed",
+    //       top: "0",
+    //       left: "0",
+    //       zIndex: "1",
+    //     }}
+    //   ></div>
+    // </div>
   );
 };
 

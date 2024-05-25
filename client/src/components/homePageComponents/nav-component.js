@@ -19,9 +19,19 @@ const NavComponent = ({ auth }) => {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg bg-body-tertiary bg-info-subtle">
+    <nav
+      className="navbar navbar-expand-lg"
+      style={{
+        backgroundColor: "rgb(90, 178, 255)",
+        opacity: "0.8",
+      }}
+    >
       <div className="container-fluid">
-        <Link className="navbar-brand" to="/">
+        <Link
+          className="navbar-brand"
+          to="/"
+          style={{ color: "black", fontWeight: "700" }}
+        >
           首頁
         </Link>
         <button
@@ -38,12 +48,21 @@ const NavComponent = ({ auth }) => {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav mb-2 mb-lg-0">
             <li className="nav-item">
-              <Link className="nav-link" aria-current="page" to="/">
+              <Link
+                className="nav-link"
+                aria-current="page"
+                to="/"
+                style={{ color: "black", fontWeight: "700" }}
+              >
                 行程瀏覽
               </Link>
             </li>
             <li className="nav-item">
-              <Link className="nav-link " to="/">
+              <Link
+                className="nav-link "
+                to="/"
+                style={{ color: "black", fontWeight: "700" }}
+              >
                 景點瀏覽
               </Link>
             </li>
@@ -56,12 +75,23 @@ const NavComponent = ({ auth }) => {
               placeholder="Search"
               aria-label="Search"
             />
-            <button className="btn btn-outline-success" type="submit">
+            <button
+              className="btn btn-outline-success"
+              type="submit"
+              style={{
+                color: "black",
+                fontWeight: "700",
+                borderColor: "black",
+              }}
+            >
               Search
             </button>
           </form>
           <ul className="navbar-nav mb-2 mb-lg-0 ms-auto me-5 ">
-            <li className="nav-item dropdown">
+            <li
+              className="nav-item dropdown"
+              style={{ color: "black", fontWeight: "700" }}
+            >
               <Link
                 className="nav-link dropdown-toggle"
                 to="/"

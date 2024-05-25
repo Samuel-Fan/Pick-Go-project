@@ -138,7 +138,7 @@ router.get("/mySite", authCheck, async (req, res) => {
 });
 
 // 計算使用者收藏的sites總數
-router.get("/mySite/count", authCheck, async (req, res) => {
+router.get("/myCollection/count", authCheck, async (req, res) => {
   let { _id } = req.user;
   try {
     let count = await Action.find({

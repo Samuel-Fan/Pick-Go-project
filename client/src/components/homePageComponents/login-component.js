@@ -46,17 +46,17 @@ const LoginComponent = ({ setAuth }) => {
   };
 
   return (
-    <section className="vh-100">
-      <div className="container py-5 ">
+    <section>
+      <div className="container py-2 ">
         <div className="row d-flex align-items-center justify-content-center h-100 ">
-          <div className="col-md-8 col-lg-7 col-xl-6">
+          <div className="col-xl-6">
             <img
               src="https://img.freepik.com/free-vector/travel-concept-with-landmarks_1057-4873.jpg?t=st=1715064829~exp=1715068429~hmac=87777009ecf1996440171e92d5f2634a1c1289bae34dc314c2e7c55a8a9302ce&w=826"
               className="img-fluid"
               alt="Phone image"
             />
           </div>
-          <div className="col-md-7 col-lg-5 col-xl-5 offset-xl-1">
+          <div className="col-xl-5 offset-xl-1">
             <form>
               {/* <!-- Email input --> */}
               <div data-mdb-input-init className="form-outline mb-4">
