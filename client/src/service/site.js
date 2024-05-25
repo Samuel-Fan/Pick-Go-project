@@ -35,9 +35,21 @@ class siteService {
     );
   }
 
+  // 確認有無點過讚或收藏
+  get_site_like_and_collect(_id) {
+    return axios.get(apiURL + "/api/sites/check/like-collect/" + _id);
+  }
+
   // 查詢景點詳細資訊
   get_site_detail(_id) {
     return axios.get(apiURL + "/api/sites/detail/" + _id);
+  }
+
+  // 得到同作者的其他景點
+  get_other_sites(author_id, site_id) {
+    return axios.get(
+      apiURL + `/api/sites/other?author_id=${author_id}&site_id=${site_id}`
+    );
   }
 
   // 建立新景點

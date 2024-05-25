@@ -7,11 +7,11 @@ const Sites = () => {
   const navigate = useNavigate();
   const { category } = useParams(); // 設定顯示 我建立的景點 or 我收藏的景點
 
-  let [sites, setSites] = useState();
-  let [count, setCount] = useState(); // 計算有幾個sites 分頁用
-  let [page, setPage] = useState(1);
-  let [numberPerPage, setNumberPerPage] = useState(4); //每頁顯示幾個
-  let [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
+  const [sites, setSites] = useState();
+  const [count, setCount] = useState(); // 計算有幾個sites 分頁用
+  const [page, setPage] = useState(1);
+  const [numberPerPage, setNumberPerPage] = useState(4); //每頁顯示幾個
+  const [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
 
   // 選擇頁數
   const handlePage = (e) => {
@@ -50,6 +50,7 @@ const Sites = () => {
     try {
       console.log(deleteId);
       let result;
+      document.body.style.cursor = "wait";
       if (category === "mine") {
         result = await siteService.delete_site(deleteId);
       } else if (category === "collections") {
@@ -140,7 +141,7 @@ const Sites = () => {
 
   return (
     <div className="container">
-      <div className="d-flex container">
+      <div className="d-flex flex-wrap container">
         {/* 選擇我建立的景點or我收藏的景點 */}
         <div className="me-5">
           <a
@@ -268,37 +269,31 @@ const Sites = () => {
                 key={site._id}
               >
                 <div
-                  className="bg-image hover-overlay"
-                  data-mdb-ripple-init
-                  data-mdb-ripple-color="light"
-                  style={{ height: "12rem", borderBottom: "1px solid black" }}
+                  className="d-flex"
+                  style={{ height: "45%", borderBottom: "1px solid black" }}
                 >
-                  <Link
-                    to={"/site/" + site._id}
-                    style={{ textDecoration: "none" }}
-                  >
-                    {site.photo.url ? (
-                      <img
-                        src={site.photo.url}
-                        alt={site.photo.photoName}
-                        className="img-fluid"
-                        style={{
-                          objectFit: "cover",
-                          height: "100%",
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          fontSize: "3rem",
-                          transform: "rotate(20deg) translate(40px,50px)",
-                          color: "black",
-                        }}
-                      >
-                        No photo
-                      </div>
-                    )}
-                  </Link>
+                  {site.photo.url ? (
+                    <img
+                      src={site.photo.url}
+                      alt={site.photo.photoName}
+                      className="img-fluid"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        fontSize: "3rem",
+                        transform: "rotate(20deg) translate(30px,40px)",
+                        color: "black",
+                      }}
+                    >
+                      No photo
+                    </div>
+                  )}
                 </div>
 
                 <div className="card-body">

@@ -14,7 +14,7 @@ import EditProfile from "./components/myPageComponents/profile/editProfile-compo
 import EditPassword from "./components/myPageComponents/profile/editPassword-component";
 import Sites from "./components/myPageComponents/site/sites-component";
 import AddNewSite from "./components/myPageComponents/site/addNewSite-component";
-import SiteDetail from "./components/myPageComponents/site/siteDetail-component";
+import SiteDetail from "./components/homePageComponents/siteDetail-component";
 import EditSite from "./components/myPageComponents/site/editSite-component";
 import NoAuth from "./components/myPageComponents/noAuth-component";
 import NotFound from "./components/homePageComponents/notFound";

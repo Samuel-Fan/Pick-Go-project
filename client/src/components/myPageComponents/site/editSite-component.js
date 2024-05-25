@@ -35,6 +35,7 @@ const EditSiteComponent = () => {
     }
 
     try {
+      document.body.style.cursor = "wait";
       let result = await siteService.patch_edit_site(site_id, formData);
       console.log(result);
       alert("修改完成");
@@ -89,10 +90,10 @@ const EditSiteComponent = () => {
 
         setMessage("只能上傳 jpeg, jpg 或 png 檔!");
         document.querySelector("#photo_site").value = null;
-      } else if (size > 1000000) {
-        // 如果檔案大小大於 1 MB，不允許上傳
+      } else if (size > 2.5 * 1024 * 1024) {
+        // 如果檔案大小大於 2.5 MB，不允許上傳
 
-        setMessage("圖片過大，請使用其它方式上傳！");
+        setMessage("圖片過大，請使用其它方式上傳！(限制 2.5 MB)");
         document.querySelector("#photo_site").value = null;
       } else {
         setMessage("");
@@ -114,9 +115,11 @@ const EditSiteComponent = () => {
   };
 
   useEffect(() => {
+    document.body.style.cursor = "wait";
     siteService
       .get_site_detail(site_id)
       .then((data) => {
+        document.body.style.cursor = "default";
         let siteInfo = data.data.site;
         console.log(data.data);
         // 如果作者與編輯人不符，跳轉頁面
@@ -345,7 +348,7 @@ const EditSiteComponent = () => {
           <textarea
             className="form-control"
             id="content_site"
-            style={{ whiteSpace: "pre-line" }}
+            style={{ whiteSpace: "pre-line", height: "200px" }}
             onChange={handleContent}
             value={content}
           ></textarea>

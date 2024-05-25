@@ -20,7 +20,7 @@ const authCheck = (req, res, next) => {
 // 照片檔案上傳格式設定
 const upload = multer({
   limits: {
-    fileSize: 1 * 1024 * 1024,
+    fileSize: 2.5 * 1024 * 1024,
   },
   fileFilter(req, file, cb) {
     const ext = path.extname(file.originalname).toLowerCase();
@@ -52,7 +52,13 @@ router.get("/test", (req, res) => {
     });
 });
 
-// 找尋特定景點
+// 搜尋多個景點簡略資訊
+router.get("/search", async (req, res) => {
+  try {
+  } catch (e) {}
+});
+
+// 找尋單個景點詳細資訊
 router.get("/detail/:_id", async (req, res) => {
   let { _id } = req.params;
   try {
@@ -137,12 +143,31 @@ router.get("/mySite", authCheck, async (req, res) => {
   }
 });
 
+// 找尋特定作者的其他site，排除query給予的site_id
+router.get("/other", async (req, res) => {
+  let { author_id, site_id } = req.query;
+
+  try {
+    let foundSite = await Site.aggregate({
+      $match: {
+        author: new ObjectId(author_id),
+        _id: { $ne: new ObjectId(site_id) },
+      },
+    }).sample(3);
+
+    return res.send(foundSite);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("伺服器發生問題");
+  }
+});
+
 // 計算使用者收藏的sites總數
 router.get("/myCollection/count", authCheck, async (req, res) => {
-  let { _id } = req.user;
+  let user_id = req.user._id;
   try {
     let count = await Action.find({
-      user_id: new ObjectId(_id),
+      user_id,
       action: "收藏",
     })
       .count()
@@ -171,6 +196,29 @@ router.get("/myCollections", authCheck, async (req, res) => {
       .lean()
       .exec();
     return res.send(foundSite);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("伺服器發生問題");
+  }
+});
+
+// 確認有無點過讚或收藏
+router.get("/check/like-collect/:_id", async (req, res) => {
+  let site_id = req.params._id;
+  if (!req.user) {
+    return res.status(401).send("你必須先登入");
+  }
+  let user_id = req.user._id;
+
+  try {
+    let like = await Action.findOne({ user_id, site_id, action: "讚" })
+      .lean()
+      .exec();
+    let collect = await Action.findOne({ user_id, site_id, action: "收藏" })
+      .lean()
+      .exec();
+    let result = { like: like ? true : false, collect: collect ? true : false };
+    return res.send(result);
   } catch (e) {
     console.log(e);
     return res.status(500).send("伺服器發生問題");

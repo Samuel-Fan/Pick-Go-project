@@ -34,7 +34,7 @@ client
 
 app.set("view engine", "ejs"); // 測試照片上傳
 
-app.use(express.json({ limit: "1.5mb" }));
+app.use(express.json({ limit: "2.5mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(
   session({
