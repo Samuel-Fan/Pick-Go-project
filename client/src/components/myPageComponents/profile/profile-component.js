@@ -24,10 +24,11 @@ const Profile = ({ currentUser, setCurrentUser }) => {
         setCurrentUser(user);
       })
       .catch((e) => {
+        localStorage.removeItem("auth");
         navigate("/login");
         navigate(0);
       });
-  }, []);
+  }, [navigate, setCurrentUser]);
 
   return (
     <div className="container">

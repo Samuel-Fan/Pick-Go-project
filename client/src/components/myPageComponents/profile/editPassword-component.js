@@ -15,17 +15,11 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
     let data = { oldPassword, password, confirmPassword };
 
     try {
-      let result = await authService.patch_modify_password(data);
-      alert(result.data);
+      await authService.patch_modify_password(data);
+      alert("成功修改密碼");
       navigate("/users");
     } catch (e) {
-      if (e.response && e.response.status === 401) {
-        console.log(e.response.data);
-        alert("請重新登入後再嘗試");
-        localStorage.removeItem("auth");
-        navigate("/login");
-        navigate(0);
-      } else if (e.response && e.response.status !== 401) {
+      if (e.response) {
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");
@@ -57,7 +51,7 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
         navigate("/login");
         navigate(0);
       });
-  }, []);
+  }, [navigate, setCurrentUser]);
 
   return (
     <div className="container">

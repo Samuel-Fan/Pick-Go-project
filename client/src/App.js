@@ -1,7 +1,6 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import authService from "./service/auth";
+import { useState } from "react";
 import Layout from "./components/homePageComponents/Layout";
 import HomeComponent from "./components/homePageComponents/home-component";
 import AppExample from "./AppExample";

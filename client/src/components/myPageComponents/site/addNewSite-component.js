@@ -15,6 +15,7 @@ const AddNewSiteComponent = () => {
   const [message, setMessage] = useState("");
 
   const handleAddSite = async () => {
+    // 處理form data
     const formData = new FormData();
     formData.append("file-to-upload", photo);
     formData.append("title", title);
@@ -22,6 +23,9 @@ const AddNewSiteComponent = () => {
     formData.append("region", region);
     formData.append("type", type);
     formData.append("content", content);
+
+    // loading中禁用submit按鈕
+    document.querySelector("#add-new-site-button").disabled = true;
 
     try {
       document.body.style.cursor = "wait";
@@ -31,6 +35,11 @@ const AddNewSiteComponent = () => {
       navigate("/users/sites/overview/mine");
       navigate(0);
     } catch (e) {
+      // 回復游標與submit按鈕
+      document.querySelector("#add-new-site-button").disabled = false;
+      document.body.style.cursor = "default";
+
+      // 處理錯誤訊息
       console.log(e);
       if (e.response) {
         console.log(e.response.data);
@@ -283,6 +292,7 @@ const AddNewSiteComponent = () => {
           )}
         </div>
         <button
+          id="add-new-site-button"
           type="button"
           className="btn btn-primary"
           onClick={handleAddSite}

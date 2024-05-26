@@ -1,18 +1,28 @@
 import axios from "axios";
-axios.defaults.withCredentials = true;
 
 const apiURL = process.env.REACT_APP_API_URL;
 
+// 設定token
+let token;
+if (localStorage.getItem("auth")) {
+  token = JSON.parse(localStorage.getItem("auth")).jwtToken;
+} else {
+  token = "";
+}
+
+axios.defaults.headers.common["Authorization"] = token;
+
 // 負責"景點"相關與server的互動
-class siteService {
+class SiteService {
   // 取得使用者自己建立的景點資訊
+
   // 用來計算幾頁
   get_mySite_count() {
     return axios.get(apiURL + "/api/sites/mySite/count");
   }
 
+  // 取得資訊
   get_mySite(page, numberPerPage) {
-    // 取得資訊
     return axios.get(
       apiURL +
         "/api/sites/mySite" +
@@ -40,9 +50,14 @@ class siteService {
     return axios.get(apiURL + "/api/sites/check/like-collect/" + _id);
   }
 
-  // 查詢景點詳細資訊
+  // 查詢景點詳細資訊(公開版)
   get_site_detail(_id) {
     return axios.get(apiURL + "/api/sites/detail/" + _id);
+  }
+
+  // 查詢景點詳細資訊(私人)
+  get_mySite_detail(_id) {
+    return axios.get(apiURL + "/api/sites/mySite/detail/" + _id);
   }
 
   // 得到同作者的其他景點
@@ -57,12 +72,11 @@ class siteService {
     return axios.post(apiURL + "/api/sites/new", data, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Authorization: "Client-ID {42dd75588885b5e}",
       },
     });
   }
 
-  // 收藏 or 取消讚
+  // 按讚 or 收回讚
   post_click_like(_id) {
     return axios.post(apiURL + "/api/sites/click/like/" + _id);
   }
@@ -77,7 +91,6 @@ class siteService {
     return axios.patch(apiURL + "/api/sites/modify/" + _id, data, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Authorization: "Client-ID {42dd75588885b5e}",
       },
     });
   }
@@ -86,6 +99,16 @@ class siteService {
   delete_site(_id) {
     return axios.delete(apiURL + "/api/sites/" + _id);
   }
-}
 
-export default new siteService();
+  // 設定 jwt token
+  setToken() {
+    if (localStorage.getItem("auth")) {
+      return JSON.parse(localStorage.getItem("auth")).jwtToken;
+    } else {
+      return "";
+    }
+  }
+}
+let siteService = new SiteService();
+
+export default siteService;

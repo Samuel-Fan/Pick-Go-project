@@ -28,7 +28,9 @@ const Sites = () => {
 
   // 每頁幾張?
   const handlePerPage = (e) => {
-    setNumberPerPage(e.target.value);
+    if (e.target.value > 0 && e.target.value <= 8) {
+      setNumberPerPage(e.target.value);
+    }
   };
 
   // 處理刪除景點 or 移除收藏
@@ -130,6 +132,7 @@ const Sites = () => {
           setSites(result);
         })
         .catch((e) => {
+          console.log(e);
           if (e.response && e.response.status === 401) {
             localStorage.removeItem("auth");
             navigate("/login");
@@ -143,7 +146,7 @@ const Sites = () => {
     <div className="container">
       <div className="d-flex flex-wrap container">
         {/* 選擇我建立的景點or我收藏的景點 */}
-        <div className="me-5">
+        <div className="me-5 mb-3">
           <a
             href="/users/sites/overview/mine"
             className={`btn btn-outline-primary me-3 ${
@@ -238,10 +241,12 @@ const Sites = () => {
         {/* 每頁顯示幾個? */}
         <div className="mt-1 me-5">
           <label htmlFor="set-Number-Per-Page" className="me-2">
-            每頁顯示幾個?
+            每頁顯示幾個?(1-8)
           </label>
           <input
             type="number"
+            min="1"
+            max="8"
             id="set-Number-Per-Page"
             style={{ width: "2rem" }}
             onChange={handlePerPage}

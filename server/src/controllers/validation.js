@@ -45,7 +45,7 @@ const registerValidation = (data) => {
 // 驗證登入資料
 const loginValidation = (data) => {
   const Schema = Joi.object({
-    username: Joi.string().lowercase().required().email().messages({
+    email: Joi.string().lowercase().required().email().messages({
       "any.required": "'Email'為必須填寫的項目",
       "string.empty": "'Email'為必須填寫的項目",
       "string.email": "請提供一個有效的'Email'",

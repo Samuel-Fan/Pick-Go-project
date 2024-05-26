@@ -1,21 +1,13 @@
 import React from "react";
-import authService from "../../service/auth";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 const NavComponent = ({ auth }) => {
   const navigate = useNavigate();
-  console.log(auth);
   const handleLogout = async () => {
-    try {
-      let result = await authService.get_logout();
-      alert(result.data);
-      window.localStorage.removeItem("auth");
-      navigate("/");
-      navigate(0); // 刷新頁面
-    } catch (e) {
-      alert("某些錯誤發生: " + e);
-    }
+    window.localStorage.removeItem("auth");
+    navigate("/");
+    navigate(0); // 刷新頁面
   };
 
   return (
@@ -98,6 +90,7 @@ const NavComponent = ({ auth }) => {
                 role="button"
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
+                style={{ color: "black", fontWeight: "700" }}
               >
                 {auth ? auth.username + " 的" : "我的"}帳號
               </Link>
@@ -144,7 +137,11 @@ const NavComponent = ({ auth }) => {
             </li>
             <li className="nav-item me-2">
               {!auth && (
-                <Link className="nav-link" to="/signup">
+                <Link
+                  className="nav-link"
+                  to="/signup"
+                  style={{ color: "black", fontWeight: "700" }}
+                >
                   註冊
                 </Link>
               )}

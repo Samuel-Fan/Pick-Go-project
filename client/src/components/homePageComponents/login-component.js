@@ -3,18 +3,22 @@ import { useState } from "react";
 import authService from "../../service/auth";
 import { useNavigate } from "react-router-dom";
 
-const LoginComponent = ({ setAuth }) => {
+const LoginComponent = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
   const handleLogin = async () => {
     try {
-      let result = await authService.post_login(username, password);
+      let result = await authService.post_login(email, password);
       localStorage.setItem(
         "auth",
-        JSON.stringify({ _id: result.data._id, username: result.data.username })
+        JSON.stringify({
+          _id: result.data.user._id,
+          username: result.data.user.username,
+          jwtToken: result.data.jwtToken,
+        })
       );
       alert("成功登入");
       navigate("/");
@@ -37,8 +41,8 @@ const LoginComponent = ({ setAuth }) => {
     }
   };
 
-  const handleUsernameInput = (e) => {
-    setUsername(e.target.value);
+  const handleEmailInput = (e) => {
+    setEmail(e.target.value);
   };
 
   const handlePasswordInput = (e) => {
@@ -64,8 +68,8 @@ const LoginComponent = ({ setAuth }) => {
                   type="email"
                   id="signin-email"
                   className="form-control form-control-lg"
-                  name="username"
-                  onChange={handleUsernameInput}
+                  name="email"
+                  onChange={handleEmailInput}
                   onKeyUp={handleEnter}
                 />
                 <label className="form-label" htmlFor="signIn-email">

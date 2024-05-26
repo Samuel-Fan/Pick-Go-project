@@ -46,11 +46,13 @@ const SiteDetailComponent = () => {
       console.log(result);
       setCheckLike(!checkLike);
     } catch (e) {
-      if (e.response && e.response.status === 401) {
-        localStorage.removeItem("auth");
-        navigate("/login");
-      }
       console.log(e);
+      if (e.response && e.response.status === 401) {
+        // localStorage.removeItem("auth");
+        // navigate("/login");
+        // navigate(0);
+        alert("401!");
+      }
     }
   };
 
@@ -61,12 +63,13 @@ const SiteDetailComponent = () => {
       console.log(result);
       setCheckCollect(!checkCollect);
     } catch (e) {
-      if (e.response && e.response.status === 401) {
-        localStorage.removeItem("auth");
-        navigate("/login");
-        navigate(0);
-      }
       console.log(e);
+      if (e.response && e.response.status === 401) {
+        // localStorage.removeItem("auth");
+        // navigate("/login");
+        // navigate(0);
+        alert("401!");
+      }
     }
   };
 
@@ -79,8 +82,11 @@ const SiteDetailComponent = () => {
         setCollect(data.data.collect);
       })
       .catch((e) => {
-        if (e.response) {
-          console.log(e.response.data);
+        if (e.response && e.response.status === 403) {
+          navigate("/noAuth");
+        } else if (e.response && e.response.status === 401) {
+          alert("請先登入");
+          navigate("/login");
         }
       });
     siteService

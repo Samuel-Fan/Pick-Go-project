@@ -32,17 +32,11 @@ const EditProfile = () => {
     e.preventDefault();
     let data = { username, age, gender, description };
     try {
-      let result = await authService.patch_modify(data);
-      localStorage.setItem("user", JSON.stringify(result.data));
+      await authService.patch_modify(data);
       navigate("/users");
       navigate(0); // 刷新頁面
     } catch (e) {
       if (e.response && e.response.status === 401) {
-        setMessage("請重新登入後再嘗試");
-        localStorage.removeItem("auth");
-        navigate("/login");
-        navigate(0);
-      } else if (e.response && e.response.status !== 401) {
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");
@@ -74,13 +68,15 @@ const EditProfile = () => {
           case "其他":
             document.querySelector("#gender_other").checked = true;
             break;
+          default:
+            break;
         }
       })
       .catch((e) => {
         navigate("/login");
         navigate(0);
       });
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="container">

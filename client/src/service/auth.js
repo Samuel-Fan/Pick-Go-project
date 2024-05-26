@@ -1,28 +1,37 @@
 import axios from "axios";
-axios.defaults.withCredentials = true;
 
 const apiURL = process.env.REACT_APP_API_URL;
 
+// 設定token
+let token;
+if (localStorage.getItem("auth")) {
+  token = JSON.parse(localStorage.getItem("auth")).jwtToken;
+} else {
+  token = "";
+}
+
+axios.defaults.headers.common["Authorization"] = token;
+
 // 負責使用者相關與server的互動
 class AuthService {
-  // 登入系統
-  post_login(username, password) {
-    return axios.post(apiURL + "/api/users/login", {
-      username,
-      password,
+  // 得到使用者資訊-local
+  get_auth_user() {
+    return axios.get(apiURL + "/api/users");
+  }
+
+  // google登入取得jwt
+  get_google_jwt() {
+    return axios.get(apiURL + "/api/users/auth/google/setJwt", {
+      withCredentials: true,
     });
   }
 
-  // 登出系統
-
-  get_logout() {
-    console.log(apiURL);
-    return axios.get(apiURL + "/api/users/logout");
-  }
-
-  // 得到使用者資訊
-  get_auth_user() {
-    return axios.get(apiURL + "/api/users");
+  // 登入系統
+  post_login(email, password) {
+    return axios.post(apiURL + "/api/users/login", {
+      email,
+      password,
+    });
   }
 
   // 註冊系統
@@ -45,4 +54,6 @@ class AuthService {
   }
 }
 
-export default new AuthService();
+let authService = new AuthService();
+
+export default authService;

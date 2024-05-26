@@ -19,6 +19,7 @@ const EditSiteComponent = () => {
   const [message, setMessage] = useState("");
 
   const handleAddSite = async () => {
+    // 處理form data
     const formData = new FormData();
     formData.append("file-to-upload", photo);
     formData.append("title", title);
@@ -34,6 +35,9 @@ const EditSiteComponent = () => {
       formData.append("removeOriginPhoto", removeOriginPhoto);
     }
 
+    // loading中禁用submit按鈕
+    document.querySelector("#edit-site-submit-button").disabled = true;
+
     try {
       document.body.style.cursor = "wait";
       let result = await siteService.patch_edit_site(site_id, formData);
@@ -42,6 +46,11 @@ const EditSiteComponent = () => {
       navigate("/users/sites/overview/mine");
       navigate(0);
     } catch (e) {
+      // 回復游標與submit按鈕
+      document.body.style.cursor = "default";
+      document.querySelector("#edit-site-submit-button").disabled = false;
+
+      // 處理錯誤訊息
       console.log(e);
       if (e.response) {
         console.log(e.response.data);
@@ -116,10 +125,13 @@ const EditSiteComponent = () => {
 
   useEffect(() => {
     document.body.style.cursor = "wait";
+    document.querySelector("#edit-site-submit-button").disabled = true;
+
     siteService
-      .get_site_detail(site_id)
+      .get_mySite_detail(site_id)
       .then((data) => {
         document.body.style.cursor = "default";
+        document.querySelector("#edit-site-submit-button").disabled = false;
         let siteInfo = data.data.site;
         console.log(data.data);
         // 如果作者與編輯人不符，跳轉頁面
@@ -396,6 +408,7 @@ const EditSiteComponent = () => {
           )}
         </div>
         <button
+          id="edit-site-submit-button"
           type="button"
           className="btn btn-primary"
           onClick={handleAddSite}
