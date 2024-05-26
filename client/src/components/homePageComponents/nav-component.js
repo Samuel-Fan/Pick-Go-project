@@ -52,7 +52,7 @@ const NavComponent = ({ auth }) => {
             <li className="nav-item">
               <Link
                 className="nav-link "
-                to="/"
+                to="/sites"
                 style={{ color: "black", fontWeight: "700" }}
               >
                 景點瀏覽

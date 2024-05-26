@@ -3,7 +3,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import Layout from "./components/homePageComponents/Layout";
 import HomeComponent from "./components/homePageComponents/home-component";
-import AppExample from "./AppExample";
+import SearchSitesComponent from "./components/homePageComponents/search-sites-component";
+import SiteDetail from "./components/homePageComponents/siteDetail-component";
 import LoginComponent from "./components/homePageComponents/login-component";
 import SignupComponent from "./components/homePageComponents/signup-component";
 import GoogleLogin from "./components/homePageComponents/googleLogin";
@@ -12,8 +13,8 @@ import Profile from "./components/myPageComponents/profile/profile-component";
 import EditProfile from "./components/myPageComponents/profile/editProfile-component";
 import EditPassword from "./components/myPageComponents/profile/editPassword-component";
 import Sites from "./components/myPageComponents/site/sites-component";
+import MySiteDetailComponent from "./components/myPageComponents/site/mySiteDetail-component";
 import AddNewSite from "./components/myPageComponents/site/addNewSite-component";
-import SiteDetail from "./components/homePageComponents/siteDetail-component";
 import EditSite from "./components/myPageComponents/site/editSite-component";
 import NoAuth from "./components/myPageComponents/noAuth-component";
 import NotFound from "./components/homePageComponents/notFound";
@@ -25,9 +26,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* 首頁 (不須登入即可瀏覽的頁面) */}
         <Route path="/" element={<Layout auth={auth} />}>
           <Route index element={<HomeComponent auth={auth} />}></Route>
-          <Route path="react" element={<AppExample />}></Route>
+          <Route path="/sites" element={<SearchSitesComponent />}></Route>
           <Route path="/site/:site_id" element={<SiteDetail />}></Route>
           <Route
             path="login"
@@ -35,7 +37,11 @@ function App() {
           ></Route>
           <Route path="signup" element={<SignupComponent />}></Route>
         </Route>
+
+        {/* 處理google登入 */}
         <Route path="googleLogin" element={<GoogleLogin />}></Route>
+
+        {/* 個人帳號頁面 */}
         <Route
           path="/users"
           element={
@@ -49,6 +55,7 @@ function App() {
             )
           }
         >
+          {/* 帳號資訊瀏覽、修改 */}
           <Route
             index
             element={
@@ -68,9 +75,15 @@ function App() {
               />
             }
           ></Route>
+
+          {/* 景點建立、修改、瀏覽 */}
           <Route
             path="/users/sites/overview/:category"
             element={<Sites />}
+          ></Route>
+          <Route
+            path="/users/mySite/:site_id"
+            element={<MySiteDetailComponent />}
           ></Route>
           <Route path="/users/sites/new" element={<AddNewSite />}></Route>
           <Route
@@ -78,7 +91,11 @@ function App() {
             element={<EditSite />}
           ></Route>
         </Route>
+
+        {/* 處理 403 error 的頁面 */}
         <Route path="/noAuth" element={<NoAuth />}></Route>
+
+        {/* 處理 404 error 的頁面 */}
         <Route path="*" element={<NotFound />}></Route>
       </Routes>
     </BrowserRouter>

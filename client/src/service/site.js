@@ -14,15 +14,30 @@ axios.defaults.headers.common["Authorization"] = token;
 
 // 負責"景點"相關與server的互動
 class SiteService {
-  // 取得使用者自己建立的景點資訊
+  // 取得公開的景點資料
 
-  // 用來計算幾頁
+  get_search_sites(page, numberPerPage) {
+    // 取得景點簡易圖卡資料
+    return axios.get(
+      apiURL +
+        "/api/sites/search/" +
+        `?page=${page}&numberPerPage=${numberPerPage}`
+    );
+  }
+
+  get_sites_count() {
+    // 取得公開景點的資料筆數
+    return axios.get(apiURL + "/api/sites/count");
+  }
+
+  // 取得使用者自己建立的景點資訊
   get_mySite_count() {
+    // 用來計算幾頁
     return axios.get(apiURL + "/api/sites/mySite/count");
   }
 
-  // 取得資訊
   get_mySite(page, numberPerPage) {
+    // 取得資訊
     return axios.get(
       apiURL +
         "/api/sites/mySite" +
@@ -31,13 +46,14 @@ class SiteService {
   }
 
   // 取得使用者收藏的景點資訊
-  // 用來計算幾頁
+
   get_myCollection_count() {
+    // 用來計算幾頁
     return axios.get(apiURL + "/api/sites/myCollection/count");
   }
 
-  // 取得資訊
   get_myCollection(page, numberPerPage) {
+    // 取得資訊
     return axios.get(
       apiURL +
         "/api/sites/myCollections" +

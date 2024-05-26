@@ -308,7 +308,7 @@ const Sites = () => {
                       ? site.content.slice(0, 30) + "..."
                       : site.content}
                   </p>
-                  <Link to={"/site/" + site._id}>顯示更多</Link>
+                  <Link to={"/users/mySite/" + site._id}>顯示更多</Link>
                   <hr />
                   {category === "mine" ? (
                     <div className="d-flex align-items-center">

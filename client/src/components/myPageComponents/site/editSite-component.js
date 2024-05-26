@@ -132,11 +132,12 @@ const EditSiteComponent = () => {
       .then((data) => {
         document.body.style.cursor = "default";
         document.querySelector("#edit-site-submit-button").disabled = false;
-        let siteInfo = data.data.site;
+        let siteInfo = data.data;
         console.log(data.data);
         // 如果作者與編輯人不符，跳轉頁面
         if (
-          !siteInfo.author._id === JSON.parse(localStorage.getItem("auth"))._id
+          !siteInfo.author[0]._id ===
+          JSON.parse(localStorage.getItem("auth"))._id
         ) {
           navigate("/noAuth");
           navigate(0);

@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const Site = require("../models/index").site;
-const Action = require("../models/index").action;
+const Like = require("../models/index").like;
+const Collect = require("../models/index").collect;
 const ObjectId = require("mongoose").Types.ObjectId;
 const valid = require("../controllers/validation");
 const multer = require("multer");
@@ -44,6 +45,74 @@ router.get("/test", (req, res) => {
     });
 });
 
+// 以關鍵字搜尋景點
+router.get("/search", async (req, res) => {
+  try {
+    let {
+      tilte,
+      country,
+      region,
+      type,
+      username,
+      page,
+      numberPerPage,
+      orderBy,
+    } = req.query;
+
+    let sortObj;
+    if (orderBy === "date") {
+      sortObj = { updateDate: 1 };
+    } else {
+      sortObj = { num_of_like: -1 };
+    }
+
+    foundSite = await Site.aggregate([
+      { $match: { public: true } },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "site_id",
+          as: "like",
+        },
+      },
+      {
+        $project: {
+          num_of_like: { $size: "$like" },
+          title: 1,
+          country: 1,
+          region: 1,
+          type: 1,
+          content: 1,
+          photo: 1,
+          updateDate: 1,
+        },
+      },
+      {
+        $sort: sortObj,
+      },
+      { $skip: (page - 1) * numberPerPage },
+      { $limit: Number(numberPerPage) },
+    ]);
+    console.log(foundSite);
+    return res.send(foundSite);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("伺服器發生問題");
+  }
+});
+
+// 公開景點資料數
+router.get("/count", async (req, res) => {
+  try {
+    let count = await Site.find({ public: true }).count().exec();
+    return res.send({ count });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("伺服器發生問題");
+  }
+});
+
 // 找尋單個景點詳細資訊 (非公開頁面)
 router.get(
   "/mySite/detail/:_id",
@@ -54,47 +123,74 @@ router.get(
       // 先搜尋快取中有無數據
       let dataFromRedis = await redisClient.get(`Site:${_id}`);
       if (dataFromRedis) {
-        console.log("利用快取提供資料");
+        console.log("利用快取提供景點資料");
         return res.send(dataFromRedis);
       }
 
       // 若找不到則搜尋資料庫
-      console.log("利用資料庫提取資料");
-      let foundSite = await Site.findOne({ _id })
-        .populate("author", ["username"])
-        .lean()
-        .exec();
+      console.log("利用資料庫提取景點資料");
+
+      let foundSite = await Site.aggregate([
+        { $match: { _id: new ObjectId(_id) } },
+        {
+          $lookup: {
+            from: "likes",
+            localField: "_id",
+            foreignField: "site_id",
+            as: "like",
+          },
+        },
+        {
+          $lookup: {
+            from: "collects",
+            localField: "_id",
+            foreignField: "site_id",
+            as: "collect",
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "author",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $project: {
+            num_of_like: { $size: "$like" },
+            num_of_collect: { $size: "$collect" },
+            title: 1,
+            country: 1,
+            region: 1,
+            type: 1,
+            content: 1,
+            photo: 1,
+            "author._id": 1,
+            "author.username": 1,
+            public: 1,
+            updateDate: 1,
+          },
+        },
+      ]);
+
+      foundSite = foundSite[0];
 
       // 若搜尋到則確認其是否公開，若否則檢察是否為作者本人，非本人則返回403錯誤
       if (!foundSite.public) {
-        if (!req.user || !foundSite.author._id.equals(req.user._id)) {
+        if (!req.user || !foundSite.author[0]._id.equals(req.user._id)) {
           return res.status(403).send("作者不公開相關頁面");
         }
       }
 
-      // 搜尋site有幾個讚、收藏
-      let like = await Action.find({ site_id: new ObjectId(_id), action: "讚" })
-        .count()
-        .exec();
-      let collect = await Action.find({
-        site_id: new ObjectId(_id),
-        action: "收藏",
-      })
-        .count()
-        .exec();
-
-      // 若site是公開德，則存入快取，時間設定 10 分鐘
+      // 若site是公開，則存入快取，時間設定 10 分鐘
       if (foundSite.public) {
-        await redisClient.set(
-          `Site:${_id}`,
-          JSON.stringify({ site: foundSite, like, collect }),
-          {
-            EX: 10 * 60 * 1,
-          }
-        );
+        await redisClient.set(`Site:${_id}`, JSON.stringify(foundSite), {
+          EX: 10 * 60 * 1,
+        });
       }
 
-      return res.send({ site: foundSite, like, collect });
+      return res.send(foundSite);
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
@@ -109,46 +205,72 @@ router.get("/detail/:_id", async (req, res) => {
     // 先搜尋快取中有無數據
     let dataFromRedis = await redisClient.get(`Site:${_id}`);
     if (dataFromRedis) {
-      console.log("利用快取提供資料");
+      console.log("利用快取提供景點資料");
       return res.send(dataFromRedis);
     }
 
     // 若找不到則搜尋資料庫
-    console.log("利用資料庫提取資料");
-    let foundSite = await Site.findOne({ _id })
-      .populate("author", ["username"])
-      .lean()
-      .exec();
+    console.log("利用資料庫提取景點資料");
 
-    // 若搜尋到則確認其是否公開，若否則檢察是否為作者本人，非本人則返回403錯誤
+    let foundSite = await Site.aggregate([
+      { $match: { _id: new ObjectId(_id) } },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "site_id",
+          as: "like",
+        },
+      },
+      {
+        $lookup: {
+          from: "collects",
+          localField: "_id",
+          foreignField: "site_id",
+          as: "collect",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "author",
+        },
+      },
+      {
+        $project: {
+          num_of_like: { $size: "$like" },
+          num_of_collect: { $size: "$collect" },
+          title: 1,
+          country: 1,
+          region: 1,
+          type: 1,
+          content: 1,
+          photo: 1,
+          "author._id": 1,
+          "author.username": 1,
+          public: 1,
+          updateDate: 1,
+        },
+      },
+    ]);
+
+    foundSite = foundSite[0];
+
+    // 若搜尋到則確認其是否公開，若不公開則返回403錯誤
     if (!foundSite.public) {
       return res.status(403).send("作者不公開相關頁面");
     }
 
-    console.log(foundSite);
-    // 搜尋site有幾個讚、收藏
-    let like = await Action.find({ site_id: new ObjectId(_id), action: "讚" })
-      .count()
-      .exec();
-    let collect = await Action.find({
-      site_id: new ObjectId(_id),
-      action: "收藏",
-    })
-      .count()
-      .exec();
-
-    // 若site是公開德，則存入快取，時間設定 10 分鐘
+    // 若site是公開，則存入快取，時間設定 10 分鐘
     if (foundSite.public) {
-      await redisClient.set(
-        `Site:${_id}`,
-        JSON.stringify({ site: foundSite, like, collect }),
-        {
-          EX: 10 * 60 * 1,
-        }
-      );
+      await redisClient.set(`Site:${_id}`, JSON.stringify(foundSite), {
+        EX: 10 * 60 * 1,
+      });
     }
 
-    return res.send({ site: foundSite, like, collect });
+    return res.send(foundSite);
   } catch (e) {
     console.log(e);
     return res.status(500).send("伺服器發生問題");
@@ -162,7 +284,9 @@ router.get(
   async (req, res) => {
     let { _id } = req.user;
     try {
-      let count = await Site.find({ author: _id }).count().exec();
+      let count = await Site.find({ author: new ObjectId(_id) })
+        .count()
+        .exec();
       return res.send({ count });
     } catch (e) {
       console.log(e);
@@ -222,11 +346,9 @@ router.get(
   "/myCollection/count",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
-    let user_id = req.user._id;
     try {
-      let count = await Action.find({
-        user_id,
-        action: "收藏",
+      let count = await Collect.find({
+        user_id: new ObjectId(req.user._id),
       })
         .count()
         .exec();
@@ -246,7 +368,7 @@ router.get(
     let user_id = req.user._id;
     let { page, numberPerPage } = req.query;
     try {
-      let foundSite = await Action.find({ user_id, action: "收藏" })
+      let foundSite = await Collect.find({ user_id })
         .select(["site_id"])
         .populate({
           path: "site_id",
@@ -274,12 +396,8 @@ router.get(
     let user_id = req.user._id;
 
     try {
-      let like = await Action.findOne({ user_id, site_id, action: "讚" })
-        .lean()
-        .exec();
-      let collect = await Action.findOne({ user_id, site_id, action: "收藏" })
-        .lean()
-        .exec();
+      let like = await Like.findOne({ user_id, site_id }).lean().exec();
+      let collect = await Collect.findOne({ user_id, site_id }).lean().exec();
       let result = {
         like: like ? true : false,
         collect: collect ? true : false,
@@ -377,13 +495,12 @@ router.post(
     let user_id = req.user._id; // 使用者id
     try {
       // 先確認有無點過讚，如有點過，則收回讚
-      let checkLike = await Action.findOne({
+      let checkLike = await Like.findOne({
         user_id,
         site_id,
-        action: "讚",
       }).exec();
       if (checkLike) {
-        await Action.deleteOne({ user_id, site_id, action: "讚" }).exec();
+        await Like.deleteOne({ user_id, site_id }).exec();
         return res.send("成功收回讚");
       }
 
@@ -403,8 +520,8 @@ router.post(
       }
 
       // 存入資料庫
-      let action = new Action({ user_id, site_id, action: "讚" });
-      await action.save();
+      let like = new Like({ user_id, site_id });
+      await like.save();
       return res.send("成功按讚");
     } catch (e) {
       console.log(e);
@@ -422,13 +539,12 @@ router.post(
     let user_id = req.user._id; // 使用者id
     try {
       // 先確認有無點過收藏，如有點過，則取消收藏
-      let checkCollect = await Action.findOne({
+      let checkCollect = await Collect.findOne({
         user_id,
         site_id,
-        action: "收藏",
       }).exec();
       if (checkCollect) {
-        await Action.deleteOne({ user_id, site_id, action: "收藏" }).exec();
+        await Collect.deleteOne({ user_id, site_id }).exec();
         return res.send("成功取消收藏");
       }
 
@@ -448,8 +564,8 @@ router.post(
       }
 
       // 存入資料庫
-      let action = new Action({ user_id, site_id, action: "收藏" });
-      await action.save();
+      let collect = new Collect({ user_id, site_id });
+      await collect.save();
       return res.send("成功收藏");
     } catch (e) {
       console.log(e);
@@ -599,7 +715,8 @@ router.delete(
 
       await Promise.all([
         Site.deleteOne({ _id }), // 從景點資料庫移除
-        Action.deleteMany({ site_id: new ObjectId(_id) }), // 從讚、收藏資料庫中移除
+        Like.deleteMany({ site_id: new ObjectId(_id) }), // 從讚資料庫中移除
+        Collect.deleteMany({ site_id: new ObjectId(_id) }), // 從收藏資料庫中移除
         imgurClient.deleteImage(deletehash), // 刪imgur圖片
         redisClient.del(`Site:${_id}`), // 刪快取
       ]);

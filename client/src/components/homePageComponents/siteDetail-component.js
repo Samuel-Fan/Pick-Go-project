@@ -1,6 +1,6 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import siteService from "../../service/site";
 
 const SiteDetailComponent = () => {
@@ -9,9 +9,7 @@ const SiteDetailComponent = () => {
   const { site_id } = useParams();
 
   const [site, setSite] = useState("");
-  const [like, setLike] = useState("");
   const [checkLike, setCheckLike] = useState(false); // 確認點讚狀態
-  const [collect, setCollect] = useState("");
   const [checkCollect, setCheckCollect] = useState(false); // 確認收藏狀態
   const [otherSites, setOtherSites] = useState(""); // 找尋該作者的其他景點
 
@@ -48,10 +46,7 @@ const SiteDetailComponent = () => {
     } catch (e) {
       console.log(e);
       if (e.response && e.response.status === 401) {
-        // localStorage.removeItem("auth");
-        // navigate("/login");
-        // navigate(0);
-        alert("401!");
+        alert("您需要先登入");
       }
     }
   };
@@ -65,10 +60,7 @@ const SiteDetailComponent = () => {
     } catch (e) {
       console.log(e);
       if (e.response && e.response.status === 401) {
-        // localStorage.removeItem("auth");
-        // navigate("/login");
-        // navigate(0);
-        alert("401!");
+        alert("您需要先登入!");
       }
     }
   };
@@ -77,9 +69,7 @@ const SiteDetailComponent = () => {
     siteService
       .get_site_detail(site_id)
       .then((data) => {
-        setSite(data.data.site);
-        setLike(data.data.like);
-        setCollect(data.data.collect);
+        setSite(data.data);
       })
       .catch((e) => {
         if (e.response && e.response.status === 403) {
@@ -98,21 +88,20 @@ const SiteDetailComponent = () => {
       .catch((e) => {
         console.log(e);
       });
-  }, []);
+  }, [navigate, site_id]);
 
   useEffect(() => {
     if (site) {
       siteService
-        .get_other_sites(site.author._id, site_id)
+        .get_other_sites(site.author[0]._id, site_id)
         .then((data) => {
-          console.log(data.data);
           setOtherSites(data.data);
         })
         .catch((e) => {
           console.log(e);
         });
     }
-  }, [site]);
+  }, [site, site_id]);
 
   return (
     <div>
@@ -157,7 +146,7 @@ const SiteDetailComponent = () => {
             <hr />
             <div className="d-flex flex-wrap justify-content-between mt-2">
               <div className="text-start">
-                {like}人按讚，{collect}人收藏
+                {site.num_of_like}人按讚，{site.num_of_collect}人收藏
               </div>
               <div className="text-end">
                 最後更新時間：{handleTime(site.updateDate)}
@@ -191,7 +180,7 @@ const SiteDetailComponent = () => {
           </div>
           <div className="p-4" style={{ flex: "1 1 800px" }}>
             <h2>景點標題：{site.title}</h2>
-            <h6>作者：{site.author && site.author.username}</h6>
+            <h6>作者：{site.author && site.author[0].username}</h6>
             <hr />
             <p style={{ whiteSpace: "pre-line" }}>{site.content}</p>
           </div>
@@ -204,7 +193,7 @@ const SiteDetailComponent = () => {
 
       {/* 其他推薦的景點 */}
       <div className="ms-4">
-        {site.author && site.author.username}的其他景點：
+        {site.author && site.author[0].username}的其他景點：
       </div>
       <div className="d-flex flex-wrap justify-content-center">
         {/* 景點圖卡 */}
