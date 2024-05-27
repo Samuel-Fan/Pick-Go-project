@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import authService from "../../service/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -14,8 +14,7 @@ const SignupComponent = () => {
   const handleRegister = async () => {
     try {
       let data = { email, password, confirmPassword, username };
-      let result = await authService.post_signup(data);
-      await authService.get_logout();
+      await authService.post_signup(data);
       alert("成功註冊");
       navigate("/");
     } catch (e) {

@@ -153,9 +153,7 @@ const AddNewSiteComponent = () => {
           </div>
         </div>
         <div className="mb-3">
-          <label htmlFor="ageEdit" className="form-label">
-            地區
-          </label>
+          <label className="form-label">地區</label>
           {!country && (
             <select className="form-select" aria-label="Default select example">
               <option>請選擇地區</option>

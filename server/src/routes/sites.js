@@ -9,6 +9,7 @@ const path = require("path");
 const imgurClient = require("../config/imgur");
 const redisClient = require("../config/redis");
 const passport = require("passport");
+const hash = require("object-hash");
 
 // 照片檔案上傳格式設定
 const upload = multer({
@@ -49,7 +50,7 @@ router.get("/test", (req, res) => {
 router.get("/search", async (req, res) => {
   try {
     let {
-      tilte,
+      title,
       country,
       region,
       type,
@@ -59,15 +60,34 @@ router.get("/search", async (req, res) => {
       orderBy,
     } = req.query;
 
+    // 先搜尋快取中有沒有
+    let queryHash = hash.sha1(req.query);
+    let dataFromRedis = await redisClient.get(`search_hash:${queryHash}`);
+    if (dataFromRedis) {
+      console.log("利用快取給予搜尋資料");
+      return res.send(dataFromRedis);
+    }
+
+    // 若快取沒有，則搜尋資料庫
+    let searchObj = Object.assign(
+      {},
+      country && { country },
+      region && { region },
+      type && { type },
+      username && { username },
+      title && { title: { $regex: title, $options: "i" } },
+      { public: true }
+    );
+
     let sortObj;
     if (orderBy === "date") {
-      sortObj = { updateDate: 1 };
-    } else {
-      sortObj = { num_of_like: -1 };
+      sortObj = { updateDate: -1 };
+    } else if (orderBy === "like") {
+      sortObj = { num_of_like: -1, updateDate: -1 };
     }
 
     foundSite = await Site.aggregate([
-      { $match: { public: true } },
+      { $match: searchObj },
       {
         $lookup: {
           from: "likes",
@@ -94,7 +114,17 @@ router.get("/search", async (req, res) => {
       { $skip: (page - 1) * numberPerPage },
       { $limit: Number(numberPerPage) },
     ]);
-    console.log(foundSite);
+    console.log("利用資料庫提供搜尋資料");
+
+    // 存入快取，過期時間先設定短一點(方便展示project用)
+    await redisClient.set(
+      `search_hash:${queryHash}`,
+      JSON.stringify(foundSite),
+      {
+        EX: 1 * 60 * 1,
+      }
+    );
+
     return res.send(foundSite);
   } catch (e) {
     console.log(e);
@@ -122,7 +152,12 @@ router.get(
     try {
       // 先搜尋快取中有無數據
       let dataFromRedis = await redisClient.get(`Site:${_id}`);
-      if (dataFromRedis) {
+      if (dataFromRedis === "404") {
+        console.log("利用快取返回404 error");
+        return res.status(404).send("錯誤");
+      }
+
+      if (dataFromRedis && dataFromRedis !== "403") {
         console.log("利用快取提供景點資料");
         return res.send(dataFromRedis);
       }
@@ -131,7 +166,12 @@ router.get(
       console.log("利用資料庫提取景點資料");
 
       let foundSite = await Site.aggregate([
-        { $match: { _id: new ObjectId(_id) } },
+        {
+          $match: {
+            _id: new ObjectId(_id),
+            author: new ObjectId(req.user._id),
+          },
+        },
         {
           $lookup: {
             from: "likes",
@@ -156,6 +196,7 @@ router.get(
             as: "author",
           },
         },
+        { $unwind: "$author" },
         {
           $project: {
             num_of_like: { $size: "$like" },
@@ -176,18 +217,32 @@ router.get(
 
       foundSite = foundSite[0];
 
-      // 若搜尋到則確認其是否公開，若否則檢察是否為作者本人，非本人則返回403錯誤
-      if (!foundSite.public) {
-        if (!req.user || !foundSite.author[0]._id.equals(req.user._id)) {
-          return res.status(403).send("作者不公開相關頁面");
-        }
+      // 若沒找到資料
+      if (!foundSite) {
+        // 找不到資料也存進快取，防快取穿透 Cache Penetration
+        await redisClient.set(`Site:${_id}`, "404", {
+          EX: 60 * 60 * 1,
+        });
+        return res.status(404).send("無此資料");
       }
 
-      // 若site是公開，則存入快取，時間設定 10 分鐘
+      // 若site是公開，則存入快取，時間設定 30-60 分鐘
+      let randomTime = Math.floor(Math.random() * 31) + 30; // 使用隨機數，防快取雪崩 Cache Avalanche
       if (foundSite.public) {
         await redisClient.set(`Site:${_id}`, JSON.stringify(foundSite), {
-          EX: 10 * 60 * 1,
+          EX: randomTime * 60 * 1,
         });
+      }
+
+      // 若搜尋到則確認其是否公開，若否則檢察是否為作者本人，非本人則返回403錯誤
+      if (!foundSite.public) {
+        if (!req.user || !foundSite.author._id.equals(req.user._id)) {
+          await redisClient.set(`Site:${_id}`, "403error", {
+            // 防快取穿透 Cache Penetration，其實期限可以設久一點
+            EX: 60 * 60 * 1,
+          });
+          return res.status(403).send("作者不公開相關頁面");
+        }
       }
 
       return res.send(foundSite);
@@ -205,6 +260,15 @@ router.get("/detail/:_id", async (req, res) => {
     // 先搜尋快取中有無數據
     let dataFromRedis = await redisClient.get(`Site:${_id}`);
     if (dataFromRedis) {
+      if (dataFromRedis === "404") {
+        console.log("利用快取返回404 error");
+        return res.status(404).send("錯誤");
+      }
+
+      if (dataFromRedis === "403") {
+        console.log("快取中發現此資料不公開");
+        return res.status(403).send("作者不公開相關頁面");
+      }
       console.log("利用快取提供景點資料");
       return res.send(dataFromRedis);
     }
@@ -238,6 +302,7 @@ router.get("/detail/:_id", async (req, res) => {
           as: "author",
         },
       },
+      { $unwind: "$author" },
       {
         $project: {
           num_of_like: { $size: "$like" },
@@ -258,8 +323,21 @@ router.get("/detail/:_id", async (req, res) => {
 
     foundSite = foundSite[0];
 
+    // 若沒找到資料
+    if (!foundSite) {
+      // 找不到資料也存進快取，防快取穿透 Cache Penetration
+      await redisClient.set(`Site:${_id}`, "404", {
+        EX: 60 * 60 * 1,
+      });
+      return res.status(404).send("無此資料");
+    }
+
     // 若搜尋到則確認其是否公開，若不公開則返回403錯誤
     if (!foundSite.public) {
+      await redisClient.set(`Site:${_id}`, "403", {
+        // 防快取穿透 Cache Penetration，其實期限可以設久一點
+        EX: 60 * 60 * 1,
+      });
       return res.status(403).send("作者不公開相關頁面");
     }
 
@@ -331,6 +409,26 @@ router.get("/other", async (req, res) => {
           public: true,
         },
       },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "site_id",
+          as: "like",
+        },
+      },
+      {
+        $project: {
+          title: 1,
+          country: 1,
+          region: 1,
+          type: 1,
+          content: 1,
+          photo: 1,
+          updateDate: 1,
+          num_of_like: { $size: "$like" },
+        },
+      },
       { $sample: { size: 3 } },
     ]);
 
@@ -368,17 +466,42 @@ router.get(
     let user_id = req.user._id;
     let { page, numberPerPage } = req.query;
     try {
-      let foundSite = await Collect.find({ user_id })
-        .select(["site_id"])
-        .populate({
-          path: "site_id",
-          select: ["title", "content", "photo", "author"],
-          populate: { path: "author", select: ["username"] },
-        })
-        .skip((page - 1) * numberPerPage)
-        .limit(numberPerPage)
-        .lean()
-        .exec();
+      let foundSite = await Collect.aggregate([
+        { $match: { user_id: new ObjectId(user_id) } },
+        {
+          $lookup: {
+            from: "sites",
+            localField: "site_id",
+            foreignField: "_id",
+            as: "site",
+          },
+        },
+        { $unwind: "$site" },
+        {
+          $lookup: {
+            from: "likes",
+            localField: "site_id",
+            foreignField: "site_id",
+            as: "like",
+          },
+        },
+        {
+          $project: {
+            num_of_like: { $size: "$like" },
+            _id: "$site._id",
+            title: "$site.title",
+            country: "$site.country",
+            region: "$site.region",
+            type: "$site.type",
+            content: "$site.content",
+            photo: "$site.photo",
+            updateDate: "$site.updateDate",
+          },
+        },
+        { $skip: (page - 1) * numberPerPage },
+        { $limit: Number(numberPerPage) },
+      ]);
+
       return res.send(foundSite);
     } catch (e) {
       console.log(e);
@@ -406,82 +529,6 @@ router.get(
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
-    }
-  }
-);
-
-// 新增新的景點
-router.post(
-  "/new",
-  passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    try {
-      upload(req, res, async (err) => {
-        // req.files 包含 圖片檔案
-        // req.body 包含 key-value 資料
-
-        // 如圖片規格不符 multer 設定(大小、格式)，則返回 error 訊息
-        if (err) {
-          console.log(err);
-          return res.status(400).send(err.message);
-        }
-
-        // 如景點規格不符，則返回客製化錯誤訊息
-        let { title, country, region, type, content } = req.body;
-        console.log(title, country, region, type, content);
-        let { error } = valid.sitesValidation({
-          title,
-          country,
-          region,
-          type,
-          content,
-        });
-        if (error) {
-          console.log("資料", error);
-          return res.status(400).send(error.details[0].message);
-        }
-
-        // 圖片上傳 imgur ，取得 url 及 deleteHash
-        let url;
-        let deletehash;
-        let photoName;
-        if (req.files.length !== 0) {
-          const response = await imgurClient.upload({
-            image: req.files[0].buffer.toString("base64"),
-            type: "base64",
-            album: process.env.IMGUR_ALBUM_ID,
-          });
-
-          url = response.data.link;
-          deletehash = response.data.deletehash;
-          photoName = req.files[0].originalname;
-        }
-
-        // 將景點資訊儲存至資料庫
-        let site = new Site({
-          title,
-          country,
-          region,
-          type,
-          content,
-          author: req.user._id,
-          photo: {
-            url,
-            deletehash,
-            photoName,
-          },
-        });
-
-        let savedResult = await site.save();
-
-        // 將快取刪掉
-        await redisClient.del(`Site_of_author:${req.user._id}`);
-
-        return res.send(savedResult);
-      });
-    } catch (e) {
-      console.log(e);
-      res.status(500).send("伺服器發生問題");
     }
   }
 );
@@ -567,6 +614,81 @@ router.post(
       let collect = new Collect({ user_id, site_id });
       await collect.save();
       return res.send("成功收藏");
+    } catch (e) {
+      console.log(e);
+      res.status(500).send("伺服器發生問題");
+    }
+  }
+);
+
+// 新增新的景點
+router.post(
+  "/new",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    try {
+      upload(req, res, async (err) => {
+        // req.files 包含 圖片檔案
+        // req.body 包含 key-value 資料
+
+        // 如圖片規格不符 multer 設定(大小、格式)，則返回 error 訊息
+        if (err) {
+          console.log(err);
+          return res.status(400).send(err.message);
+        }
+
+        // 如景點規格不符，則返回客製化錯誤訊息
+        let { title, country, region, type, content } = req.body;
+        let { error } = valid.sitesValidation({
+          title,
+          country,
+          region,
+          type,
+          content,
+        });
+        if (error) {
+          console.log("資料", error);
+          return res.status(400).send(error.details[0].message);
+        }
+
+        // 圖片上傳 imgur ，取得 url 及 deleteHash
+        let url;
+        let deletehash;
+        let photoName;
+        if (req.files.length !== 0) {
+          const response = await imgurClient.upload({
+            image: req.files[0].buffer.toString("base64"),
+            type: "base64",
+            album: process.env.IMGUR_ALBUM_ID,
+          });
+
+          url = response.data.link;
+          deletehash = response.data.deletehash;
+          photoName = req.files[0].originalname;
+        }
+
+        // 將景點資訊儲存至資料庫
+        let site = new Site({
+          title,
+          country,
+          region,
+          type,
+          content,
+          author: req.user._id,
+          photo: {
+            url,
+            deletehash,
+            photoName,
+          },
+        });
+
+        let savedResult = await site.save();
+
+        // 將快取刪掉
+        await redisClient.del(`Site_of_author:${req.user._id}`);
+
+        return res.send(savedResult);
+      });
     } catch (e) {
       console.log(e);
       res.status(500).send("伺服器發生問題");

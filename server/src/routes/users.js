@@ -141,6 +141,7 @@ router.post("/register", async (req, res) => {
     let savedUser = await newUser.save();
     return res.send({ message: "使用者資料儲存完畢", savedUser });
   } catch (e) {
+    console.log(e);
     return res.status(500).send("儲存資料時發生錯誤:" + e.message);
   }
 });

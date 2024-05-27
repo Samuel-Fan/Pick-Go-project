@@ -12,8 +12,9 @@ import MyPageLayout from "./components/myPageComponents/MyPageLayout";
 import Profile from "./components/myPageComponents/profile/profile-component";
 import EditProfile from "./components/myPageComponents/profile/editProfile-component";
 import EditPassword from "./components/myPageComponents/profile/editPassword-component";
-import Sites from "./components/myPageComponents/site/sites-component";
-import MySiteDetailComponent from "./components/myPageComponents/site/mySiteDetail-component";
+import MySites from "./components/myPageComponents/site/mySites-component";
+import MyCollectSites from "./components/myPageComponents/site/myCollectSites-component";
+import MySiteDetail from "./components/myPageComponents/site/mySiteDetail-component";
 import AddNewSite from "./components/myPageComponents/site/addNewSite-component";
 import EditSite from "./components/myPageComponents/site/editSite-component";
 import NoAuth from "./components/myPageComponents/noAuth-component";
@@ -78,12 +79,16 @@ function App() {
 
           {/* 景點建立、修改、瀏覽 */}
           <Route
-            path="/users/sites/overview/:category"
-            element={<Sites />}
+            path="/users/sites/overview/mine"
+            element={<MySites />}
+          ></Route>
+          <Route
+            path="/users/sites/overview/collections"
+            element={<MyCollectSites />}
           ></Route>
           <Route
             path="/users/mySite/:site_id"
-            element={<MySiteDetailComponent />}
+            element={<MySiteDetail />}
           ></Route>
           <Route path="/users/sites/new" element={<AddNewSite />}></Route>
           <Route

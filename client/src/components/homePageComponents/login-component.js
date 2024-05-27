@@ -57,7 +57,7 @@ const LoginComponent = () => {
             <img
               src="https://img.freepik.com/free-vector/travel-concept-with-landmarks_1057-4873.jpg?t=st=1715064829~exp=1715068429~hmac=87777009ecf1996440171e92d5f2634a1c1289bae34dc314c2e7c55a8a9302ce&w=826"
               className="img-fluid"
-              alt="Phone image"
+              alt="登入小圖案"
             />
           </div>
           <div className="col-xl-5 offset-xl-1">

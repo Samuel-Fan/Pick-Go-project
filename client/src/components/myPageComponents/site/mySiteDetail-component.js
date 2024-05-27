@@ -46,6 +46,8 @@ const MySiteDetailComponent = () => {
         } else if (e.response && e.response.status === 401) {
           alert("請先登入");
           navigate("/login");
+        } else if (e.response && e.response.status === 404) {
+          navigate("/404");
         }
       });
   }, [navigate, site_id]);
@@ -118,7 +120,7 @@ const MySiteDetailComponent = () => {
           </div>
           <div className="p-4" style={{ flex: "1 1 800px" }}>
             <h2>景點標題：{site.title}</h2>
-            <h6>作者：{site.author && site.author[0].username}</h6>
+            <h6>作者：{site.author && site.author.username}</h6>
             <hr />
             <p style={{ whiteSpace: "pre-line" }}>{site.content}</p>
           </div>

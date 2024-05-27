@@ -136,8 +136,7 @@ const EditSiteComponent = () => {
         console.log(data.data);
         // 如果作者與編輯人不符，跳轉頁面
         if (
-          !siteInfo.author[0]._id ===
-          JSON.parse(localStorage.getItem("auth"))._id
+          !siteInfo.author._id === JSON.parse(localStorage.getItem("auth"))._id
         ) {
           navigate("/noAuth");
           navigate(0);
@@ -243,9 +242,7 @@ const EditSiteComponent = () => {
           </div>
         </div>
         <div className="mb-3">
-          <label htmlFor="ageEdit" className="form-label">
-            地區
-          </label>
+          <label className="form-label">地區</label>
           {!country && (
             <select className="form-select" aria-label="Default select example">
               <option>請選擇地區</option>

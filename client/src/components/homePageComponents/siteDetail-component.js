@@ -2,6 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import siteService from "../../service/site";
+import SiteCardComponent from "../smallComponents/siteCard_component";
 
 const SiteDetailComponent = () => {
   const navigate = useNavigate();
@@ -77,6 +78,8 @@ const SiteDetailComponent = () => {
         } else if (e.response && e.response.status === 401) {
           alert("請先登入");
           navigate("/login");
+        } else if (e.response && e.response.status === 404) {
+          navigate("/404");
         }
       });
     siteService
@@ -93,7 +96,7 @@ const SiteDetailComponent = () => {
   useEffect(() => {
     if (site) {
       siteService
-        .get_other_sites(site.author[0]._id, site_id)
+        .get_other_sites(site.author._id, site_id)
         .then((data) => {
           setOtherSites(data.data);
         })
@@ -180,7 +183,7 @@ const SiteDetailComponent = () => {
           </div>
           <div className="p-4" style={{ flex: "1 1 800px" }}>
             <h2>景點標題：{site.title}</h2>
-            <h6>作者：{site.author && site.author[0].username}</h6>
+            <h6>作者：{site.author && site.author.username}</h6>
             <hr />
             <p style={{ whiteSpace: "pre-line" }}>{site.content}</p>
           </div>
@@ -193,56 +196,11 @@ const SiteDetailComponent = () => {
 
       {/* 其他推薦的景點 */}
       <div className="ms-4">
-        {site.author && site.author[0].username}的其他景點：
+        {site.author && site.author.username}的其他景點：
       </div>
       <div className="d-flex flex-wrap justify-content-center">
         {/* 景點圖卡 */}
-        {otherSites &&
-          otherSites.map((otherSite) => {
-            return (
-              <div
-                className="card m-2"
-                style={{ width: "18rem", height: "20rem" }}
-                key={otherSite._id}
-              >
-                <div
-                  className="d-flex"
-                  style={{ height: "55%", borderBottom: "1px solid black" }}
-                >
-                  {otherSite.photo.url ? (
-                    <img
-                      src={otherSite.photo.url}
-                      alt={otherSite.photo.photoName}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <div
-                      style={{
-                        fontSize: "3rem",
-                        transform: "rotate(20deg) translate(40px,50px)",
-                        color: "black",
-                      }}
-                    >
-                      No photo
-                    </div>
-                  )}
-                </div>
-                <div className="card-body">
-                  <h5 className="card-title">{otherSite.title}</h5>
-                  <p className="card-text" style={{ height: "2.5rem" }}>
-                    {otherSite.content.length >= 30
-                      ? otherSite.content.slice(0, 30) + "..."
-                      : otherSite.content}
-                  </p>
-                  <a href={"/site/" + otherSite._id}>顯示更多</a>
-                </div>
-              </div>
-            );
-          })}
+        <SiteCardComponent sites={otherSites} />
       </div>
     </div>
   );
