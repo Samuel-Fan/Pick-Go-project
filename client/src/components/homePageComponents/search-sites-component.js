@@ -1,9 +1,9 @@
 import React from "react";
 import { useEffect, useState } from "react";
 import siteService from "../../service/site";
-import { useNavigate, Link } from "react-router-dom";
-import PageChooseComponent from "../smallComponents/pageChoose_component";
-import SiteCardComponent from "../smallComponents/siteCard_component";
+import { useNavigate } from "react-router-dom";
+import PageChooseComponent from "../smallComponents/pageChoose-component";
+import SiteCardComponent from "../smallComponents/siteCard-component";
 
 const SearchSitesComponent = () => {
   const navigate = useNavigate();
@@ -44,6 +44,24 @@ const SearchSitesComponent = () => {
   // 搜尋
   const handleSearch = async () => {
     try {
+      // 更新總頁數
+      let count_result = await siteService.get_sites_count(
+        title,
+        country,
+        region,
+        type,
+        username
+      );
+      let count = count_result.data.count;
+      setCount(Math.ceil(count / numberPerPage));
+
+      // 假設找不到任何資料
+      if (count === 0) {
+        setSites("無");
+        return;
+      }
+
+      // 更新搜尋
       let result = await siteService.get_search_sites(
         page,
         numberPerPage,
@@ -54,7 +72,6 @@ const SearchSitesComponent = () => {
         username,
         orderBy
       );
-      console.log(result.data);
       setSites(result.data);
     } catch (e) {
       console.log(e);
@@ -91,7 +108,7 @@ const SearchSitesComponent = () => {
   // 剛進網站時，讀取site總數以設定分頁格式
   useEffect(() => {
     siteService
-      .get_sites_count()
+      .get_sites_count(title, country, region, type, username)
       .then((data) => {
         console.log("讀取sites總數");
         setCount(Math.ceil(data.data.count / numberPerPage));
@@ -423,7 +440,11 @@ const SearchSitesComponent = () => {
         </div>
 
         {/* 景點圖卡 */}
-        <SiteCardComponent sites={sites} />
+        {sites === "無" ? (
+          <p className="h2 text-center mt-5">無搜尋到任何資料！</p>
+        ) : (
+          <SiteCardComponent sites={sites} />
+        )}
       </div>
     </div>
   );

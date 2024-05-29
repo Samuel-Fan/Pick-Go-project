@@ -2,8 +2,8 @@ import React from "react";
 import { useEffect, useState } from "react";
 import siteService from "../../../service/site";
 import { useNavigate, Link } from "react-router-dom";
-import PageChooseComponent from "../../smallComponents/pageChoose_component";
-import SiteCardComponent from "../../smallComponents/siteCard_component";
+import PageChooseComponent from "../../smallComponents/pageChoose-component";
+import SiteCardComponent from "../../smallComponents/siteCard-component";
 
 const MyCollectSitesComponent = () => {
   const navigate = useNavigate();
@@ -12,7 +12,6 @@ const MyCollectSitesComponent = () => {
   const [count, setCount] = useState(); // 計算有幾個sites 分頁用
   const [page, setPage] = useState(1);
   const [numberPerPage, setNumberPerPage] = useState(4); //每頁顯示幾個
-  const [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
 
   // 選擇頁數
   const handlePage = (e) => {

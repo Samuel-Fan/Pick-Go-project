@@ -2,7 +2,7 @@ import React from "react";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import siteService from "../../service/site";
-import SiteCardComponent from "../smallComponents/siteCard_component";
+import SiteCardComponent from "../smallComponents/siteCard-component";
 
 const SiteDetailComponent = () => {
   const navigate = useNavigate();

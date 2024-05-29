@@ -9,6 +9,7 @@ require("./src/config/passport");
 
 const userRoute = require("./src/routes").users;
 const siteRoute = require("./src/routes").sites;
+const tourRoute = require("./src/routes").tours;
 
 // 連線資料庫
 const mongoose = require("mongoose");
@@ -56,6 +57,7 @@ app.use(passport.session());
 
 app.use("/api/users", userRoute);
 app.use("/api/sites", siteRoute);
+app.use("/api/tours", tourRoute);
 
 app.listen(process.env.PORT || 8080, () => {
   console.log("伺服器正在運行中");

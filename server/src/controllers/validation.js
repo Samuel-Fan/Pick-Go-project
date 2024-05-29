@@ -134,10 +134,42 @@ const sitesValidation = (data) => {
   return Schema.validate(data);
 };
 
+// 驗證"旅行"的資料格式
+const toursValidation = (data) => {
+  const Schema = Joi.object({
+    title: Joi.string().max(20).required().messages({
+      "any.required": "'標題'為必須填寫的項目",
+      "string.empty": "'標題'為必須填寫的項目",
+      "string.max": "'標題'最長長度為 20 個字",
+    }),
+    description: Joi.string().required().allow(null, ""),
+    status: Joi.string().valid("不公開", "純分享", "找旅伴").messages({
+      "any.only": "類別必須為不公開、純分享、找旅伴",
+    }),
+    limit: Joi.number().max(10).min(1).required().messages({
+      "any.required": "'人數限制'為必須填寫的項目",
+      "number.base": "人數限制必須為數字",
+      "number.integer": "人數限制必須為整數",
+      "number.min": "人數限制須介於1-10人",
+      "number.max": "人數限制須介於1-10人",
+    }),
+    days: Joi.number().max(7).min(1).required().messages({
+      "any.required": "'總天數'為必須填寫的項目",
+      "number.base": "總天數必須為數字",
+      "number.integer": "總天數限制必須為整數",
+      "number.min": "總天數限制須介於1-7天",
+      "number.max": "總天數限制須介於1-7天",
+    }),
+  });
+
+  return Schema.validate(data);
+};
+
 module.exports = {
   registerValidation,
   loginValidation,
   editBasicValidation,
   editPasswordValidation,
   sitesValidation,
+  toursValidation,
 };

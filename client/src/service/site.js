@@ -34,9 +34,13 @@ class SiteService {
     );
   }
 
-  get_sites_count() {
+  get_sites_count(title, country, region, type, username) {
     // 取得公開景點的資料筆數
-    return axios.get(apiURL + "/api/sites/count");
+    return axios.get(
+      apiURL +
+        "/api/sites/count/" +
+        `?title=${title}&country=${country}&region=${region}&type=${type}&username=${username}`
+    );
   }
 
   // 取得使用者自己建立的景點資訊

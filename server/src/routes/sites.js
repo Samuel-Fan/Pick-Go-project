@@ -132,10 +132,39 @@ router.get("/search", async (req, res) => {
   }
 });
 
-// 公開景點資料數
+// 公開景點資料數(用來計算頁數)
 router.get("/count", async (req, res) => {
+  // 先搜尋快取中有沒有
+  let queryHash = hash.sha1(req.query);
+  let dataFromRedis = await redisClient.get(`search_count_hash:${queryHash}`);
+  if (dataFromRedis) {
+    console.log("利用快取搜尋頁數");
+    return res.send(dataFromRedis);
+  }
+
+  let { title, country, region, type, username } = req.query;
+  let searchObj = Object.assign(
+    {},
+    country && { country },
+    region && { region },
+    type && { type },
+    username && { username },
+    title && { title: { $regex: title, $options: "i" } },
+    { public: true }
+  );
+
   try {
-    let count = await Site.find({ public: true }).count().exec();
+    let count = await Site.find(searchObj).count().exec();
+
+    // 存入快取，過期時間與search一致
+    await redisClient.set(
+      `search_count_hash:${queryHash}`,
+      JSON.stringify({ count }),
+      {
+        EX: 1 * 60 * 1,
+      }
+    );
+
     return res.send({ count });
   } catch (e) {
     console.log(e);
