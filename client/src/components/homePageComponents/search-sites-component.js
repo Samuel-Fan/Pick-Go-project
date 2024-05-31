@@ -12,13 +12,16 @@ const SearchSitesComponent = () => {
   const [count, setCount] = useState(); // 計算有幾個sites 分頁用
   const [page, setPage] = useState(1);
   const [simpleSearch, setSimpleSearch] = useState(true); // 切換簡易搜尋及進階搜尋
-  const [title, setTitle] = useState("");
   const [country, setCountry] = useState("");
-  const [region, setRegion] = useState("");
-  const [type, setType] = useState("");
-  const [username, setUsername] = useState("");
-  const [orderBy, setOrderBy] = useState("date");
   const numberPerPage = 8; //每頁顯示幾個
+
+  const [query, setQuery] = useState({
+    title: "",
+    country: "",
+    region: "",
+    type: "",
+    orderBy: "date",
+  });
 
   // 選擇頁數
   const handlePage = (e) => {
@@ -32,86 +35,52 @@ const SearchSitesComponent = () => {
   };
 
   // 切換簡易搜尋及進階搜尋
-  const handleSimpleSearch = () => {
+  const ChangeSearchMode = () => {
     setSimpleSearch(!simpleSearch);
-    setTitle("");
-    setCountry("");
-    setRegion("");
-    setType("");
-    setUsername("");
   };
 
   // 搜尋
-  const handleSearch = async () => {
-    try {
-      // 更新總頁數
-      let count_result = await siteService.get_sites_count(
-        title,
-        country,
-        region,
-        type,
-        username
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    let form = new FormData(e.currentTarget);
+    let data = Object.fromEntries(form.entries());
+    if (simpleSearch) {
+      setQuery(
+        // 簡單搜尋 只有title
+        Object.assign({}, query, data, {
+          country: "",
+          region: "",
+          type: "",
+        })
       );
-      let count = count_result.data.count;
-      setCount(Math.ceil(count / numberPerPage));
-
-      // 假設找不到任何資料
-      if (count === 0) {
-        setSites("無");
-        return;
-      }
-
-      // 更新搜尋
-      let result = await siteService.get_search_sites(
-        page,
-        numberPerPage,
-        title,
-        country,
-        region,
-        type,
-        username,
-        orderBy
-      );
-      setSites(result.data);
-    } catch (e) {
-      console.log(e);
+    } else {
+      // 進階搜尋
+      setQuery(Object.assign({}, query, data));
     }
+    setPage(1);
   };
 
   // input 設定
-  const handleTitle = (e) => {
-    setTitle(e.target.value);
-  };
-
-  const handleUsername = (e) => {
-    setUsername(e.target.value);
-  };
 
   const handleCountry = (e) => {
     setCountry(e.target.value);
-    setRegion("");
-  };
-
-  const handleRegion = (e) => {
-    setRegion(e.target.value);
-    console.log(region);
-  };
-
-  const handleType = (e) => {
-    setType(e.target.value);
   };
 
   const handleSort = (e) => {
-    setOrderBy(e.target.value);
+    setQuery(Object.assign({}, query, { orderBy: e.target.value }));
   };
 
   // 剛進網站時，讀取site總數以設定分頁格式
   useEffect(() => {
     siteService
-      .get_sites_count(title, country, region, type, username)
+      .get_sites_count(query)
       .then((data) => {
         console.log("讀取sites總數");
-        setCount(Math.ceil(data.data.count / numberPerPage));
+        if (data.data.count === 0) {
+          setCount("無");
+        } else {
+          setCount(Math.ceil(data.data.count / numberPerPage));
+        }
       })
       .catch((e) => {
         if (e.response && e.response.status === 401) {
@@ -120,21 +89,13 @@ const SearchSitesComponent = () => {
           navigate(0);
         }
       });
-  }, [numberPerPage, navigate]);
+  }, [numberPerPage, query, navigate]);
 
   // 每次切換頁面讀取一次
   useEffect(() => {
+    console.log(query);
     siteService
-      .get_search_sites(
-        page,
-        numberPerPage,
-        title,
-        country,
-        region,
-        type,
-        username,
-        orderBy
-      )
+      .get_search_sites(query, numberPerPage, page)
       .then((data) => {
         let result = data.data;
         console.log("讀取sites詳細資料");
@@ -147,54 +108,39 @@ const SearchSitesComponent = () => {
           navigate(0);
         }
       });
-  }, [page, numberPerPage, orderBy, navigate]);
+  }, [page, numberPerPage, query, navigate]);
 
   return (
     <div className="container d-flex flex-column align-items-center my-3">
       <div className="d-flex align-items-center">
         {/* 簡易搜尋介面 */}
         {simpleSearch && (
-          <div className="my-2 ">
+          <form className="my-2" onSubmit={handleSearch}>
             <div className="input-group">
-              <div className="form-outline" data-mdb-input-init>
+              <div className="form-outline">
                 <input
                   type="search"
                   id="search-site-by-title"
                   className="form-control"
                   placeholder="以關鍵字搜尋標題"
-                  onChange={handleTitle}
+                  name="title"
                 />
               </div>
-              <button
-                type="button"
-                className="btn btn-primary"
-                data-mdb-ripple-init
-                onClick={handleSearch}
-              >
+              <button className="btn btn-primary">
                 <i className="fas fa-search"></i>
               </button>
             </div>
-          </div>
+          </form>
         )}
         {/* 進階搜尋介面 */}
         {!simpleSearch && (
-          <form className="border p-2">
+          <form className="border p-2" onSubmit={handleSearch}>
             <div className="mb-3">
               <input
                 type="text"
                 className="form-control"
                 name="title"
                 placeholder="以關鍵字搜尋標題"
-                onChange={handleTitle}
-              />
-            </div>
-            <div className="mb-3">
-              <input
-                type="text"
-                className="form-control"
-                name="username"
-                placeholder="作者暱稱"
-                onChange={handleUsername}
               />
             </div>
             <div className="mb-3">
@@ -247,15 +193,16 @@ const SearchSitesComponent = () => {
                 <select
                   className="form-select"
                   aria-label="Default select example"
+                  name="region"
                 >
-                  <option>請選擇地區</option>
+                  <option value="">請選擇地區</option>
                 </select>
               )}
               {country === "日本" && (
                 <select
                   className="form-select"
                   aria-label="Default select example"
-                  onChange={handleRegion}
+                  name="region"
                 >
                   <option value="">請選擇地區</option>
                   <option value="北海道地區">北海道地區</option>
@@ -274,7 +221,7 @@ const SearchSitesComponent = () => {
                 <select
                   className="form-select"
                   aria-label="Default select example"
-                  onChange={handleRegion}
+                  name="region"
                 >
                   <option value="">請選擇地區</option>
                   <option value="台北">台北</option>
@@ -297,7 +244,6 @@ const SearchSitesComponent = () => {
                       name="type"
                       id="restaurant_type"
                       value="餐廳"
-                      onChange={handleType}
                     />
                     <label
                       className="form-check-label"
@@ -315,7 +261,6 @@ const SearchSitesComponent = () => {
                       name="type"
                       id="spot_type"
                       value="景點"
-                      onChange={handleType}
                     />
                     <label className="form-check-label" htmlFor="spot_type">
                       景點
@@ -330,7 +275,6 @@ const SearchSitesComponent = () => {
                       name="type"
                       id="shopping_type"
                       value="購物"
-                      onChange={handleType}
                     />
                     <label className="form-check-label" htmlFor="shopping_type">
                       購物
@@ -345,7 +289,6 @@ const SearchSitesComponent = () => {
                       name="type"
                       id="other_type"
                       value="其他"
-                      onChange={handleType}
                     />
                     <label className="form-check-label" htmlFor="other_type">
                       其他
@@ -360,7 +303,6 @@ const SearchSitesComponent = () => {
                       name="type"
                       id="no_type"
                       value=""
-                      onChange={handleType}
                     />
                     <label className="form-check-label" htmlFor="no_type">
                       不限定
@@ -370,12 +312,7 @@ const SearchSitesComponent = () => {
               </div>
             </div>
             <div className="d-flex justify-content-center">
-              <button
-                id="add-new-site-button"
-                type="button"
-                className="btn btn-primary"
-                onClick={handleSearch}
-              >
+              <button id="add-new-site-button" className="btn btn-primary">
                 搜尋<i className="fas fa-search ms-2"></i>
               </button>
             </div>
@@ -384,7 +321,7 @@ const SearchSitesComponent = () => {
         <button
           className="btn btn-outline-primary ms-3 p-1"
           style={{ height: "2rem", border: "none" }}
-          onClick={handleSimpleSearch}
+          onClick={ChangeSearchMode}
         >
           切換成{simpleSearch ? "進階" : "簡易"}搜尋
         </button>
@@ -440,7 +377,7 @@ const SearchSitesComponent = () => {
         </div>
 
         {/* 景點圖卡 */}
-        {sites === "無" ? (
+        {count === "無" ? (
           <p className="h2 text-center mt-5">無搜尋到任何資料！</p>
         ) : (
           <SiteCardComponent sites={sites} />

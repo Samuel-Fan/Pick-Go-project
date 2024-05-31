@@ -5,38 +5,17 @@ import { useNavigate } from "react-router-dom";
 
 const EditProfile = () => {
   const navigate = useNavigate();
-
-  const [username, setUsername] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState("");
-  const [description, setDescription] = useState("");
   const [message, setMessage] = useState("");
-
-  const handleUsername = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const handleAge = (e) => {
-    setAge(e.target.value);
-  };
-
-  const handleGender = (e) => {
-    setGender(e.target.value);
-  };
-
-  const handleDescription = (e) => {
-    setDescription(e.target.value);
-  };
 
   const handleEditProfile = async (e) => {
     e.preventDefault();
-    let data = { username, age, gender, description };
+    let form = new FormData(e.currentTarget);
     try {
-      await authService.patch_modify(data);
+      await authService.patch_modify(form);
       navigate("/users");
       navigate(0); // 刷新頁面
     } catch (e) {
-      if (e.response && e.response.status === 401) {
+      if (e.response) {
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");
@@ -51,10 +30,10 @@ const EditProfile = () => {
       .then((data) => {
         let user = data.data;
         // setState
-        setUsername(user.username);
-        setAge(user.age);
-        setGender(user.gender);
-        setDescription(user.description);
+        document.querySelector("#usernameEdit").value = user.username || "";
+        document.querySelector("#ageEdit").value = user.age || "";
+        document.querySelector("#descriptionEdit").value =
+          user.description || "";
 
         // 選取預設性別
 
@@ -94,8 +73,6 @@ const EditProfile = () => {
             className="form-control"
             id="usernameEdit"
             name="username"
-            value={username}
-            onChange={handleUsername}
           />
         </div>
         <div className="mb-3">
@@ -107,8 +84,6 @@ const EditProfile = () => {
             className="form-control"
             id="ageEdit"
             name="age"
-            value={age}
-            onChange={handleAge}
           />
         </div>
         <div className="mb-3">
@@ -124,7 +99,6 @@ const EditProfile = () => {
                   name="gender"
                   id="gender_male"
                   value="男"
-                  onChange={handleGender}
                 />
                 <label className="form-check-label" htmlFor="gender_male">
                   男
@@ -137,7 +111,6 @@ const EditProfile = () => {
                   name="gender"
                   id="gender_female"
                   value="女"
-                  onChange={handleGender}
                 />
                 <label className="form-check-label" htmlFor="gender_female">
                   女
@@ -150,7 +123,6 @@ const EditProfile = () => {
                   name="gender"
                   id="gender_other"
                   value="其他"
-                  onChange={handleGender}
                 />
                 <label className="form-check-label" htmlFor="gender_other">
                   其他
@@ -163,12 +135,7 @@ const EditProfile = () => {
           <label htmlFor="descriptionEdit" className="mb-3">
             自我介紹
           </label>
-          <textarea
-            className="form-control"
-            value={description}
-            id="descriptionEdit"
-            onChange={handleDescription}
-          ></textarea>
+          <textarea className="form-control" id="descriptionEdit"></textarea>
         </div>
         <div className="small mb-2 pb-lg-2">
           {message && (

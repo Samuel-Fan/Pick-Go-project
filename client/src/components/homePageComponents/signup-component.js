@@ -5,15 +5,14 @@ import { useNavigate } from "react-router-dom";
 
 const SignupComponent = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleRegister = async () => {
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    let form = new FormData(e.currentTarget);
+    let data = Object.fromEntries(form.entries());
+    console.log(form.entries());
     try {
-      let data = { email, password, confirmPassword, username };
       await authService.post_signup(data);
       alert("成功註冊");
       navigate("/");
@@ -25,28 +24,6 @@ const SignupComponent = () => {
         setMessage("伺服器發生問題，請稍後再試");
       }
     }
-  };
-
-  const handleEnter = (e) => {
-    if (e.key === "Enter") {
-      handleRegister();
-    }
-  };
-
-  const handleUsernameInput = (e) => {
-    setUsername(e.target.value);
-  };
-
-  const handleEmailInput = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const handlePasswordInput = (e) => {
-    setPassword(e.target.value);
-  };
-
-  const handleConfirmPasswordInput = (e) => {
-    setConfirmPassword(e.target.value);
   };
 
   return (
@@ -72,7 +49,7 @@ const SignupComponent = () => {
             <div className="col-lg-6 mb-5 mb-lg-0">
               <div className="card">
                 <div className="card-body py-5 px-md-5">
-                  <form>
+                  <form onSubmit={handleRegister}>
                     {/* 2 column grid layout with text inputs for the first and last names */}
 
                     {/* Email input */}
@@ -82,8 +59,6 @@ const SignupComponent = () => {
                         id="signup-email"
                         className="form-control"
                         name="email"
-                        onChange={handleEmailInput}
-                        onKeyUp={handleEnter}
                       />
                       <label className="form-label" htmlFor="signup-email">
                         Email address
@@ -96,9 +71,7 @@ const SignupComponent = () => {
                         type="password"
                         id="signup-password"
                         className="form-control"
-                        name="signup-password"
-                        onChange={handlePasswordInput}
-                        onKeyUp={handleEnter}
+                        name="password"
                       />
                       <label className="form-label" htmlFor="signup-password">
                         Password
@@ -110,9 +83,7 @@ const SignupComponent = () => {
                         type="password"
                         id="signup-confirmpassword"
                         className="form-control"
-                        name="confirmpassword"
-                        onChange={handleConfirmPasswordInput}
-                        onKeyUp={handleEnter}
+                        name="confirmPassword"
                       />
                       <label
                         className="form-label"
@@ -127,8 +98,6 @@ const SignupComponent = () => {
                         id="signup-username"
                         className="form-control"
                         name="username"
-                        onChange={handleUsernameInput}
-                        onKeyUp={handleEnter}
                       />
                       <label className="form-label" htmlFor="signup-username">
                         username
@@ -145,11 +114,7 @@ const SignupComponent = () => {
                     </div>
 
                     {/* <!-- Submit button --> */}
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-block mb-4"
-                      onClick={handleRegister}
-                    >
+                    <button className="btn btn-primary btn-block mb-4">
                       Sign up
                     </button>
 

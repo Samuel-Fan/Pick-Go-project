@@ -224,6 +224,8 @@ const MySites = () => {
             );
           })}
       </div>
+
+      {/* // 刪除景點功能 */}
       <DeleteSiteOrTourComponent
         cancelDelete={cancelDelete}
         deleteIt={deleteIt}

@@ -7,29 +7,20 @@ const EditSiteComponent = () => {
   const navigate = useNavigate();
   const { site_id } = useParams();
 
-  const [title, setTitle] = useState("");
   const [country, setCountry] = useState("");
   const [region, setRegion] = useState("");
-  const [type, setType] = useState("");
-  const [content, setContent] = useState("");
-  const [originPhoto, setOriginPhoto] = useState("");
   const [removeOriginPhoto, setRemoveOriginPhoto] = useState(false);
-  const [photo, setPhoto] = useState("");
   const [sitePublic, setSitePublic] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleAddSite = async () => {
+  const handleEditSite = async (e) => {
+    e.preventDefault();
     // 處理form data
-    const formData = new FormData();
-    formData.append("file-to-upload", photo);
-    formData.append("title", title);
-    formData.append("country", country);
-    formData.append("region", region);
-    formData.append("type", type);
-    formData.append("content", content);
+    const formData = new FormData(e.currentTarget);
     formData.append("public", sitePublic);
-    console.log(Boolean(removeOriginPhoto), Boolean(photo));
-    if (photo) {
+
+    // 如有編輯新照片或移除舊照片，則設定參數告訴後台要刪除照片
+    if (formData.get("photo").name) {
       formData.append("removeOriginPhoto", true);
     } else {
       formData.append("removeOriginPhoto", removeOriginPhoto);
@@ -61,10 +52,6 @@ const EditSiteComponent = () => {
     }
   };
 
-  const handleTitle = (e) => {
-    setTitle(e.target.value);
-  };
-
   const handleCountry = (e) => {
     setCountry(e.target.value);
     setRegion("");
@@ -72,15 +59,6 @@ const EditSiteComponent = () => {
 
   const handleRegion = (e) => {
     setRegion(e.target.value);
-    console.log(region);
-  };
-
-  const handleType = (e) => {
-    setType(e.target.value);
-  };
-
-  const handleContent = (e) => {
-    setContent(e.target.value);
   };
 
   const handleImage = (e) => {
@@ -106,16 +84,15 @@ const EditSiteComponent = () => {
         document.querySelector("#photo_site").value = null;
       } else {
         setMessage("");
-        setPhoto(file);
       }
     } else {
-      setPhoto("");
+      document.querySelector("#photo_site").value = null;
     }
   };
 
   const removePhoto = () => {
     setRemoveOriginPhoto(true);
-    setOriginPhoto("");
+    document.querySelector("#origin_photo").textContent = "";
     document.querySelector("#removePhotoButton").style.display = "none";
   };
 
@@ -133,7 +110,7 @@ const EditSiteComponent = () => {
         document.body.style.cursor = "default";
         document.querySelector("#edit-site-submit-button").disabled = false;
         let siteInfo = data.data;
-        console.log(data.data);
+        console.log(siteInfo);
         // 如果作者與編輯人不符，跳轉頁面
         if (
           !siteInfo.author._id === JSON.parse(localStorage.getItem("auth"))._id
@@ -141,17 +118,12 @@ const EditSiteComponent = () => {
           navigate("/noAuth");
           navigate(0);
         }
-        setTitle(siteInfo.title);
-        setCountry(siteInfo.country);
-        setRegion(siteInfo.region);
-        setType(siteInfo.type);
-        setContent(siteInfo.content);
-        setSitePublic(siteInfo.public);
-        if (siteInfo.photo) {
-          setOriginPhoto(siteInfo.photo.photoName);
-        }
+
+        // 更新標題
+        document.querySelector("#title_site_edit").value = siteInfo.title;
 
         // 選取國家
+        setCountry(siteInfo.country);
         switch (siteInfo.country) {
           case "日本":
             document.querySelector("#japan_country").checked = true;
@@ -163,8 +135,10 @@ const EditSiteComponent = () => {
             break;
         }
 
-        // 選取類型
+        // 更新地區
+        setRegion(siteInfo.region);
 
+        // 選取類型
         switch (siteInfo.type) {
           case "餐廳":
             document.querySelector("#restaurant_type").checked = true;
@@ -182,7 +156,15 @@ const EditSiteComponent = () => {
             break;
         }
 
+        // 更新內容
+        document.querySelector("#content_site_edit").value = siteInfo.content;
+
+        // 顯示舊相片名稱
+        document.querySelector("#origin_photo").textContent =
+          siteInfo.photo.photoName;
+
         // 公開設定
+        setSitePublic(siteInfo.public);
         if (siteInfo.public) {
           document.querySelector("#publicButton").checked = true;
         }
@@ -196,16 +178,14 @@ const EditSiteComponent = () => {
         <h2 className="me-4 my-2">編輯景點</h2>
       </div>
       <hr />
-      <form>
+      <form onSubmit={handleEditSite}>
         <div className="mb-3">
           <label className="form-label">標題</label>
           <input
             type="text"
             className="form-control"
-            id="titleEdit"
+            id="title_site_edit"
             name="title"
-            onChange={handleTitle}
-            value={title}
           />
         </div>
         <div className="mb-3">
@@ -244,7 +224,11 @@ const EditSiteComponent = () => {
         <div className="mb-3">
           <label className="form-label">地區</label>
           {!country && (
-            <select className="form-select" aria-label="Default select example">
+            <select
+              className="form-select"
+              aria-label="Default select example"
+              name="region"
+            >
               <option>請選擇地區</option>
             </select>
           )}
@@ -252,6 +236,7 @@ const EditSiteComponent = () => {
             <select
               className="form-select"
               aria-label="Default select example"
+              name="region"
               onChange={handleRegion}
               value={region}
             >
@@ -272,6 +257,7 @@ const EditSiteComponent = () => {
             <select
               className="form-select"
               aria-label="Default select example"
+              name="region"
               onChange={handleRegion}
               value={region}
             >
@@ -297,7 +283,6 @@ const EditSiteComponent = () => {
                   name="type"
                   id="restaurant_type"
                   value="餐廳"
-                  onChange={handleType}
                 />
                 <label className="form-check-label" htmlFor="restaurant_type">
                   餐廳
@@ -312,7 +297,6 @@ const EditSiteComponent = () => {
                   name="type"
                   id="spot_type"
                   value="景點"
-                  onChange={handleType}
                 />
                 <label className="form-check-label" htmlFor="spot_type">
                   景點
@@ -327,7 +311,6 @@ const EditSiteComponent = () => {
                   name="type"
                   id="shopping_type"
                   value="購物"
-                  onChange={handleType}
                 />
                 <label className="form-check-label" htmlFor="shopping_type">
                   購物
@@ -342,7 +325,6 @@ const EditSiteComponent = () => {
                   name="type"
                   id="other_type"
                   value="其他"
-                  onChange={handleType}
                 />
                 <label className="form-check-label" htmlFor="other_type">
                   其他
@@ -352,20 +334,19 @@ const EditSiteComponent = () => {
           </div>
         </div>
         <div className="mb-3">
-          <label htmlFor="content_site" className="mb-3">
-            內文
-          </label>
+          <label className="mb-3">內文</label>
           <textarea
             className="form-control"
-            id="content_site"
+            id="content_site_edit"
             style={{ whiteSpace: "pre-line", height: "200px" }}
-            onChange={handleContent}
-            value={content}
+            name="content"
           ></textarea>
         </div>
         <div className="mb-3">
           <div className="d-flex my-2">
-            <div className="my-auto">原照片：{originPhoto}</div>
+            <div className="my-auto">
+              原照片：<span id="origin_photo"></span>
+            </div>
             <button
               id="removePhotoButton"
               className="btn bg-danger-subtle ms-2"
@@ -376,13 +357,14 @@ const EditSiteComponent = () => {
             </button>
           </div>
 
-          <label htmlFor="photo_site" className="mb-3">
+          <label htmlFor="photo_site_edit" className="mb-3">
             更換照片
           </label>
           <input
             type="file"
             className="form-control"
-            id="photo_site"
+            id="photo_site_edit"
+            name="photo"
             onChange={handleImage}
           />
         </div>
@@ -405,12 +387,7 @@ const EditSiteComponent = () => {
             </div>
           )}
         </div>
-        <button
-          id="edit-site-submit-button"
-          type="button"
-          className="btn btn-primary"
-          onClick={handleAddSite}
-        >
+        <button id="edit-site-submit-button" className="btn btn-primary">
           Submit
         </button>
       </form>

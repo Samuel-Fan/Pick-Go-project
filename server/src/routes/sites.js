@@ -49,16 +49,8 @@ router.get("/test", (req, res) => {
 // 以關鍵字搜尋景點
 router.get("/search", async (req, res) => {
   try {
-    let {
-      title,
-      country,
-      region,
-      type,
-      username,
-      page,
-      numberPerPage,
-      orderBy,
-    } = req.query;
+    let { title, country, region, type, page, numberPerPage, orderBy } =
+      req.query;
 
     // 先搜尋快取中有沒有
     let queryHash = hash.sha1(req.query);
@@ -74,7 +66,6 @@ router.get("/search", async (req, res) => {
       country && { country },
       region && { region },
       type && { type },
-      username && { username },
       title && { title: { $regex: title, $options: "i" } },
       { public: true }
     );
@@ -142,13 +133,12 @@ router.get("/count", async (req, res) => {
     return res.send(dataFromRedis);
   }
 
-  let { title, country, region, type, username } = req.query;
+  let { title, country, region, type } = req.query;
   let searchObj = Object.assign(
     {},
     country && { country },
     region && { region },
     type && { type },
-    username && { username },
     title && { title: { $regex: title, $options: "i" } },
     { public: true }
   );

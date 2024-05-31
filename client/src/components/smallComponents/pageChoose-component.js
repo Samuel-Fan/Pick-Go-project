@@ -1,6 +1,7 @@
 import React from "react";
 
 const PageChooseComponent = ({ page, handlePage, count }) => {
+  
   return (
     <nav aria-label="Page navigation example" className="me-5">
       <ul className="pagination">

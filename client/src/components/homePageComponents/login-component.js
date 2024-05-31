@@ -5,13 +5,14 @@ import { useNavigate } from "react-router-dom";
 
 const LoginComponent = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleLogin = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    let form = new FormData(e.currentTarget);
+    let data = Object.fromEntries(form.entries());
     try {
-      let result = await authService.post_login(email, password);
+      let result = await authService.post_login(data);
       localStorage.setItem(
         "auth",
         JSON.stringify({
@@ -35,20 +36,6 @@ const LoginComponent = () => {
     }
   };
 
-  const handleEnter = (e) => {
-    if (e.key === "Enter") {
-      handleLogin();
-    }
-  };
-
-  const handleEmailInput = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const handlePasswordInput = (e) => {
-    setPassword(e.target.value);
-  };
-
   return (
     <section>
       <div className="container py-2 ">
@@ -61,7 +48,7 @@ const LoginComponent = () => {
             />
           </div>
           <div className="col-xl-5 offset-xl-1">
-            <form>
+            <form onSubmit={handleSubmit}>
               {/* <!-- Email input --> */}
               <div data-mdb-input-init className="form-outline mb-4">
                 <input
@@ -69,8 +56,6 @@ const LoginComponent = () => {
                   id="signin-email"
                   className="form-control form-control-lg"
                   name="email"
-                  onChange={handleEmailInput}
-                  onKeyUp={handleEnter}
                 />
                 <label className="form-label" htmlFor="signIn-email">
                   Email address
@@ -84,8 +69,6 @@ const LoginComponent = () => {
                   id="signin-password"
                   className="form-control form-control-lg"
                   name="password"
-                  onChange={handlePasswordInput}
-                  onKeyUp={handleEnter}
                 />
                 <label className="form-label" htmlFor="signin-password">
                   Password
@@ -100,25 +83,21 @@ const LoginComponent = () => {
                   </div>
                 )}
               </div>
-
               {/* <!-- Submit button --> */}
-              <button
-                type="button"
-                className="btn btn-primary btn-lg btn-block"
-                onClick={handleLogin}
-              >
+              <button className="btn btn-primary btn-lg btn-block">
                 Sign in
               </button>
-
               <div className="divider d-flex align-items-center my-4">
                 <p className="text-center fw-bold mx-3 mb-0 text-muted">OR</p>
               </div>
             </form>
+
+            {/* <!-- google login --> */}
             <a href={`${process.env.REACT_APP_API_URL}/api/users/auth/google`}>
               <button
                 className="btn btn-lg btn-block btn-primary"
                 style={{ backgroundColor: "#dd4b39" }}
-                type="submit"
+                type="button"
               >
                 <i className="fab fa-google me-2"></i> Continue with google
               </button>

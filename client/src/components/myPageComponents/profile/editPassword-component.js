@@ -6,13 +6,12 @@ import { useNavigate } from "react-router-dom";
 const EditPassword = ({ currentUser, setCurrentUser }) => {
   const navigate = useNavigate();
 
-  const [oldPassword, setOldPassword] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleEditPassword = async () => {
-    let data = { oldPassword, password, confirmPassword };
+  const handleEditPassword = async (e) => {
+    e.preventDefault();
+    let form = new FormData(e.currentTarget);
+    let data = Object.fromEntries(form.entries());
 
     try {
       await authService.patch_modify_password(data);
@@ -25,18 +24,6 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
         setMessage("伺服器發生問題，請稍後再試");
       }
     }
-  };
-
-  const handleOldPasswordInput = (e) => {
-    setOldPassword(e.target.value);
-  };
-
-  const handlePasswordInput = (e) => {
-    setPassword(e.target.value);
-  };
-
-  const handleConfirmPasswordInput = (e) => {
-    setConfirmPassword(e.target.value);
   };
 
   // 取得使用者資料
@@ -59,7 +46,7 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
         <h2 className="me-4 my-2">變更密碼</h2>
       </div>
       <hr />
-      <form id="editProfileForm">
+      <form id="editProfileForm" onSubmit={handleEditPassword}>
         {currentUser.password && (
           <div className="mb-3">
             <label htmlFor="old_password_edit" className="form-label">
@@ -69,8 +56,8 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
               type="password"
               className="form-control"
               id="old_password_edit"
-              onChange={handleOldPasswordInput}
-              autoComplete="off"
+              name="oldPassword"
+              autocomplete="off"
             />
           </div>
         )}
@@ -82,8 +69,8 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
             type="password"
             className="form-control"
             id="password_edit"
-            onChange={handlePasswordInput}
-            autoComplete="off"
+            name="password"
+            autocomplete="off"
           />
         </div>
         <div className="mb-3">
@@ -94,7 +81,7 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
             type="password"
             className="form-control"
             id="confirm_password_edit"
-            onChange={handleConfirmPasswordInput}
+            name="confirmPassword"
             autoComplete="off"
           />
         </div>
@@ -105,13 +92,7 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
             </div>
           )}
         </div>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleEditPassword}
-        >
-          Submit
-        </button>
+        <button className="btn btn-primary">Submit</button>
       </form>
     </div>
   );

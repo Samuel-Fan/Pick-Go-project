@@ -6,23 +6,13 @@ import { useNavigate } from "react-router-dom";
 const AddNewSiteComponent = () => {
   const navigate = useNavigate();
 
-  const [title, setTitle] = useState("");
   const [country, setCountry] = useState("");
-  const [region, setRegion] = useState("");
-  const [type, setType] = useState("");
-  const [content, setContent] = useState("");
-  const [photo, setPhoto] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleAddSite = async () => {
+  const handleAddSite = async (e) => {
+    e.preventDefault();
     // 處理form data
-    const formData = new FormData();
-    formData.append("file-to-upload", photo);
-    formData.append("title", title);
-    formData.append("country", country);
-    formData.append("region", region);
-    formData.append("type", type);
-    formData.append("content", content);
+    const formData = new FormData(e.currentTarget);
 
     // loading中禁用submit按鈕
     document.querySelector("#add-new-site-button").disabled = true;
@@ -50,26 +40,9 @@ const AddNewSiteComponent = () => {
     }
   };
 
-  const handleTitle = (e) => {
-    setTitle(e.target.value);
-  };
-
   const handleCountry = (e) => {
     setCountry(e.target.value);
-    setRegion("");
-  };
-
-  const handleRegion = (e) => {
-    setRegion(e.target.value);
-    console.log(region);
-  };
-
-  const handleType = (e) => {
-    setType(e.target.value);
-  };
-
-  const handleContent = (e) => {
-    setContent(e.target.value);
+    document.querySelector("#region_site_add").value = "";
   };
 
   const handleImage = (e) => {
@@ -95,10 +68,9 @@ const AddNewSiteComponent = () => {
         document.querySelector("#photo_site").value = null;
       } else {
         setMessage("");
-        setPhoto(file);
       }
     } else {
-      setPhoto("");
+      document.querySelector("#photo_site").value = null;
     }
   };
 
@@ -108,7 +80,7 @@ const AddNewSiteComponent = () => {
         <h2 className="me-4 my-2">新增景點</h2>
       </div>
       <hr />
-      <form>
+      <form onSubmit={handleAddSite}>
         <div className="mb-3">
           <label className="form-label">標題</label>
           <input
@@ -116,7 +88,6 @@ const AddNewSiteComponent = () => {
             className="form-control"
             id="titleEdit"
             name="title"
-            onChange={handleTitle}
           />
         </div>
         <div className="mb-3">
@@ -155,7 +126,11 @@ const AddNewSiteComponent = () => {
         <div className="mb-3">
           <label className="form-label">地區</label>
           {!country && (
-            <select className="form-select" aria-label="Default select example">
+            <select
+              className="form-select"
+              aria-label="Default select example"
+              id="region_site_add"
+            >
               <option>請選擇地區</option>
             </select>
           )}
@@ -163,7 +138,8 @@ const AddNewSiteComponent = () => {
             <select
               className="form-select"
               aria-label="Default select example"
-              onChange={handleRegion}
+              id="region_site_add"
+              name="region"
             >
               <option value="">請選擇地區</option>
               <option value="北海道地區">北海道地區</option>
@@ -182,7 +158,8 @@ const AddNewSiteComponent = () => {
             <select
               className="form-select"
               aria-label="Default select example"
-              onChange={handleRegion}
+              id="region_site_add"
+              name="region"
             >
               <option value="">請選擇地區</option>
               <option value="台北">台北</option>
@@ -206,7 +183,6 @@ const AddNewSiteComponent = () => {
                   name="type"
                   id="restaurant_type"
                   value="餐廳"
-                  onChange={handleType}
                 />
                 <label className="form-check-label" htmlFor="restaurant_type">
                   餐廳
@@ -221,7 +197,6 @@ const AddNewSiteComponent = () => {
                   name="type"
                   id="spot_type"
                   value="景點"
-                  onChange={handleType}
                 />
                 <label className="form-check-label" htmlFor="spot_type">
                   景點
@@ -236,7 +211,6 @@ const AddNewSiteComponent = () => {
                   name="type"
                   id="shopping_type"
                   value="購物"
-                  onChange={handleType}
                 />
                 <label className="form-check-label" htmlFor="shopping_type">
                   購物
@@ -251,7 +225,6 @@ const AddNewSiteComponent = () => {
                   name="type"
                   id="other_type"
                   value="其他"
-                  onChange={handleType}
                 />
                 <label className="form-check-label" htmlFor="other_type">
                   其他
@@ -268,7 +241,7 @@ const AddNewSiteComponent = () => {
             className="form-control"
             id="content_site"
             style={{ whiteSpace: "pre-line", height: "200px" }}
-            onChange={handleContent}
+            name="content"
           ></textarea>
         </div>
         <div className="mb-3">
@@ -279,6 +252,7 @@ const AddNewSiteComponent = () => {
             type="file"
             className="form-control"
             id="photo_site"
+            name="photo"
             onChange={handleImage}
           />
         </div>
@@ -289,12 +263,7 @@ const AddNewSiteComponent = () => {
             </div>
           )}
         </div>
-        <button
-          id="add-new-site-button"
-          type="button"
-          className="btn btn-primary"
-          onClick={handleAddSite}
-        >
+        <button id="add-new-site-button" className="btn btn-primary">
           Submit
         </button>
       </form>

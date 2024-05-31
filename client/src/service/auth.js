@@ -27,11 +27,8 @@ class AuthService {
   }
 
   // 登入系統
-  post_login(email, password) {
-    return axios.post(apiURL + "/api/users/login", {
-      email,
-      password,
-    });
+  post_login(data) {
+    return axios.post(apiURL + "/api/users/login", data);
   }
 
   // 註冊系統

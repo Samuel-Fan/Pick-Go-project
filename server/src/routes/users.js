@@ -5,6 +5,21 @@ const jwt = require("jsonwebtoken");
 const valid = require("../controllers/validation");
 const bcrypt = require("bcrypt");
 const reditClient = require("../config/redis");
+const multer = require("multer");
+
+// 照片檔案上傳格式設定
+const upload = multer({
+  limits: {
+    fileSize: 2.5 * 1024 * 1024,
+  },
+  fileFilter(req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext !== ".jpg" && ext !== ".png" && ext !== ".jpeg") {
+      cb({ message: '"檔案格式錯誤，僅限上傳 jpg、jpeg 與 png 格式。"' });
+    }
+    cb(null, true);
+  },
+}).any();
 
 router.use((req, res, next) => {
   console.log("正在接收一個跟'使用者'有關的請求");
@@ -81,34 +96,38 @@ router.get("/auth/google/setJwt", (req, res) => {
 // local 登入會員
 router.post("/login", async (req, res) => {
   // 先驗證資料格式
-  console.log(req.body);
   let { error } = valid.loginValidation(req.body); //req.body 中應有 email, password
   if (error) {
     return res.status(400).send(error.details[0].message);
   }
 
   let { email, password } = req.body;
-  // 用email找尋使用者
-  const foundUser = await User.findOne({ email }).exec();
-  if (!foundUser) {
-    return res.status(400).send("此email無人註冊過");
-  }
-
-  // 驗證密碼
-  let result = bcrypt.compare(password, foundUser.password);
-  if (!result) {
-    return res.status(400).send("帳號或密碼錯誤");
-  }
-
-  const tokenObject = { _id: foundUser._id, email: foundUser.email };
-  const token = jwt.sign(
-    tokenObject,
-    process.env.JWT_SECRET || "happycodingjwtyeah!",
-    {
-      expiresIn: "1h",
+  try {
+    // 用email找尋使用者
+    const foundUser = await User.findOne({ email }).exec();
+    if (!foundUser) {
+      return res.status(400).send("此email無人註冊過");
     }
-  );
-  return res.send({ user: foundUser, jwtToken: "JWT " + token });
+
+    // 驗證密碼
+    let result = bcrypt.compare(password, foundUser.password);
+    if (!result) {
+      return res.status(400).send("帳號或密碼錯誤");
+    }
+
+    const tokenObject = { _id: foundUser._id, email: foundUser.email };
+    const token = jwt.sign(
+      tokenObject,
+      process.env.JWT_SECRET || "happycodingjwtyeah!",
+      {
+        expiresIn: "1h",
+      }
+    );
+    return res.send({ user: foundUser, jwtToken: "JWT " + token });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("儲存資料時發生錯誤:" + e.message);
+  }
 });
 
 // local 註冊會員
@@ -150,35 +169,38 @@ router.post("/register", async (req, res) => {
 router.patch(
   "/modify/basic",
   passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
+  (req, res) => {
     let { _id } = req.user;
+    upload(req, res, async (err) => {
+      try {
+        // 確認有無此人
+        let foundUser = await User.findOne({ _id }).exec();
+        if (!foundUser) {
+          return res.status(400).send("無搜尋到此用戶");
+        }
 
-    try {
-      // 確認有無此人
-      let foundUser = await User.findOne({ _id }).exec();
-      if (!foundUser) {
-        return res.status(400).send("無搜尋到此用戶");
+        // 驗證填入資料的正確性，如果不合規範則 return 錯誤
+        let { error } = valid.editBasicValidation(req.body); // req.body 應有 username, age, gender, description
+        if (error) {
+          console.log(error);
+          return res.status(400).send(error.details[0].message);
+        }
+
+        await Promise.all([
+          User.findOneAndUpdate({ _id }, req.body, {
+            // 更新資料
+            new: true,
+            runValidators: true,
+          }),
+          reditClient.del(`User:${_id}`), // 刪掉快取
+        ]);
+
+        return res.send("成功修改資料");
+      } catch (e) {
+        console.log(e);
+        return res.status(500).send(e.message);
       }
-
-      // 驗證填入資料的正確性，如果不合規範則 return 錯誤
-      let { error } = valid.editBasicValidation(req.body); // req.body 應有 username, age, gender, description
-      if (error) {
-        return res.status(400).send(error.details[0].message);
-      }
-
-      await Promise.all([
-        User.findOneAndUpdate({ _id }, req.body, {
-          // 更新資料
-          new: true,
-          runValidators: true,
-        }),
-        reditClient.del(`User:${_id}`), // 刪掉快取
-      ]);
-
-      return res.send("成功修改資料");
-    } catch (e) {
-      return res.status(500).send(e.message);
-    }
+    });
   }
 );
 
@@ -190,18 +212,18 @@ router.patch(
     let { _id } = req.user;
     try {
       // 確認有無此人
-      console.log(_id);
       let foundUser = await User.findOne({ _id }).exec();
       if (!foundUser) {
         return res.status(400).send("無搜尋到此用戶");
       }
 
       let { oldPassword, password, confirmPassword } = req.body;
-
+      console.log(req.body);
       // 比較舊密碼
       if (foundUser.password) {
         // Google註冊的沒有舊密碼
         let result = await bcrypt.compare(oldPassword, foundUser.password);
+        console.log(foundUser.password);
         if (!result) {
           return res.status(400).send("舊密碼輸入不正確!");
         }
