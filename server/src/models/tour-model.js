@@ -6,7 +6,7 @@ const tourSchema = new Schema({
   description: { type: String },
   author: { type: Schema.Types.ObjectId, ref: "User", index: true }, // User 的 primary key
   limit: { type: Number, default: 1 }, // 限制參加人數
-  days: { type: Number, defalut: 1 }, // 旅行有幾天
+  totalDays: { type: Number, defalut: 1 }, // 旅行有幾天
   status: {
     type: String,
     default: "不公開",

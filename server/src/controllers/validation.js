@@ -153,7 +153,7 @@ const toursValidation = (data) => {
       "number.min": "人數限制須介於1-10人",
       "number.max": "人數限制須介於1-10人",
     }),
-    days: Joi.number().max(7).min(1).required().messages({
+    totalDays: Joi.number().max(7).min(1).required().messages({
       "any.required": "'總天數'為必須填寫的項目",
       "number.base": "總天數必須為數字",
       "number.integer": "總天數限制必須為整數",
