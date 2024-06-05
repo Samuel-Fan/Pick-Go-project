@@ -1,6 +1,53 @@
 import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const DeleteSiteOrTourComponent = ({ cancelDelete, deleteIt }) => {
+const DeleteSiteOrTourComponent = ({
+  deleteFunction,
+  deleteId,
+  setDeleteId,
+}) => {
+  const navigate = useNavigate();
+  const [message, setMessage] = useState("");
+
+  // 確認後不刪除
+  const cancelDelete = () => {
+    setDeleteId("");
+    document.querySelector("#siteDeleteConfirm").style.display = "none";
+    document.querySelector("#gray_cover").style.display = "none";
+  };
+
+  // 確認後刪除
+  const deleteIt = async () => {
+
+    // 設定游標、暫停按鈕功能
+    document.body.style.cursor = "wait";
+    document.querySelectorAll("button").forEach((button) => {
+      button.disabled = true;
+    });
+    
+    try {
+      let result = await deleteFunction(deleteId);
+      alert(result.data);
+      navigate(0);
+    } catch (e) {
+      document.body.style.cursor = "default";
+      document.querySelectorAll("button").forEach((button) => {
+        button.disabled = false;
+      });
+
+      if (e.response) {
+        console.log(e.response.data);
+        setMessage(e.response.data);
+      } else {
+        setMessage("伺服器發生問題，請稍後再試");
+      }
+    }
+    document.querySelector("#siteDeleteConfirm").style.display = "none";
+    document.querySelector("#gray_cover").style.display = "none";
+    setDeleteId("");
+  };
+
   return (
     <div>
       {/* 確定刪除按鈕 */}
@@ -36,6 +83,15 @@ const DeleteSiteOrTourComponent = ({ cancelDelete, deleteIt }) => {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* // 錯誤訊息 */}
+      <div className="small mb-2 pb-lg-2">
+        {message && (
+          <div className="alert alert-danger" role="alert">
+            {message}
+          </div>
+        )}
       </div>
 
       {/* 遮罩 */}

@@ -9,9 +9,10 @@ const EditProfile = () => {
 
   const handleEditProfile = async (e) => {
     e.preventDefault();
-    let form = new FormData(e.currentTarget);
+    let formData = new FormData(e.currentTarget);
+    let data = Object.fromEntries(formData.entries());
     try {
-      await authService.patch_modify(form);
+      await authService.patch_modify(data);
       navigate("/users");
       navigate(0); // 刷新頁面
     } catch (e) {
@@ -135,7 +136,13 @@ const EditProfile = () => {
           <label htmlFor="descriptionEdit" className="mb-3">
             自我介紹
           </label>
-          <textarea className="form-control" id="descriptionEdit"></textarea>
+          <textarea
+            className="form-control"
+            id="descriptionEdit"
+            name="description"
+            rows="6"
+            style={{ whiteSpace: "pre-line" }}
+          ></textarea>
         </div>
         <div className="small mb-2 pb-lg-2">
           {message && (

@@ -5,21 +5,6 @@ const jwt = require("jsonwebtoken");
 const valid = require("../controllers/validation");
 const bcrypt = require("bcrypt");
 const reditClient = require("../config/redis");
-const multer = require("multer");
-
-// 照片檔案上傳格式設定
-const upload = multer({
-  limits: {
-    fileSize: 2.5 * 1024 * 1024,
-  },
-  fileFilter(req, file, cb) {
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (ext !== ".jpg" && ext !== ".png" && ext !== ".jpeg") {
-      cb({ message: '"檔案格式錯誤，僅限上傳 jpg、jpeg 與 png 格式。"' });
-    }
-    cb(null, true);
-  },
-}).any();
 
 router.use((req, res, next) => {
   console.log("正在接收一個跟'使用者'有關的請求");
@@ -49,6 +34,27 @@ router.get(
     }
   }
 );
+
+// 得到特定使用者的資料
+router.get("/profile/:_id", async (req, res) => {
+  let { _id } = req.params;
+  try {
+    let foundUser = await User.findOne({ _id })
+      .select(["username", "email", "gender", "age", "description"])
+      .lean()
+      .exec();
+
+    // 若搜尋不到使用者
+    if (!foundUser) {
+      return res.status(400).send("找不到使用者");
+    }
+
+    return res.send(foundUser);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).send("伺服器發生問題");
+  }
+});
 
 // google登入、註冊會員
 router.get(
@@ -120,7 +126,7 @@ router.post("/login", async (req, res) => {
       tokenObject,
       process.env.JWT_SECRET || "happycodingjwtyeah!",
       {
-        expiresIn: "1h",
+        expiresIn: "4h",
       }
     );
     return res.send({ user: foundUser, jwtToken: "JWT " + token });
@@ -169,38 +175,36 @@ router.post("/register", async (req, res) => {
 router.patch(
   "/modify/basic",
   passport.authenticate("jwt", { session: false }),
-  (req, res) => {
+  async (req, res) => {
     let { _id } = req.user;
-    upload(req, res, async (err) => {
-      try {
-        // 確認有無此人
-        let foundUser = await User.findOne({ _id }).exec();
-        if (!foundUser) {
-          return res.status(400).send("無搜尋到此用戶");
-        }
-
-        // 驗證填入資料的正確性，如果不合規範則 return 錯誤
-        let { error } = valid.editBasicValidation(req.body); // req.body 應有 username, age, gender, description
-        if (error) {
-          console.log(error);
-          return res.status(400).send(error.details[0].message);
-        }
-
-        await Promise.all([
-          User.findOneAndUpdate({ _id }, req.body, {
-            // 更新資料
-            new: true,
-            runValidators: true,
-          }),
-          reditClient.del(`User:${_id}`), // 刪掉快取
-        ]);
-
-        return res.send("成功修改資料");
-      } catch (e) {
-        console.log(e);
-        return res.status(500).send(e.message);
+    try {
+      // 確認有無此人
+      let foundUser = await User.findOne({ _id }).exec();
+      if (!foundUser) {
+        return res.status(400).send("無搜尋到此用戶");
       }
-    });
+
+      // 驗證填入資料的正確性，如果不合規範則 return 錯誤
+      let { error } = valid.editBasicValidation(req.body); // req.body 應有 username, age, gender, description
+      if (error) {
+        console.log(error);
+        return res.status(400).send(error.details[0].message);
+      }
+
+      await Promise.all([
+        User.findOneAndUpdate({ _id }, req.body, {
+          // 更新資料
+          new: true,
+          runValidators: true,
+        }),
+        reditClient.del(`User:${_id}`), // 刪掉快取
+      ]);
+
+      return res.send("成功修改資料");
+    } catch (e) {
+      console.log(e);
+      return res.status(500).send(e.message);
+    }
   }
 );
 

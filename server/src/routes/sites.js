@@ -253,17 +253,6 @@ router.get(
         });
       }
 
-      // 若搜尋到則確認其是否公開，若否則檢察是否為作者本人，非本人則返回403錯誤
-      if (!foundSite.public) {
-        if (!req.user || !foundSite.author._id.equals(req.user._id)) {
-          await redisClient.set(`Site:${_id}`, "403error", {
-            // 防快取穿透 Cache Penetration，其實期限可以設久一點
-            EX: 60 * 60 * 1,
-          });
-          return res.status(403).send("作者不公開相關頁面");
-        }
-      }
-
       return res.send(foundSite);
     } catch (e) {
       console.log(e);
@@ -401,7 +390,6 @@ router.get(
     let { page, numberPerPage } = req.query;
     try {
       let foundSite = await Site.find({ author: _id })
-        .select({ title: 1, photo: 1, content: 1, public: 1 })
         .skip((page - 1) * numberPerPage)
         .limit(numberPerPage)
         .lean()

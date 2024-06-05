@@ -47,10 +47,13 @@ const Sidebar = ({ currentUser }) => {
           </Link>
         </li>
         <li>
-          <a href="#submenu2" className="nav-link px-0 align-middle ">
+          <Link
+            to="/users/tours/overview"
+            className="nav-link px-0 align-middle "
+          >
             <i className="fs-4 fa-solid fa-plane"></i>
             <span className="ms-1 d-none d-sm-inline">我的旅程</span>
-          </a>
+          </Link>
           <hr />
         </li>
         <li>

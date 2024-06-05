@@ -121,15 +121,6 @@ class SiteService {
   delete_site(_id) {
     return axios.delete(apiURL + "/api/sites/" + _id);
   }
-
-  // 設定 jwt token
-  setToken() {
-    if (localStorage.getItem("auth")) {
-      return JSON.parse(localStorage.getItem("auth")).jwtToken;
-    } else {
-      return "";
-    }
-  }
 }
 let siteService = new SiteService();
 

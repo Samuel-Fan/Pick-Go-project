@@ -19,6 +19,11 @@ class AuthService {
     return axios.get(apiURL + "/api/users");
   }
 
+  // 得到特定使用者資訊
+  get_profile(user_id) {
+    return axios.get(apiURL + "/api/users/profile/" + user_id);
+  }
+
   // google登入取得jwt
   get_google_jwt() {
     return axios.get(apiURL + "/api/users/auth/google/setJwt", {
