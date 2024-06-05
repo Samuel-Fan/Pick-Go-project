@@ -12,7 +12,9 @@ const MySites = () => {
   const [count, setCount] = useState(); // 計算有幾個sites 分頁用
   const [page, setPage] = useState(1);
   const [numberPerPage, setNumberPerPage] = useState(4); //每頁顯示幾個
+
   const [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
+  const deleteFunction = siteService.delete_site;
 
   // 選擇頁數
   const handlePage = (e) => {
@@ -32,35 +34,11 @@ const MySites = () => {
     }
   };
 
-  // 處理刪除景點 or 移除收藏
+  // 處理刪除景點
   const handleDelete = (e) => {
     setDeleteId(e.target.name);
     document.querySelector("#siteDeleteConfirm").style.display = "flex";
     document.querySelector("#gray_cover").style.display = "block";
-  };
-
-  // 確認後不刪除
-  const cancelDelete = () => {
-    setDeleteId("");
-    document.querySelector("#siteDeleteConfirm").style.display = "none";
-    document.querySelector("#gray_cover").style.display = "none";
-  };
-
-  // 確認後刪除
-  const deleteIt = async () => {
-    try {
-      document.body.style.cursor = "wait";
-      let result = await siteService.delete_site(deleteId);
-      alert(result.data);
-      navigate(0);
-    } catch (e) {
-      if (e.response) {
-        alert(e.response.data);
-      }
-    }
-    document.querySelector("#siteDeleteConfirm").style.display = "none";
-    document.querySelector("#gray_cover").style.display = "none";
-    setDeleteId("");
   };
 
   // 剛進網站時，讀取site總數以設定分頁格式
@@ -227,8 +205,9 @@ const MySites = () => {
 
       {/* // 刪除景點功能 */}
       <DeleteSiteOrTourComponent
-        cancelDelete={cancelDelete}
-        deleteIt={deleteIt}
+        deleteFunction={deleteFunction}
+        deleteId={deleteId}
+        setDeleteId={setDeleteId}
       />
     </div>
   );

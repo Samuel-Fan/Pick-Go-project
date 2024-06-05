@@ -11,8 +11,8 @@ const registerValidation = (data) => {
     password: Joi.string().min(6).max(20).required().messages({
       "any.required": "'密碼'為必須填寫的項目",
       "string.empty": "'密碼'為必須填寫的項目",
-      "string.min": "'密碼'長度最少長度為 6",
-      "string.max": "'密碼'長度最長長度為 20",
+      "string.min": "'密碼'長度最少為 6",
+      "string.max": "'密碼'長度最長為 20",
     }),
     confirmPassword: Joi.string()
       .required()
@@ -142,7 +142,10 @@ const toursValidation = (data) => {
       "string.empty": "'標題'為必須填寫的項目",
       "string.max": "'標題'最長長度為 20 個字",
     }),
-    description: Joi.string().required().allow(null, ""),
+    description: Joi.string().max(100).required().allow(null, "").messages({
+      "any.required": "'簡介'為必須填寫的項目",
+      "string.max": "'簡介'最長為 100字",
+    }),
     status: Joi.string().valid("不公開", "純分享", "找旅伴").messages({
       "any.only": "類別必須為不公開、純分享、找旅伴",
     }),

@@ -9,7 +9,7 @@ import LoginComponent from "./components/homePageComponents/login-component";
 import SignupComponent from "./components/homePageComponents/signup-component";
 import GoogleLogin from "./components/homePageComponents/googleLogin";
 import MyPageLayout from "./components/myPageComponents/MyPageLayout";
-import Profile from "./components/myPageComponents/profile/profile-component";
+import MyProfile from "./components/myPageComponents/profile/myProfile-component";
 import EditProfile from "./components/myPageComponents/profile/editProfile-component";
 import EditPassword from "./components/myPageComponents/profile/editPassword-component";
 import MySites from "./components/myPageComponents/site/mySites-component";
@@ -17,8 +17,13 @@ import MyCollectSites from "./components/myPageComponents/site/myCollectSites-co
 import MySiteDetail from "./components/myPageComponents/site/mySiteDetail-component";
 import AddNewSite from "./components/myPageComponents/site/addNewSite-component";
 import EditSite from "./components/myPageComponents/site/editSite-component";
+import MyTours from "./components/myPageComponents/tour/myTours-component";
+import AddNewTour from "./components/myPageComponents/tour/addNewTour-component";
+import AddSiteToATour from "./components/myPageComponents/tour/addSiteToATour-component";
+import AddNewParticipant from "./components/myPageComponents/tour/addNewParticipant-component";
 import NoAuth from "./components/myPageComponents/noAuth-component";
 import NotFound from "./components/homePageComponents/notFound";
+import MyTourDetail from "./components/myPageComponents/tour/myTourDetail-component";
 
 function App() {
   let [auth, setAuth] = useState(JSON.parse(localStorage.getItem("auth"))); // 確認登入狀態
@@ -60,7 +65,7 @@ function App() {
           <Route
             index
             element={
-              <Profile
+              <MyProfile
                 currentUser={currentUser}
                 setCurrentUser={setCurrentUser}
               />
@@ -94,6 +99,22 @@ function App() {
           <Route
             path="/users/sites/edit/:site_id"
             element={<EditSite />}
+          ></Route>
+
+          {/* 旅程建立、修改、瀏覽 */}
+          <Route path="/users/tours/overview" element={<MyTours />}></Route>
+          <Route path="/users/tours/new" element={<AddNewTour />}></Route>
+          <Route
+            path="/users/tours/myTour/:tour_id"
+            element={<MyTourDetail />}
+          ></Route>
+          <Route
+            path="/users/tours/:tour_id/:title/:day/addSite"
+            element={<AddSiteToATour />}
+          ></Route>
+          <Route
+            path="/users/tours/:tour_id/participants"
+            element={<AddNewParticipant />}
           ></Route>
         </Route>
 

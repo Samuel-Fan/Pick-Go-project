@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import authService from "../../../service/auth";
 
-const Profile = ({ currentUser, setCurrentUser }) => {
+const MyProfile = ({ currentUser, setCurrentUser }) => {
   const navigate = useNavigate();
 
   // 客製化日期
@@ -101,7 +101,7 @@ const Profile = ({ currentUser, setCurrentUser }) => {
         </tbody>
       </table>
       <div>
-        <div style={{ margin: "0.5rem" }}>
+        <div style={{ margin: "0.5rem", whiteSpace: "pre-line" }}>
           {currentUser && currentUser.description}
         </div>
       </div>
@@ -109,4 +109,4 @@ const Profile = ({ currentUser, setCurrentUser }) => {
   );
 };
 
-export default Profile;
+export default MyProfile;
