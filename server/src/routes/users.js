@@ -144,7 +144,7 @@ router.post("/register", async (req, res) => {
     return res.status(400).send(error.details[0].message);
   }
 
-  let { email, password, username, gender, age, description } = req.body;
+  let { email, password, username } = req.body;
 
   try {
     // 查看 email 是否已經註冊過
@@ -158,9 +158,6 @@ router.post("/register", async (req, res) => {
       email,
       password,
       username,
-      gender,
-      age,
-      description,
     });
 
     let savedUser = await newUser.save();
@@ -191,7 +188,7 @@ router.patch(
         return res.status(400).send(error.details[0].message);
       }
 
-      await Promise.all([
+      let [data, _reditDel] = await Promise.all([
         User.findOneAndUpdate({ _id }, req.body, {
           // 更新資料
           new: true,
@@ -200,7 +197,7 @@ router.patch(
         reditClient.del(`User:${_id}`), // 刪掉快取
       ]);
 
-      return res.send("成功修改資料");
+      return res.send(data);
     } catch (e) {
       console.log(e);
       return res.status(500).send(e.message);

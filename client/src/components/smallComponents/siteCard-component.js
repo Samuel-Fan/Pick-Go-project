@@ -83,7 +83,10 @@ const SiteCardComponent = ({ sites }) => {
                   <p>最後更新：{handleTime(site.updateDate)}</p>
                 </div>
                 <hr className="my-1" />
-                <div className="mt-2">共 {site.num_of_like} 人按讚</div>
+                <div className="d-flex justify-content-between align-items-center mt-3">
+                  <div>共 {site.num_of_like} 人按讚</div>
+                  <div>by {site.author && site.author.username}</div>
+                </div>
               </div>
             </div>
           );

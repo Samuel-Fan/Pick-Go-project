@@ -1,14 +1,13 @@
 import React from "react";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const DeleteSiteOrTourComponent = ({
   deleteFunction,
   deleteId,
   setDeleteId,
+  setMessage
 }) => {
   const navigate = useNavigate();
-  const [message, setMessage] = useState("");
 
   // 確認後不刪除
   const cancelDelete = () => {
@@ -83,15 +82,6 @@ const DeleteSiteOrTourComponent = ({
             </button>
           </div>
         </div>
-      </div>
-
-      {/* // 錯誤訊息 */}
-      <div className="small mb-2 pb-lg-2">
-        {message && (
-          <div className="alert alert-danger" role="alert">
-            {message}
-          </div>
-        )}
       </div>
 
       {/* 遮罩 */}

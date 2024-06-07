@@ -12,10 +12,15 @@ const EditProfile = () => {
     let formData = new FormData(e.currentTarget);
     let data = Object.fromEntries(formData.entries());
     try {
-      await authService.patch_modify(data);
+      let result = await authService.patch_modify(data);
+      let auth = JSON.parse(localStorage.getItem("auth"));
+      console.log(auth);
+      auth.username = result.data.username;
+      localStorage.setItem("auth", JSON.stringify(auth));
       navigate("/users");
       navigate(0); // 刷新頁面
     } catch (e) {
+      console.log(e);
       if (e.response) {
         setMessage(e.response.data);
       } else {

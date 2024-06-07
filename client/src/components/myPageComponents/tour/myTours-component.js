@@ -19,17 +19,6 @@ const MyToursComponent = () => {
 
   const [message, setMessage] = useState(""); // 錯誤訊息
 
-  // 選擇頁數
-  const handlePage = (e) => {
-    if (e.target.value === "previous") {
-      setPage(page - 1);
-    } else if (e.target.value === "next") {
-      setPage(page + 1);
-    } else {
-      setPage(Number(e.target.value));
-    }
-  };
-
   // 編輯旅程基本資訊
   const handleEdit = async (e) => {
     e.preventDefault();
@@ -88,6 +77,11 @@ const MyToursComponent = () => {
     document.querySelector("#gray_cover").style.display = "block";
   };
 
+  // 處理description的文字長度
+  const handleDescription = (string) => {
+    return string.length >= 40 ? string.slice(0, 40) + "..." : string;
+  };
+
   // 剛進網站時，讀取site總數以設定分頁格式
   useEffect(() => {
     tourService
@@ -128,12 +122,24 @@ const MyToursComponent = () => {
   return (
     <div className="container">
       <div className="d-flex">
+        {/* 選擇我建立的景點or我收藏的景點 */}
+        <div className="me-5 mb-3">
+          <Link
+            to="/users/tours/overview"
+            className="btn btn-outline-primary me-3 active"
+            disabled
+          >
+            我建立的旅程
+          </Link>
+          <Link
+            to="/users/tours/overview/Apply"
+            className="btn btn-outline-primary"
+          >
+            我參加的旅程
+          </Link>
+        </div>
         {/* 頁數選擇 */}
-        <PageChooseComponent
-          page={page}
-          handlePage={handlePage}
-          count={count}
-        />
+        <PageChooseComponent page={page} setPage={setPage} count={count} />
         {/* 新增旅程按鈕 */}
         <div style={{ width: "18rem" }}>
           <a href="/users/tours/new">
@@ -169,10 +175,10 @@ const MyToursComponent = () => {
               tours &&
               tours.map((tour) => {
                 return (
-                  <tr key={tour._id}>
+                  <tr key={tour._id} style={{ height: "5rem" }}>
                     <th>{tour.title}</th>
                     <td style={{ wordWrap: "break-word", maxWidth: "9rem" }}>
-                      {tour.description}
+                      {handleDescription(tour.description)}
                     </td>
                     <td className="text-center">{tour.totalDays}</td>
                     <td className="text-center">
@@ -291,6 +297,7 @@ const MyToursComponent = () => {
         deleteFunction={deleteFunction}
         deleteId={deleteId}
         setDeleteId={setDeleteId}
+        setMessage={setMessage}
       />
     </div>
   );

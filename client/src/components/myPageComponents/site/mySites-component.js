@@ -13,19 +13,10 @@ const MySites = () => {
   const [page, setPage] = useState(1);
   const [numberPerPage, setNumberPerPage] = useState(4); //每頁顯示幾個
 
+  const [message, setMessage] = useState(""); //錯誤訊息
+
   const [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
   const deleteFunction = siteService.delete_site;
-
-  // 選擇頁數
-  const handlePage = (e) => {
-    if (e.target.value === "previous") {
-      setPage(page - 1);
-    } else if (e.target.value === "next") {
-      setPage(page + 1);
-    } else {
-      setPage(Number(e.target.value));
-    }
-  };
 
   // 每頁幾張?
   const handlePerPage = (e) => {
@@ -98,11 +89,7 @@ const MySites = () => {
         </div>
 
         {/* 頁數選擇 */}
-        <PageChooseComponent
-          page={page}
-          handlePage={handlePage}
-          count={count}
-        />
+        <PageChooseComponent page={page} setPage={setPage} count={count} />
 
         {/* 每頁顯示幾個? */}
         <div className="mt-1 me-5">
@@ -203,11 +190,21 @@ const MySites = () => {
           })}
       </div>
 
+      {/* // 錯誤訊息 */}
+      <div className="small mb-2 pb-lg-2">
+        {message && (
+          <div className="alert alert-danger" role="alert">
+            {message}
+          </div>
+        )}
+      </div>
+
       {/* // 刪除景點功能 */}
       <DeleteSiteOrTourComponent
         deleteFunction={deleteFunction}
         deleteId={deleteId}
         setDeleteId={setDeleteId}
+        setMessage={setMessage}
       />
     </div>
   );

@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import tourService from "../../service/tour";
 import { useNavigate } from "react-router-dom";
 
-const TouristComponent = ({ tourists, handleDelete, setUser_id }) => {
+const TouristComponent = ({
+  tourists,
+  handleDelete,
+  setUser_id,
+  tourPublic,
+}) => {
   const navigate = useNavigate();
 
   // 將申請者更新為參加者
@@ -49,36 +54,38 @@ const TouristComponent = ({ tourists, handleDelete, setUser_id }) => {
                 <th>{tourist.user_id.username} </th>
                 <td>{tourist.type}</td>
                 <td>
-                  {tourist.type !== "主辦者" && (
-                    <div>
-                      <button
-                        className="btn bg-primary-subtle"
-                        onClick={() => {
-                          setUser_id(tourist.user_id._id);
-                        }}
-                      >
-                        檢視
-                      </button>
-                      <button
-                        type="button"
-                        className="btn bg-primary-subtle ms-2 my-2"
-                        name={tourist._id}
-                        onClick={handleAddTourist}
-                      >
-                        加入
-                      </button>
-                      {tourist.type !== "主辦者" && (
+                  <div>
+                    <button
+                      className="btn bg-primary-subtle"
+                      onClick={() => {
+                        setUser_id(tourist.user_id._id);
+                      }}
+                    >
+                      檢視
+                    </button>
+                    {tourist.type !== "主辦者" &&
+                      tourist.type !== "參加者" &&
+                      !tourPublic && (
                         <button
                           type="button"
-                          className="btn bg-danger-subtle ms-2 my-2"
+                          className="btn bg-primary-subtle ms-2 my-2"
                           name={tourist._id}
-                          onClick={handleDelete}
+                          onClick={handleAddTourist}
                         >
-                          刪除
+                          加入
                         </button>
                       )}
-                    </div>
-                  )}
+                    {tourist.type !== "主辦者" && !tourPublic && (
+                      <button
+                        type="button"
+                        className="btn bg-danger-subtle ms-2 my-2"
+                        name={tourist._id}
+                        onClick={handleDelete}
+                      >
+                        刪除
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             );

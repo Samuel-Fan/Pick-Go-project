@@ -67,6 +67,14 @@
   color: red !important;
 }
 
+.custom-nav-hover {
+  opacity: 0.9;
+}
+
+.custom-nav-hover:hover {
+  opacity: 1;
+}
+
 .mybtn {
   border: outset black 2px;
 }
@@ -86,5 +94,16 @@
 }
 
 .deleteConfirmButton:hover {
+  opacity: 0.8;
+}
+
+.custom-botton-link {
+  border: none;
+  background-color: transparent;
+  text-decoration: underline;
+  color: rgb(0, 67, 148);
+}
+
+.custom-botton-link:hover {
   opacity: 0.8;
 }

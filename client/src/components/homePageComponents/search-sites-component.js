@@ -13,6 +13,7 @@ const SearchSitesComponent = () => {
   const [page, setPage] = useState(1);
   const [simpleSearch, setSimpleSearch] = useState(true); // 切換簡易搜尋及進階搜尋
   const [country, setCountry] = useState("");
+  const [orderBy, setOrderBy] = useState("date");
   const numberPerPage = 8; //每頁顯示幾個
 
   const [query, setQuery] = useState({
@@ -20,19 +21,8 @@ const SearchSitesComponent = () => {
     country: "",
     region: "",
     type: "",
-    orderBy: "date",
+    username: "",
   });
-
-  // 選擇頁數
-  const handlePage = (e) => {
-    if (e.target.value === "previous") {
-      setPage(page - 1);
-    } else if (e.target.value === "next") {
-      setPage(page + 1);
-    } else {
-      setPage(Number(e.target.value));
-    }
-  };
 
   // 切換簡易搜尋及進階搜尋
   const ChangeSearchMode = () => {
@@ -51,6 +41,7 @@ const SearchSitesComponent = () => {
           country: "",
           region: "",
           type: "",
+          username: "",
         })
       );
     } else {
@@ -66,16 +57,12 @@ const SearchSitesComponent = () => {
     setCountry(e.target.value);
   };
 
-  const handleSort = (e) => {
-    setQuery(Object.assign({}, query, { orderBy: e.target.value }));
-  };
-
   // 剛進網站時，讀取site總數以設定分頁格式
   useEffect(() => {
     siteService
       .get_sites_count(query)
       .then((data) => {
-        console.log("讀取sites總數");
+        console.log(data.data.count);
         if (data.data.count === 0) {
           setCount("無");
         } else {
@@ -83,10 +70,10 @@ const SearchSitesComponent = () => {
         }
       })
       .catch((e) => {
-        if (e.response && e.response.status === 401) {
-          localStorage.removeItem("auth");
-          navigate("/login");
-          navigate(0);
+        if (e.response) {
+          alert(e.response.data);
+        } else {
+          alert("伺服器發生問題");
         }
       });
   }, [numberPerPage, query, navigate]);
@@ -95,20 +82,20 @@ const SearchSitesComponent = () => {
   useEffect(() => {
     console.log(query);
     siteService
-      .get_search_sites(query, numberPerPage, page)
+      .get_search_sites(query, numberPerPage, page, orderBy)
       .then((data) => {
         let result = data.data;
-        console.log("讀取sites詳細資料");
+        console.log(data.data);
         setSites(result);
       })
       .catch((e) => {
-        if (e.response && e.response.status === 401) {
-          localStorage.removeItem("auth");
-          navigate("/login");
-          navigate(0);
+        if (e.response) {
+          alert(e.response.data);
+        } else {
+          alert("伺服器發生問題");
         }
       });
-  }, [page, numberPerPage, query, navigate]);
+  }, [orderBy, page, numberPerPage, query, navigate]);
 
   return (
     <div className="container d-flex flex-column align-items-center my-3">
@@ -126,7 +113,7 @@ const SearchSitesComponent = () => {
                   name="title"
                 />
               </div>
-              <button className="btn btn-primary">
+              <button className="btn btn-primary" style={{ zIndex: 0 }}>
                 <i className="fas fa-search"></i>
               </button>
             </div>
@@ -141,6 +128,14 @@ const SearchSitesComponent = () => {
                 className="form-control"
                 name="title"
                 placeholder="以關鍵字搜尋標題"
+              />
+            </div>
+            <div className="mb-3">
+              <input
+                type="text"
+                className="form-control"
+                name="username"
+                placeholder="作者暱稱"
               />
             </div>
             <div className="mb-3">
@@ -334,11 +329,7 @@ const SearchSitesComponent = () => {
         />
         {/* 頁數選擇 */}
         <div className="d-flex flex-wrap container ms-3">
-          <PageChooseComponent
-            page={page}
-            handlePage={handlePage}
-            count={count}
-          />
+          <PageChooseComponent page={page} setPage={setPage} count={count} />
 
           {/* 排序 */}
           <div className="mt-2">
@@ -348,8 +339,10 @@ const SearchSitesComponent = () => {
                 type="radio"
                 name="sort"
                 id="sort_by_date"
-                value="date"
-                onChange={handleSort}
+                onClick={() => {
+                  setOrderBy("date");
+                }}
+                defaultChecked
               />
               <label className="form-check-label" htmlFor="sort_by_date">
                 依最新上傳時間排序
@@ -361,8 +354,9 @@ const SearchSitesComponent = () => {
                 type="radio"
                 name="sort"
                 id="sort_by_like"
-                value="like"
-                onChange={handleSort}
+                onClick={() => {
+                  setOrderBy("like");
+                }}
               />
               <label className="form-check-label" htmlFor="sort_by_like">
                 依最多讚數排序
@@ -372,7 +366,7 @@ const SearchSitesComponent = () => {
           <div className="mt-2 ms-5">
             備註： 點讚、新增、編輯景點後要{" "}
             <span style={{ color: "red", fontWeight: "bold" }}>1</span>{" "}
-            分鐘才會同步於此頁面
+            分鐘才會同步於此搜尋頁面
           </div>
         </div>
 

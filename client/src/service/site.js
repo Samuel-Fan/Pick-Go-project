@@ -16,23 +16,23 @@ axios.defaults.headers.common["Authorization"] = token;
 class SiteService {
   // 取得公開的景點資料
 
-  get_search_sites(query, numberPerPage, page) {
+  get_search_sites(query, numberPerPage, page, orderBy) {
     // 取得景點簡易圖卡資料
-    let { title, country, region, type, orderBy } = query;
+    let { title, username, country, region, type } = query;
     return axios.get(
       apiURL +
         "/api/sites/search/" +
-        `?page=${page}&numberPerPage=${numberPerPage}&title=${title}&country=${country}&region=${region}&type=${type}&orderBy=${orderBy}`
+        `?page=${page}&numberPerPage=${numberPerPage}&title=${title}&username=${username}&country=${country}&region=${region}&type=${type}&orderBy=${orderBy}`
     );
   }
 
   get_sites_count(query) {
     // 取得公開景點的資料筆數
-    let { title, country, region, type } = query;
+    let { title, country, region, type, username } = query;
     return axios.get(
       apiURL +
         "/api/sites/count/" +
-        `?title=${title}&country=${country}&region=${region}&type=${type}`
+        `?title=${title}&username=${username}&country=${country}&region=${region}&type=${type}`
     );
   }
 

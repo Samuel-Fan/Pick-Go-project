@@ -70,6 +70,7 @@ const SiteDetailComponent = () => {
     siteService
       .get_site_detail(site_id)
       .then((data) => {
+        console.log(data.data);
         setSite(data.data);
       })
       .catch((e) => {

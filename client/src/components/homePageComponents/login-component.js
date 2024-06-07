@@ -47,7 +47,7 @@ const LoginComponent = () => {
               alt="登入小圖案"
             />
           </div>
-          <div className="col-xl-5 offset-xl-1">
+          <div className="col-xl-5 offset-xl-1 my-5">
             <form onSubmit={handleSubmit}>
               {/* <!-- Email input --> */}
               <div data-mdb-input-init className="form-outline mb-4">

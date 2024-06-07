@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-const Sidebar = ({ currentUser }) => {
+const Sidebar = () => {
   const navigate = useNavigate();
   const handleLogout = async () => {
     window.localStorage.removeItem("auth");
@@ -24,10 +24,7 @@ const Sidebar = ({ currentUser }) => {
       >
         <li className="nav-item">
           <div className="nav-link align-middle px-0 text-white">
-            <span className="ms-1 d-none d-sm-inline ">
-              {currentUser ? currentUser.username + " 的" : "我的"}
-              頁面
-            </span>
+            <span className="ms-1 d-none d-sm-inline ">我的頁面</span>
           </div>
         </li>
         <li>
