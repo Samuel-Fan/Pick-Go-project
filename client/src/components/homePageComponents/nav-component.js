@@ -20,7 +20,7 @@ const NavComponent = ({ auth }) => {
     >
       <div className="container-fluid">
         <Link
-          className="navbar-brand"
+          className="navbar-brand custom-nav-hover"
           to="/"
           style={{ color: "black", fontWeight: "700" }}
         >
@@ -39,53 +39,33 @@ const NavComponent = ({ auth }) => {
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav mb-2 mb-lg-0">
-            <li className="nav-item">
+            <li className="nav-item custom-nav-hover">
               <Link
                 className="nav-link"
                 aria-current="page"
-                to="/"
+                to="/tours"
                 style={{ color: "black", fontWeight: "700" }}
               >
-                行程瀏覽
+                旅程規劃瀏覽
               </Link>
             </li>
-            <li className="nav-item">
+            <li className="nav-item custom-nav-hover">
               <Link
                 className="nav-link "
                 to="/sites"
                 style={{ color: "black", fontWeight: "700" }}
               >
-                景點瀏覽
+                單一景點瀏覽
               </Link>
             </li>
           </ul>
-          <form className="d-flex" role="search">
-            <input
-              id="search"
-              className="form-control me-2"
-              type="search"
-              placeholder="Search"
-              aria-label="Search"
-            />
-            <button
-              className="btn btn-outline-success"
-              type="submit"
-              style={{
-                color: "black",
-                fontWeight: "700",
-                borderColor: "black",
-              }}
-            >
-              Search
-            </button>
-          </form>
           <ul className="navbar-nav mb-2 mb-lg-0 ms-auto me-5 ">
             <li
               className="nav-item dropdown"
               style={{ color: "black", fontWeight: "700" }}
             >
               <Link
-                className="nav-link dropdown-toggle"
+                className="nav-link dropdown-toggle custom-nav-hover"
                 to="/"
                 role="button"
                 data-bs-toggle="dropdown"
@@ -138,7 +118,7 @@ const NavComponent = ({ auth }) => {
             <li className="nav-item me-2">
               {!auth && (
                 <Link
-                  className="nav-link"
+                  className="nav-link custom-nav-hover"
                   to="/signup"
                   style={{ color: "black", fontWeight: "700" }}
                 >

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useEffect, useState } from "react";
 import siteService from "../../../service/site";
 import tourService from "../../../service/tour";
@@ -16,18 +16,25 @@ const AddSiteToATourComponent = () => {
   const [type, setType] = useState("mine");
   const [message, setMessage] = useState("");
 
-  const numberPerPage = 20; //每頁顯示幾個
+  const numberPerPage = 8; //每頁顯示幾個
 
-  // 選擇頁數
-  const handlePage = (e) => {
-    if (e.target.value === "previous") {
-      setPage(page - 1);
-    } else if (e.target.value === "next") {
-      setPage(page + 1);
-    } else {
-      setPage(Number(e.target.value));
+  // 切換我的景點、我的收藏
+
+  const fetchCount = useCallback(() => {
+    if (type === "mine") {
+      return siteService.get_mySite_count();
+    } else if (type === "collections") {
+      return siteService.get_myCollection_count();
     }
-  };
+  }, [type]);
+
+  const fetchSites = useCallback(() => {
+    if (type === "mine") {
+      return siteService.get_mySite(page, numberPerPage);
+    } else if (type === "collections") {
+      return siteService.get_myCollection(page, numberPerPage);
+    }
+  }, [type, page, numberPerPage]);
 
   // 加入景點
   const handleAddSites = async (e) => {
@@ -62,23 +69,6 @@ const AddSiteToATourComponent = () => {
     }
   };
 
-  // 切換我的景點、我的收藏
-  const fetchCount = () => {
-    if (type === "mine") {
-      return siteService.get_mySite_count();
-    } else if (type === "collections") {
-      return siteService.get_myCollection_count();
-    }
-  };
-
-  const fetchSites = () => {
-    if (type === "mine") {
-      return siteService.get_mySite(page, numberPerPage);
-    } else if (type === "collections") {
-      return siteService.get_myCollection(page, numberPerPage);
-    }
-  };
-
   // 剛進網站時，讀取site總數以設定分頁格式
   useEffect(() => {
     fetchCount()
@@ -94,7 +84,7 @@ const AddSiteToATourComponent = () => {
           navigate(0);
         }
       });
-  }, [type, numberPerPage, navigate]);
+  }, [fetchCount, navigate]);
 
   // 每次切換頁面讀取一次
   useEffect(() => {
@@ -112,45 +102,42 @@ const AddSiteToATourComponent = () => {
           navigate(0);
         }
       });
-  }, [type, page, numberPerPage, navigate]);
+  }, [fetchSites, navigate]);
 
   return (
     <div className="mx-auto" style={{ width: "50%" }}>
       <h1 className="text-center mb-4">
         {title} : 第{day}天
       </h1>
-      {/* 選擇我建立的景點or我收藏的景點 */}
-      <div className="me-5 mb-3">
-        <button
-          className={`btn btn-outline-primary me-3 ${
-            type === "mine" && "active"
-          }`}
-          onClick={() => {
-            setType("mine");
-          }}
-        >
-          我建立的景點
-        </button>
-        <button
-          className={`btn btn-outline-primary ${
-            type === "collection" && "active"
-          }`}
-          onClick={() => {
-            setType("collections");
-          }}
-        >
-          我收藏的景點
-        </button>
+      <div>
+        {/* 選擇我建立的景點or我收藏的景點 */}
+        <div className="me-5 mb-3">
+          <button
+            className={`btn btn-outline-primary me-3 ${
+              type === "mine" && "active"
+            }`}
+            onClick={() => {
+              setType("mine");
+            }}
+          >
+            我建立的景點
+          </button>
+          <button
+            className={`btn btn-outline-primary ${
+              type === "collection" && "active"
+            }`}
+            onClick={() => {
+              setType("collections");
+            }}
+          >
+            我收藏的景點
+          </button>
+        </div>
+        <div className="text-center">
+          <PageChooseComponent page={page} setPage={setPage} count={count} />
+        </div>
       </div>
-
       {/* 頁數選擇 */}
-      <div className="text-center">
-        <PageChooseComponent
-          page={page}
-          handlePage={handlePage}
-          count={count}
-        />
-      </div>
 
       {/* 錯誤訊息 */}
       <div className="small mb-2 pb-lg-2">

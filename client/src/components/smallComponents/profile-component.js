@@ -14,7 +14,7 @@ const ProfileComponent = ({ user_id, setUser_id }) => {
       .catch((e) => {
         alert("伺服器發生錯誤");
       });
-  }, []);
+  }, [user_id]);
 
   return (
     <div className="container">
@@ -23,12 +23,13 @@ const ProfileComponent = ({ user_id, setUser_id }) => {
         style={{
           position: "absolute",
           zIndex: "10",
-          top: "13%",
-          left: "28%",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
           backgroundColor: "white",
           padding: "1rem",
-          width: "40rem",
-          height: "30rem",
+          width: "50rem",
+          height: "40rem",
           overflowY: "scroll",
         }}
       >

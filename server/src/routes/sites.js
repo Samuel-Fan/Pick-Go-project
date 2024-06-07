@@ -49,12 +49,20 @@ router.get("/test", (req, res) => {
 // 以關鍵字搜尋景點
 router.get("/search", async (req, res) => {
   try {
-    let { title, country, region, type, page, numberPerPage, orderBy } =
-      req.query;
+    let {
+      title,
+      country,
+      region,
+      type,
+      username,
+      page,
+      numberPerPage,
+      orderBy,
+    } = req.query;
 
     // 先搜尋快取中有沒有
     let queryHash = hash.sha1(req.query);
-    let dataFromRedis = await redisClient.get(`search_hash:${queryHash}`);
+    let dataFromRedis = await redisClient.get(`sites_search_hash:${queryHash}`);
     if (dataFromRedis) {
       console.log("利用快取給予搜尋資料");
       return res.send(dataFromRedis);
@@ -66,6 +74,7 @@ router.get("/search", async (req, res) => {
       country && { country },
       region && { region },
       type && { type },
+      username && { "author.username": { $regex: username, $options: "i" } },
       title && { title: { $regex: title, $options: "i" } },
       { public: true }
     );
@@ -78,6 +87,16 @@ router.get("/search", async (req, res) => {
     }
 
     foundSite = await Site.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          pipeline: [{ $project: { username: 1 } }],
+          as: "author",
+        },
+      },
+      { $unwind: "$author" },
       { $match: searchObj },
       {
         $lookup: {
@@ -97,6 +116,8 @@ router.get("/search", async (req, res) => {
           content: 1,
           photo: 1,
           updateDate: 1,
+          "author._id": 1,
+          "author.username": 1,
         },
       },
       {
@@ -109,7 +130,7 @@ router.get("/search", async (req, res) => {
 
     // 存入快取，過期時間先設定短一點(方便展示project用)
     await redisClient.set(
-      `search_hash:${queryHash}`,
+      `sites_search_hash:${queryHash}`,
       JSON.stringify(foundSite),
       {
         EX: 1 * 60 * 1,
@@ -127,35 +148,53 @@ router.get("/search", async (req, res) => {
 router.get("/count", async (req, res) => {
   // 先搜尋快取中有沒有
   let queryHash = hash.sha1(req.query);
-  let dataFromRedis = await redisClient.get(`search_count_hash:${queryHash}`);
+  let dataFromRedis = await redisClient.get(
+    `sites_search_count_hash:${queryHash}`
+  );
   if (dataFromRedis) {
     console.log("利用快取搜尋頁數");
     return res.send(dataFromRedis);
   }
 
-  let { title, country, region, type } = req.query;
+  let { title, country, region, type, username } = req.query;
   let searchObj = Object.assign(
     {},
     country && { country },
     region && { region },
     type && { type },
+    username && { "author.username": { $regex: username, $options: "i" } },
     title && { title: { $regex: title, $options: "i" } },
     { public: true }
   );
 
   try {
-    let count = await Site.find(searchObj).count().exec();
+    let count = await Site.aggregate([
+      {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          pipeline: [{ $project: { username: 1 } }],
+          as: "author",
+        },
+      },
+      { $unwind: "$author" },
+      { $match: searchObj },
+      { $count: "count" },
+    ]);
+
+    count = count[0] || { count: 0 };
 
     // 存入快取，過期時間與search一致
     await redisClient.set(
-      `search_count_hash:${queryHash}`,
-      JSON.stringify({ count }),
+      `sites_search_count_hash:${queryHash}`,
+      JSON.stringify(count),
       {
         EX: 1 * 60 * 1,
       }
     );
 
-    return res.send({ count });
+    return res.send(count);
   } catch (e) {
     console.log(e);
     return res.status(500).send("伺服器發生問題");

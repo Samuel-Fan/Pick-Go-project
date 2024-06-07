@@ -9,9 +9,12 @@ import DeleteSiteOrTourComponent from "../../smallComponents/delete_siteOrTour-c
 const AddNewParticipantComponent = () => {
   const { tour_id } = useParams();
 
-  const [participant, setParticipant] = useState("");
-  const [applicant, setApplicant] = useState("");
+  const [participant, setParticipant] = useState(""); // 參加者
+  const [applicant, setApplicant] = useState(""); // 申請者
   const [user_id, setUser_id] = useState(""); // 設定想查看的profile
+
+  const [message, setMessage] = useState(""); //錯誤訊息
+
   const [deleteId, setDeleteId] = useState(); // 設定即將要刪除的目標
   const deleteFunction = tourService.delete_tourist;
 
@@ -22,6 +25,7 @@ const AddNewParticipantComponent = () => {
     document.querySelector("#gray_cover").style.display = "block";
   };
 
+  // 申請者資訊
   useEffect(() => {
     tourService
       .get_myTour_tourist(tour_id)
@@ -31,25 +35,36 @@ const AddNewParticipantComponent = () => {
         setApplicant(data.data.filter((user) => user.type === "申請者"));
       })
       .catch((e) => console.log(e));
-  }, []);
+  }, [tour_id]);
 
   return (
-    <div className="d-flex flex-wrap justify-content-around">
-      <div className="me-5" style={{ flex: "1 1 400px" }}>
-        <p className="h1">已參與的人員</p>
-        <TouristComponent
-          tourists={participant}
-          handleDelete={handleDelete}
-          setUser_id={setUser_id}
-        />
+    <div>
+      <div className="d-flex flex-wrap justify-content-around">
+        <div className="me-5" style={{ flex: "1 1 400px" }}>
+          <p className="h1">已參與的人員</p>
+          <TouristComponent
+            tourists={participant}
+            handleDelete={handleDelete}
+            setUser_id={setUser_id}
+          />
+        </div>
+        <div className="me-5" style={{ flex: "1 1 400px" }}>
+          <p className="h1">申請中的人員</p>
+          <TouristComponent
+            tourists={applicant}
+            handleDelete={handleDelete}
+            setUser_id={setUser_id}
+            tourPublic={false}
+          />
+        </div>
       </div>
-      <div className="me-5" style={{ flex: "1 1 400px" }}>
-        <p className="h1">申請中的人員</p>
-        <TouristComponent
-          tourists={applicant}
-          handleDelete={handleDelete}
-          setUser_id={setUser_id}
-        />
+      {/* // 錯誤訊息 */}
+      <div className="small mb-2 pb-lg-2">
+        {message && (
+          <div className="alert alert-danger" role="alert">
+            {message}
+          </div>
+        )}
       </div>
 
       {/* // 查看profile */}
@@ -62,6 +77,7 @@ const AddNewParticipantComponent = () => {
         deleteFunction={deleteFunction}
         deleteId={deleteId}
         setDeleteId={setDeleteId}
+        setMessage={setMessage}
       />
     </div>
   );

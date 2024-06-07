@@ -1,10 +1,10 @@
 import React from "react";
 import { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
-import tourService from "../../../service/tour";
-import TourCardComponent from "../../smallComponents/tourCard-component";
+import { useParams, useNavigate } from "react-router-dom";
+import tourService from "../../service/tour";
+import TourCardComponent from "../smallComponents/tourCard-component";
 
-const MyTourDetailComponent = () => {
+const TourDetailComponent = () => {
   const navigate = useNavigate();
 
   const { tour_id } = useParams();
@@ -12,13 +12,13 @@ const MyTourDetailComponent = () => {
   const [tour, setTour] = useState(""); // 景點詳細資料
   const [sites, setSites] = useState(""); // 每天行程
   const [days, setDays] = useState([""]); // 設定每天格式用
-  const [type, setType] = useState(""); // 主辦人 or 參加者?
+  const [type, setType] = useState(""); // 確認自己的參加狀態
   const [tourist_id, setTourist_id] = useState(""); // 使用者於此行程的參加id
 
-  // 得到景點資訊
+  // 旅程資訊
   useEffect(() => {
     tourService
-      .get_myTour_detail(tour_id)
+      .get_tour_detail(tour_id)
       .then((data) => {
         console.log(data.data);
         setTour(data.data.foundTour);
@@ -30,9 +30,6 @@ const MyTourDetailComponent = () => {
       .catch((e) => {
         if (e.response && e.response.status === 403) {
           navigate("/noAuth");
-        } else if (e.response && e.response.status === 401) {
-          alert("請先登入");
-          navigate("/login");
         } else if (e.response && e.response.status === 404) {
           navigate("/404");
         }
@@ -54,17 +51,8 @@ const MyTourDetailComponent = () => {
         }
       });
   }, [navigate, tour_id]);
-
   return (
     <div>
-      <div className="mx-5 mb-3">
-        <Link
-          to="/users/tours/overview"
-          className="btn btn-outline-primary me-3"
-        >
-          回到我的旅程
-        </Link>
-      </div>
       <hr
         className="mx-4 "
         style={{ border: "2px solid rgb(90, 178, 255)", opacity: "1" }}
@@ -83,4 +71,4 @@ const MyTourDetailComponent = () => {
   );
 };
 
-export default MyTourDetailComponent;
+export default TourDetailComponent;

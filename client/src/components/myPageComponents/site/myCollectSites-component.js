@@ -13,17 +13,6 @@ const MyCollectSitesComponent = () => {
   const [page, setPage] = useState(1);
   const [numberPerPage, setNumberPerPage] = useState(4); //每頁顯示幾個
 
-  // 選擇頁數
-  const handlePage = (e) => {
-    if (e.target.value === "previous") {
-      setPage(page - 1);
-    } else if (e.target.value === "next") {
-      setPage(page + 1);
-    } else {
-      setPage(Number(e.target.value));
-    }
-  };
-
   // 每頁幾張?
   const handlePerPage = (e) => {
     if (e.target.value > 0 && e.target.value <= 8) {
@@ -89,11 +78,7 @@ const MyCollectSitesComponent = () => {
         </div>
 
         {/* 頁數選擇 */}
-        <PageChooseComponent
-          page={page}
-          handlePage={handlePage}
-          count={count}
-        />
+        <PageChooseComponent page={page} setPage={setPage} count={count} />
 
         {/* 每頁顯示幾個? */}
         <div className="mt-1 me-5">

@@ -1,7 +1,17 @@
 import React from "react";
 
-const PageChooseComponent = ({ page, handlePage, count }) => {
-  
+const PageChooseComponent = ({ page, setPage, count }) => {
+  // 選擇頁數
+  const handlePage = (e) => {
+    if (e.target.value === "previous") {
+      setPage(page - 1);
+    } else if (e.target.value === "next") {
+      setPage(page + 1);
+    } else {
+      setPage(Number(e.target.value));
+    }
+  };
+
   return (
     <nav aria-label="Page navigation example" className="me-5">
       <ul className="pagination">
@@ -28,7 +38,7 @@ const PageChooseComponent = ({ page, handlePage, count }) => {
             </button>
           </li>
         )}
-        <li className="page-item active">
+        <li className="page-item active" style={{ zIndex: 0 }}>
           <button className="page-link">{page} </button>
         </li>
         {count >= page + 1 && (

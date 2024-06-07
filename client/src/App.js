@@ -2,11 +2,13 @@ import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import Layout from "./components/homePageComponents/Layout";
-import HomeComponent from "./components/homePageComponents/home-component";
-import SearchSitesComponent from "./components/homePageComponents/search-sites-component";
+import Home from "./components/homePageComponents/home-component";
+import SearchSites from "./components/homePageComponents/search-sites-component";
 import SiteDetail from "./components/homePageComponents/siteDetail-component";
-import LoginComponent from "./components/homePageComponents/login-component";
-import SignupComponent from "./components/homePageComponents/signup-component";
+import SearchTours from "./components/homePageComponents/search-tours-component";
+import TourDetail from "./components/homePageComponents/tourDetail-component";
+import Login from "./components/homePageComponents/login-component";
+import Signup from "./components/homePageComponents/signup-component";
 import GoogleLogin from "./components/homePageComponents/googleLogin";
 import MyPageLayout from "./components/myPageComponents/MyPageLayout";
 import MyProfile from "./components/myPageComponents/profile/myProfile-component";
@@ -18,6 +20,7 @@ import MySiteDetail from "./components/myPageComponents/site/mySiteDetail-compon
 import AddNewSite from "./components/myPageComponents/site/addNewSite-component";
 import EditSite from "./components/myPageComponents/site/editSite-component";
 import MyTours from "./components/myPageComponents/tour/myTours-component";
+import MyApplied from "./components/myPageComponents/tour/myApplied-component";
 import AddNewTour from "./components/myPageComponents/tour/addNewTour-component";
 import AddSiteToATour from "./components/myPageComponents/tour/addSiteToATour-component";
 import AddNewParticipant from "./components/myPageComponents/tour/addNewParticipant-component";
@@ -34,14 +37,13 @@ function App() {
       <Routes>
         {/* 首頁 (不須登入即可瀏覽的頁面) */}
         <Route path="/" element={<Layout auth={auth} />}>
-          <Route index element={<HomeComponent auth={auth} />}></Route>
-          <Route path="/sites" element={<SearchSitesComponent />}></Route>
+          <Route index element={<Home auth={auth} />}></Route>
+          <Route path="/tours" element={<SearchTours />}></Route>
+          <Route path="tour/:tour_id" element={<TourDetail />}></Route>
+          <Route path="/sites" element={<SearchSites />}></Route>
           <Route path="/site/:site_id" element={<SiteDetail />}></Route>
-          <Route
-            path="login"
-            element={<LoginComponent setAuth={setAuth} />}
-          ></Route>
-          <Route path="signup" element={<SignupComponent />}></Route>
+          <Route path="login" element={<Login setAuth={setAuth} />}></Route>
+          <Route path="signup" element={<Signup />}></Route>
         </Route>
 
         {/* 處理google登入 */}
@@ -54,10 +56,7 @@ function App() {
             !window.localStorage.getItem("auth") ? (
               <Navigate to="/login" />
             ) : (
-              <MyPageLayout
-                currentUser={currentUser}
-                setCurrentUser={setCurrentUser}
-              />
+              <MyPageLayout />
             )
           }
         >
@@ -105,6 +104,10 @@ function App() {
           <Route path="/users/tours/overview" element={<MyTours />}></Route>
           <Route path="/users/tours/new" element={<AddNewTour />}></Route>
           <Route
+            path="/users/tours/overview/apply"
+            element={<MyApplied />}
+          ></Route>
+          <Route
             path="/users/tours/myTour/:tour_id"
             element={<MyTourDetail />}
           ></Route>
@@ -118,11 +121,13 @@ function App() {
           ></Route>
         </Route>
 
-        {/* 處理 403 error 的頁面 */}
-        <Route path="/noAuth" element={<NoAuth />}></Route>
+        <Route path="/" element={<Layout auth={auth} />}>
+          {/* 處理 403 error 的頁面 */}
+          <Route path="/noAuth" element={<NoAuth />}></Route>
 
-        {/* 處理 404 error 的頁面 */}
-        <Route path="*" element={<NotFound />}></Route>
+          {/* 處理 404 error 的頁面 */}
+          <Route path="*" element={<NotFound />}></Route>
+        </Route>
       </Routes>
     </BrowserRouter>
   );

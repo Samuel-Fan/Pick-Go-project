@@ -52,11 +52,23 @@ const AddNewTourComponent = () => {
         </div>
         <div className="mb-3">
           <label className="form-label">人數上限</label>
-          <input type="number" className="form-control" name="limit" />
+          <input
+            type="number"
+            className="form-control"
+            name="limit"
+            min="1"
+            max="10"
+          />
         </div>
         <div className="mb-3">
           <label className="form-label">總天數</label>
-          <input type="number" className="form-control" name="totalDays" />
+          <input
+            type="number"
+            className="form-control"
+            name="totalDays"
+            min="1"
+            max="7"
+          />
         </div>
         <div className="mb-3">
           <label className="form-label me-2">狀態</label>
