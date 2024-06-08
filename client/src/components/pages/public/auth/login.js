@@ -1,3 +1,4 @@
+import loginImage from "../../../../images/login.jpg";
 import React from "react";
 import { useState } from "react";
 import authService from "../../../../service/auth";
@@ -42,12 +43,13 @@ const Login = () => {
     <section>
       <div className="container py-2 ">
         <div className="row d-flex align-items-center justify-content-center h-100 ">
-          <div className="col-xl-6">
-            <img
-              src="https://img.freepik.com/free-vector/travel-concept-with-landmarks_1057-4873.jpg?t=st=1715064829~exp=1715068429~hmac=87777009ecf1996440171e92d5f2634a1c1289bae34dc314c2e7c55a8a9302ce&w=826"
-              className="img-fluid"
-              alt="登入小圖案"
-            />
+          <div className="col-xl-6 d-flex flex-column align-items-center">
+            <img src={loginImage} className="img-fluid" alt="登入小圖案" />
+            <p>
+              <a href="https://www.freepik.com/free-vector/travel-concept-with-landmarks_1217791.htm#fromView=search&page=1&position=39&uuid=cd65337a-346f-4c2e-aaa0-e57c7fd0d3d9">
+                Image by ibrandify on Freepik
+              </a>
+            </p>
           </div>
           <div className="col-xl-5 offset-xl-1 my-5">
             <form onSubmit={handleSubmit}>
