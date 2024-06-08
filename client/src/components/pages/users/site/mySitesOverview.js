@@ -25,6 +25,7 @@ const MySitesOverview = () => {
   const handlePerPage = (e) => {
     if (e.target.value > 0 && e.target.value <= 8) {
       setNumberPerPage(e.target.value);
+      setPage(1);
     }
   };
 

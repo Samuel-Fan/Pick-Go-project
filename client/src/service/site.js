@@ -68,8 +68,8 @@ class SiteService {
   }
 
   // 確認有無點過讚或收藏
-  get_site_like_and_collect(_id) {
-    return axios.get(apiURL + "/api/sites/check/like-collect/" + _id);
+  get_site_like_and_collection(_id) {
+    return axios.get(apiURL + "/api/sites/like_collection/" + _id);
   }
 
   // 查詢景點詳細資訊(公開版)
@@ -98,14 +98,14 @@ class SiteService {
     });
   }
 
-  // 按讚 or 收回讚
-  post_click_like(_id) {
-    return axios.post(apiURL + "/api/sites/click/like/" + _id);
+  // 按讚
+  put_click_like(_id) {
+    return axios.put(apiURL + "/api/sites/like/" + _id);
   }
 
-  // 收藏 or 取消收藏
-  post_click_collect(_id) {
-    return axios.post(apiURL + "/api/sites/click/collect/" + _id);
+  // 收藏
+  put_click_collection(_id) {
+    return axios.put(apiURL + "/api/sites/collection/" + _id);
   }
 
   // 編輯景點
@@ -120,6 +120,16 @@ class SiteService {
   // 刪除景點
   delete_site(_id) {
     return axios.delete(apiURL + "/api/sites/" + _id);
+  }
+
+  // 收回讚
+  delete_click_like(_id) {
+    return axios.delete(apiURL + "/api/sites/like/" + _id);
+  }
+
+  // 取消收藏
+  delete_click_collection(_id) {
+    return axios.delete(apiURL + "/api/sites/collection/" + _id);
   }
 }
 let siteService = new SiteService();

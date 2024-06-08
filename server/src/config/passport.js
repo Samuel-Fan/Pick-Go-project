@@ -2,7 +2,7 @@ const passport = require("passport");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const reditClient = require("./redis");
+const redisClient = require("./redis");
 const User = require("../models/index").user;
 
 passport.serializeUser(function (user, done) {
@@ -26,7 +26,7 @@ passport.use(
     try {
       let foundUser;
       // 先找尋快取中有沒有
-      foundUser = await reditClient.get(`User:${jwt_payload._id}`);
+      foundUser = await redisClient.get(`User:${jwt_payload._id}`);
       if (foundUser) {
         console.log("使用快取找到使用者");
         return done(null, JSON.parse(foundUser));
@@ -36,7 +36,7 @@ passport.use(
       foundUser = await User.findOne({ _id: jwt_payload._id }).exec();
       console.log("使用資料庫找到使用者");
       if (foundUser) {
-        await reditClient.set(
+        await redisClient.set(
           `User:${jwt_payload._id}`,
           JSON.stringify(foundUser)
         );

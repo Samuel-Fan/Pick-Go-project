@@ -69,7 +69,15 @@ const SiteCard = ({ sites, sitePublic, handleDelete }) => {
                     ? site.content.slice(0, 30) + "..."
                     : site.content}
                 </p>
-                <Link to={"/site/" + site._id}>顯示更多</Link>
+                <Link
+                  to={
+                    sitePublic
+                      ? "/site/" + site._id
+                      : "/users/mysite/" + site._id
+                  }
+                >
+                  顯示更多
+                </Link>
                 <hr className="my-2" />
                 <div
                   className="d-flex justify-content-between flex-wrap"

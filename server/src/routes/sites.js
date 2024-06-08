@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const Site = require("../models/index").site;
 const Like = require("../models/index").like;
-const Collect = require("../models/index").collect;
+const Collection = require("../models/index").collection;
 const ObjectId = require("mongoose").Types.ObjectId;
 const valid = require("../controllers/validation");
 const multer = require("multer");
@@ -240,10 +240,10 @@ router.get(
         },
         {
           $lookup: {
-            from: "collects",
+            from: "collections",
             localField: "_id",
             foreignField: "site_id",
-            as: "collect",
+            as: "collection",
           },
         },
         {
@@ -258,7 +258,7 @@ router.get(
         {
           $project: {
             num_of_like: { $size: "$like" },
-            num_of_collect: { $size: "$collect" },
+            num_of_collection: { $size: "$collection" },
             title: 1,
             country: 1,
             region: 1,
@@ -335,10 +335,10 @@ router.get("/detail/:_id", async (req, res) => {
       },
       {
         $lookup: {
-          from: "collects",
+          from: "collections",
           localField: "_id",
           foreignField: "site_id",
-          as: "collect",
+          as: "collection",
         },
       },
       {
@@ -353,7 +353,7 @@ router.get("/detail/:_id", async (req, res) => {
       {
         $project: {
           num_of_like: { $size: "$like" },
-          num_of_collect: { $size: "$collect" },
+          num_of_collection: { $size: "$collection" },
           title: 1,
           country: 1,
           region: 1,
@@ -460,7 +460,7 @@ router.get(
             country: 1,
             region: 1,
             content: 1,
-            status: 1,
+            public: 1,
             photo: 1,
             updateDate: 1,
             "author._id": 1,
@@ -529,7 +529,7 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
-      let count = await Collect.find({
+      let count = await Collection.find({
         user_id: new ObjectId(req.user._id),
       })
         .count()
@@ -550,7 +550,7 @@ router.get(
     let user_id = req.user._id;
     let { page, numberPerPage } = req.query;
     try {
-      let foundSite = await Collect.aggregate([
+      let foundSite = await Collection.aggregate([
         { $match: { user_id: new ObjectId(user_id) } },
         {
           $lookup: {
@@ -611,7 +611,7 @@ router.get(
 
 // 確認有無點過讚或收藏
 router.get(
-  "/check/like-collect/:_id",
+  "/like_collection/:_id",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     let site_id = req.params._id;
@@ -619,103 +619,17 @@ router.get(
 
     try {
       let like = await Like.findOne({ user_id, site_id }).lean().exec();
-      let collect = await Collect.findOne({ user_id, site_id }).lean().exec();
+      let collection = await Collection.findOne({ user_id, site_id })
+        .lean()
+        .exec();
       let result = {
         like: like ? true : false,
-        collect: collect ? true : false,
+        collection: collection ? true : false,
       };
       return res.send(result);
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
-    }
-  }
-);
-
-// 用戶對景點按讚或收回讚
-router.post(
-  "/click/like/:_id",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    let site_id = req.params._id; // 景點id
-    let user_id = req.user._id; // 使用者id
-    try {
-      // 先確認有無點過讚，如有點過，則收回讚
-      let checkLike = await Like.findOne({
-        user_id,
-        site_id,
-      }).exec();
-      if (checkLike) {
-        await Like.deleteOne({ user_id, site_id }).exec();
-        return res.send("成功收回讚");
-      }
-
-      let dataFromDatabase;
-      // 先從快取中找景點
-
-      let dataFromRedis = await redisClient.get(`Site:${site_id}`);
-      if (!dataFromRedis) {
-        dataFromDatabase = await Site.findOne({ _id: site_id }).exec();
-      }
-
-      let foundSite = dataFromRedis || dataFromDatabase;
-      // 確認景點有無存在
-      // 若景點不存在，返回錯誤
-      if (!foundSite) {
-        return res.status(400).send("此景點不存在");
-      }
-
-      // 存入資料庫
-      let like = new Like({ user_id, site_id });
-      await like.save();
-      return res.send("成功按讚");
-    } catch (e) {
-      console.log(e);
-      res.status(500).send("伺服器發生問題");
-    }
-  }
-);
-
-// 用戶對景點收藏或取消收藏
-router.post(
-  "/click/collect/:_id",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    let site_id = req.params._id; // 景點id
-    let user_id = req.user._id; // 使用者id
-    try {
-      // 先確認有無點過收藏，如有點過，則取消收藏
-      let checkCollect = await Collect.findOne({
-        user_id,
-        site_id,
-      }).exec();
-      if (checkCollect) {
-        await Collect.deleteOne({ user_id, site_id }).exec();
-        return res.send("成功取消收藏");
-      }
-
-      let dataFromDatabase;
-      // 先從快取中找景點
-
-      let dataFromRedis = await redisClient.get(`Site:${site_id}`);
-      if (!dataFromRedis) {
-        dataFromDatabase = await Site.findOne({ _id: site_id }).exec();
-      }
-
-      let foundSite = dataFromRedis || dataFromDatabase;
-      // 確認景點有無存在
-      // 若景點不存在，返回錯誤
-      if (!foundSite) {
-        return res.status(400).send("此景點不存在");
-      }
-
-      // 存入資料庫
-      let collect = new Collect({ user_id, site_id });
-      await collect.save();
-      return res.send("成功收藏");
-    } catch (e) {
-      console.log(e);
-      res.status(500).send("伺服器發生問題");
     }
   }
 );
@@ -786,8 +700,88 @@ router.post(
         // 將快取刪掉
         await redisClient.del(`Site_of_author:${req.user._id}`);
 
-        return res.send(savedResult);
+        return res.status(201).send(savedResult);
       });
+    } catch (e) {
+      console.log(e);
+      res.status(500).send("伺服器發生問題");
+    }
+  }
+);
+
+// 用戶對景點按讚
+router.put(
+  "/like/:_id",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let site_id = req.params._id; // 景點id
+    let user_id = req.user._id; // 使用者id
+    try {
+      // 確認景點是否存在
+      // 先從快取中找景點
+      let dataFromRedis = await redisClient.get(`Site:${site_id}`);
+      if (dataFromRedis === "404") {
+        return res.status(400).send("此景點不存在");
+      }
+
+      // 若快取沒有則找資料庫
+      let dataFromDatabase;
+      if (!dataFromRedis) {
+        dataFromDatabase = await Site.findOne({ _id: site_id }).lean().exec();
+      }
+
+      // 若景點不存在，返回錯誤
+      if (!dataFromRedis && !dataFromDatabase) {
+        return res.status(400).send("此景點不存在");
+      }
+
+      // 存入資料庫
+      await Like.findOneAndUpdate(
+        { user_id, site_id },
+        { user_id, site_id },
+        { upsert: true }
+      );
+      return res.send("成功按讚");
+    } catch (e) {
+      console.log(e);
+      res.status(500).send("伺服器發生問題");
+    }
+  }
+);
+
+// 用戶收藏景點
+router.put(
+  "/collection/:_id",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let site_id = req.params._id; // 景點id
+    let user_id = req.user._id; // 使用者id
+    try {
+      // 確認景點是否存在
+      // 先從快取中找景點
+      let dataFromRedis = await redisClient.get(`Site:${site_id}`);
+      if (dataFromRedis === "404") {
+        return res.status(400).send("此景點不存在");
+      }
+
+      // 若快取沒有則找資料庫
+      let dataFromDatabase;
+      if (!dataFromRedis) {
+        dataFromDatabase = await Site.findOne({ _id: site_id }).lean().exec();
+      }
+
+      // 若景點不存在，返回錯誤
+      if (!dataFromRedis && !dataFromDatabase) {
+        return res.status(400).send("此景點不存在");
+      }
+
+      // 存入資料庫
+      await Collection.findOneAndUpdate(
+        { user_id, site_id },
+        { user_id, site_id },
+        { upsert: true }
+      );
+      return res.send("成功收藏");
     } catch (e) {
       console.log(e);
       res.status(500).send("伺服器發生問題");
@@ -826,27 +820,13 @@ router.patch(
         }
 
         // 如景點規格不符，則返回客製化錯誤訊息
-        let {
-          title,
-          country,
-          region,
-          type,
-          content,
-          removeOriginPhoto,
-          public,
-        } = req.body;
-
-        let { error } = valid.sitesValidation({
-          title,
-          country,
-          region,
-          type,
-          content,
-        });
+        let { error } = valid.sitesValidation(req.body);
         if (error) {
           console.log("資料", error);
           return res.status(400).send(error.details[0].message);
         }
+
+        let { removeOriginPhoto, public } = req.body;
 
         // 新圖片上傳 imgur ，取得 url 及 deleteHash
         let url;
@@ -872,27 +852,18 @@ router.patch(
           photoName = req.files[0].originalname;
         }
 
+        let newPhoto =
+          req.files.length !== 0
+            ? { photo: { url, deletehash, photoName } }
+            : removeOriginPhoto === "true"
+            ? { photo: { url: "", deletehash: "", photoName: "" } }
+            : {};
+
         // 將景點資訊儲存至資料庫
-        let newData = {
-          title,
-          country,
-          region,
-          type,
-          content,
-          photo: {
-            url: removeOriginPhoto === "true" ? url : foundSite.photo.url,
-            deletehash:
-              removeOriginPhoto === "true"
-                ? deletehash
-                : foundSite.photo.deletehash,
-            photoName:
-              removeOriginPhoto === "true"
-                ? photoName
-                : foundSite.photo.photoName,
-          },
+        let newData = Object.assign({}, req.body, newPhoto, {
           public: public === "true" ? true : false,
           updateDate: Date.now(),
-        };
+        });
 
         await Promise.all([
           Site.findOneAndUpdate({ _id }, newData, {
@@ -937,7 +908,7 @@ router.delete(
       await Promise.all([
         Site.deleteOne({ _id }), // 從景點資料庫移除
         Like.deleteMany({ site_id: new ObjectId(_id) }), // 從讚資料庫中移除
-        Collect.deleteMany({ site_id: new ObjectId(_id) }), // 從收藏資料庫中移除
+        Collection.deleteMany({ site_id: new ObjectId(_id) }), // 從收藏資料庫中移除
         imgurClient.deleteImage(deletehash), // 刪imgur圖片
         redisClient.del(`Site:${_id}`), // 刪快取
       ]);
@@ -946,6 +917,40 @@ router.delete(
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
+    }
+  }
+);
+
+// 用戶對景點按讚或收回讚
+router.delete(
+  "/like/:_id",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let site_id = req.params._id; // 景點id
+    let user_id = req.user._id; // 使用者id
+    try {
+      await Like.deleteOne({ user_id, site_id }).exec();
+      return res.send("成功收回讚");
+    } catch (e) {
+      console.log(e);
+      res.status(500).send("伺服器發生問題");
+    }
+  }
+);
+
+// 用戶對景點收藏或取消收藏
+router.delete(
+  "/collection/:_id",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let site_id = req.params._id; // 景點id
+    let user_id = req.user._id; // 使用者id
+    try {
+      await Collection.deleteOne({ user_id, site_id }).exec();
+      return res.send("成功取消收藏");
+    } catch (e) {
+      console.log(e);
+      res.status(500).send("伺服器發生問題");
     }
   }
 );

@@ -68,9 +68,11 @@ const editBasicValidation = (data) => {
       "number.min": "年齡須介於0-120歲",
       "number.max": "年齡須介於0-120歲",
     }),
-    description: Joi.string().allow(null, "").max(50).messages({
+    description: Joi.string().allow(null, "").max(550).messages({
       "string.max": "'自我介紹'最長長度為 50 個字",
     }),
+    public: Joi.boolean(),
+    removeOriginPhoto: Joi.boolean(),
   });
 
   return Schema.validate(data);
@@ -118,12 +120,15 @@ const sitesValidation = (data) => {
       .valid("餐廳", "景點", "購物", "其他")
       .required()
       .messages({
-        "any.only": "類別必須為餐廳、景點、購物或其他",
+        "any.required": "'類型'為必須填寫的項目",
+        "any.only": "類型必須為餐廳、景點、購物或其他",
       }),
     content: Joi.string().max(300).required().allow(null, "").messages({
       "any.required": "'內容'為必須填寫的項目",
       "string.max": "'內容'最長長度為 300 個字",
     }),
+    public: Joi.boolean(),
+    removeOriginPhoto: Joi.boolean(),
   });
 
   return Schema.validate(data);

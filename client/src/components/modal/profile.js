@@ -6,6 +6,11 @@ import authService from "../../service/auth";
 const Profile = ({ user_id, setUser_id }) => {
   const [user, setUser] = useState("");
 
+  // 客製化日期
+  const timeConvert = (string) => {
+    return string.match(/\d+-\d+-\d+/);
+  };
+
   useEffect(() => {
     // 取得使用者詳細資料
     authService
@@ -14,7 +19,11 @@ const Profile = ({ user_id, setUser_id }) => {
         setUser(data.data);
       })
       .catch((e) => {
-        alert("伺服器發生錯誤");
+        if (e.response && e.response.status === 403) {
+          setUser("403");
+        } else {
+          alert(e.response ? e.response.data : "伺服器發生錯誤");
+        }
       });
   }, [user_id]);
 
@@ -37,42 +46,72 @@ const Profile = ({ user_id, setUser_id }) => {
       >
         <h2 className="me-4 my-2 text-center">個人資料頁面</h2>
         <hr />
-        <table className="table" style={{ marginBottom: "0" }}>
-          <thead>
-            <tr>
-              <th scope="col">Email</th>
-              <th scope="col"></th>
-              <th scope="col">{user && user.email}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">暱稱</th>
-              <td></td>
-              <td>{user && user.username}</td>
-            </tr>
-            <tr>
-              <th scope="row">性別</th>
-              <td></td>
-              <td>{user && user.gender}</td>
-            </tr>
-            <tr>
-              <th scope="row">年齡</th>
-              <td></td>
-              <td>{user && user.age}</td>
-            </tr>
-            <tr style={{ borderBottom: "white" }}>
-              <th scope="row">自我簡介</th>
-              <td></td>
-              <td></td>
-            </tr>
-          </tbody>
-        </table>
-        <div>
-          <div style={{ margin: "0.5rem", whiteSpace: "pre-line" }}>
-            {user && user.description}
-          </div>
-        </div>
+        {user ? (
+          user === "403" ? (
+            <p className="h2 text-center">該使用者不公開資料</p>
+          ) : (
+            <div>
+              <div className="d-flex flex-wrap justify-content-center border">
+                {user.photo.url && (
+                  <div className="me-4 border" style={{ flex: "0 1 250px" }}>
+                    <img
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      src={user.photo.url}
+                      alt={user.photo.photoName}
+                    />
+                  </div>
+                )}
+                <table
+                  className="table fw-bold align-middle"
+                  style={{
+                    flex: "1 1 300px",
+                    margin: "0",
+                  }}
+                >
+                  <tbody>
+                    <tr>
+                      <th>Email</th>
+                      <th></th>
+                      <th>{user.email}</th>
+                    </tr>
+                    <tr>
+                      <th>暱稱</th>
+                      <td></td>
+                      <td>{user.username}</td>
+                    </tr>
+                    <tr>
+                      <th>性別</th>
+                      <td></td>
+                      <td>{user.gender}</td>
+                    </tr>
+                    <tr>
+                      <th>年齡</th>
+                      <td></td>
+                      <td>{user.age}</td>
+                    </tr>
+                    <tr style={{ borderBottom: "white" }}>
+                      <th>帳號創建於</th>
+                      <td></td>
+                      <td>
+                        {user.createdDate && timeConvert(user.createdDate)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <div className="ms-2 my-4 fw-bold">自我簡介：</div>
+                <div style={{ margin: "0.5rem", whiteSpace: "pre-line" }}>
+                  {user.description}
+                </div>
+              </div>
+            </div>
+          )
+        ) : null}
 
         <button
           type="button"

@@ -9,8 +9,8 @@ const EditSite = () => {
   const navigate = useNavigate();
   const { site_id } = useParams();
 
+  const [site, setSite] = useState("");
   const [country, setCountry] = useState("");
-  const [region, setRegion] = useState("");
   const [removeOriginPhoto, setRemoveOriginPhoto] = useState(false);
   const [sitePublic, setSitePublic] = useState("");
   const [message, setMessage] = useState("");
@@ -28,14 +28,14 @@ const EditSite = () => {
       formData.append("removeOriginPhoto", removeOriginPhoto);
     }
 
-    // loading中禁用submit按鈕
+    // loading中禁用submit按鈕，調整游標圖示
     document.querySelector("#edit-site-submit-button").disabled = true;
-
+    document.body.style.cursor = "wait";
     try {
-      document.body.style.cursor = "wait";
-      let result = await siteService.patch_edit_site(site_id, formData);
-      console.log(result);
+      await siteService.patch_edit_site(site_id, formData);
       alert("修改完成");
+
+      // 重新導向
       navigate("/users/sites/overview/mine");
       navigate(0);
     } catch (e) {
@@ -46,7 +46,6 @@ const EditSite = () => {
       // 處理錯誤訊息
       console.log(e);
       if (e.response) {
-        console.log(e.response.data);
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");
@@ -54,15 +53,12 @@ const EditSite = () => {
     }
   };
 
+  // 用來控制region選項
   const handleCountry = (e) => {
     setCountry(e.target.value);
-    setRegion("");
   };
 
-  const handleRegion = (e) => {
-    setRegion(e.target.value);
-  };
-
+  // 檢查圖片格式
   const handleImage = (e) => {
     if (e.target.files[0]) {
       let file = e.target.files[0];
@@ -78,41 +74,43 @@ const EditSite = () => {
         // 只允許上傳 jpeg 或 png 檔
 
         setMessage("只能上傳 jpeg, jpg 或 png 檔!");
-        document.querySelector("#photo_site").value = null;
+        document.querySelector("#photo_site_edit").value = null;
       } else if (size > 2.5 * 1024 * 1024) {
         // 如果檔案大小大於 2.5 MB，不允許上傳
 
         setMessage("圖片過大，請使用其它方式上傳！(限制 2.5 MB)");
-        document.querySelector("#photo_site").value = null;
+        document.querySelector("#photo_site_edit").value = null;
       } else {
         setMessage("");
       }
     } else {
-      document.querySelector("#photo_site").value = null;
+      document.querySelector("#photo_site_edit").value = null;
     }
   };
 
+  // 移除舊照片
   const removePhoto = () => {
     setRemoveOriginPhoto(true);
     document.querySelector("#origin_photo").textContent = "";
     document.querySelector("#removePhotoButton").style.display = "none";
   };
 
+  // 資料公開不公開
   const handlePublic = () => {
     setSitePublic(!sitePublic);
   };
 
   useEffect(() => {
+    // 等待讀取，暫停按鈕使用
     document.body.style.cursor = "wait";
     document.querySelector("#edit-site-submit-button").disabled = true;
 
+    // 獲取景點資料
     siteService
       .get_mySite_detail(site_id)
       .then((data) => {
-        document.body.style.cursor = "default";
-        document.querySelector("#edit-site-submit-button").disabled = false;
         let siteInfo = data.data;
-        console.log(siteInfo);
+        setSite(siteInfo);
         // 如果作者與編輯人不符，跳轉頁面
         if (
           !siteInfo.author._id === JSON.parse(localStorage.getItem("auth"))._id
@@ -120,9 +118,6 @@ const EditSite = () => {
           navigate("/noAuth");
           navigate(0);
         }
-
-        // 更新標題
-        document.querySelector("#title_site_edit").value = siteInfo.title;
 
         // 選取國家
         setCountry(siteInfo.country);
@@ -136,9 +131,6 @@ const EditSite = () => {
           default:
             break;
         }
-
-        // 更新地區
-        setRegion(siteInfo.region);
 
         // 選取類型
         switch (siteInfo.type) {
@@ -158,18 +150,15 @@ const EditSite = () => {
             break;
         }
 
-        // 更新內容
-        document.querySelector("#content_site_edit").value = siteInfo.content;
-
-        // 顯示舊相片名稱
-        document.querySelector("#origin_photo").textContent =
-          siteInfo.photo.photoName;
-
         // 公開設定
         setSitePublic(siteInfo.public);
         if (siteInfo.public) {
           document.querySelector("#publicButton").checked = true;
         }
+
+        // 回復游標及按鈕
+        document.body.style.cursor = "default";
+        document.querySelector("#edit-site-submit-button").disabled = false;
       })
       .catch((e) => console.log(e));
   }, [navigate, site_id]);
@@ -188,6 +177,7 @@ const EditSite = () => {
             className="form-control"
             id="title_site_edit"
             name="title"
+            defaultValue={site.title}
           />
         </div>
         <div className="mb-3">
@@ -239,8 +229,7 @@ const EditSite = () => {
               className="form-select"
               aria-label="Default select example"
               name="region"
-              onChange={handleRegion}
-              value={region}
+              defaultValue={site.region}
             >
               <option value="">請選擇地區</option>
               <option value="北海道地區">北海道地區</option>
@@ -260,8 +249,7 @@ const EditSite = () => {
               className="form-select"
               aria-label="Default select example"
               name="region"
-              onChange={handleRegion}
-              value={region}
+              defaultValue={site.region}
             >
               <option value="">請選擇地區</option>
               <option value="台北">台北</option>
@@ -339,28 +327,30 @@ const EditSite = () => {
           <label className="mb-3">內文</label>
           <textarea
             className="form-control"
-            id="content_site_edit"
             style={{ whiteSpace: "pre-line", height: "200px" }}
             name="content"
+            defaultValue={site.content}
           ></textarea>
         </div>
         <div className="mb-3">
-          <div className="d-flex my-2">
-            <div className="my-auto">
-              原照片：<span id="origin_photo"></span>
+          {site.photo && site.photo.photoName && (
+            <div className="d-flex my-2">
+              <div className="my-auto">
+                原照片：<span id="origin_photo">{site.photo.photoName}</span>
+              </div>
+              <button
+                id="removePhotoButton"
+                className="btn bg-danger-subtle ms-2"
+                type="button"
+                onClick={removePhoto}
+              >
+                移除照片
+              </button>
             </div>
-            <button
-              id="removePhotoButton"
-              className="btn bg-danger-subtle ms-2"
-              type="button"
-              onClick={removePhoto}
-            >
-              移除照片
-            </button>
-          </div>
+          )}
 
           <label htmlFor="photo_site_edit" className="mb-3">
-            更換照片
+            上傳新照片(會取代舊的)
           </label>
           <input
             type="file"
@@ -383,6 +373,7 @@ const EditSite = () => {
           </label>
         </div>
         <div className="small mb-2 pb-lg-2">
+          {/* 錯誤訊息 */}
           {message && (
             <div className="alert alert-danger" role="alert">
               {message}

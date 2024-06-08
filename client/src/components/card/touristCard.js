@@ -44,49 +44,50 @@ const TouristCard = ({ tourists, handleDelete, setUser_id, tourPublic }) => {
         </tr>
       </thead>
       <tbody>
-        {tourists &&
-          tourists.map((tourist) => {
-            return (
-              <tr key={tourist._id} style={{ height: "4.5rem" }}>
-                <th>{tourist.user_id.username} </th>
-                <td>{tourist.type}</td>
-                <td>
-                  <div>
-                    <button
-                      className="btn bg-primary-subtle"
-                      onClick={() => {
-                        setUser_id(tourist.user_id._id);
-                      }}
-                    >
-                      檢視
-                    </button>
-                    {tourist.type !== "主辦者" &&
-                      tourist.type !== "參加者" &&
-                      !tourPublic && (
+        {tourists
+          ? tourists.map((tourist) => {
+              return (
+                <tr key={tourist._id} style={{ height: "4.5rem" }}>
+                  <th>{tourist.user_id.username}</th>
+                  <td>{tourist.type}</td>
+                  <td>
+                    <div>
+                      <button
+                        className="btn bg-primary-subtle"
+                        onClick={() => {
+                          setUser_id(tourist.user_id._id);
+                        }}
+                      >
+                        檢視
+                      </button>
+                      {tourist.type !== "主辦者" &&
+                        tourist.type !== "參加者" &&
+                        !tourPublic && (
+                          <button
+                            type="button"
+                            className="btn bg-primary-subtle ms-2 my-2"
+                            name={tourist._id}
+                            onClick={handleAddTourist}
+                          >
+                            加入
+                          </button>
+                        )}
+                      {tourist.type !== "主辦者" && !tourPublic && (
                         <button
                           type="button"
-                          className="btn bg-primary-subtle ms-2 my-2"
+                          className="btn bg-danger-subtle ms-2 my-2"
                           name={tourist._id}
-                          onClick={handleAddTourist}
+                          onClick={handleDelete}
                         >
-                          加入
+                          刪除
                         </button>
                       )}
-                    {tourist.type !== "主辦者" && !tourPublic && (
-                      <button
-                        type="button"
-                        className="btn bg-danger-subtle ms-2 my-2"
-                        name={tourist._id}
-                        onClick={handleDelete}
-                      >
-                        刪除
-                      </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })
+          : null}
       </tbody>
     </table>
   );

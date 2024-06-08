@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import siteService from "../../../../service/site";
@@ -13,7 +13,7 @@ const SiteDetail = () => {
 
   const [site, setSite] = useState("");
   const [checkLike, setCheckLike] = useState(false); // 確認點讚狀態
-  const [checkCollect, setCheckCollect] = useState(false); // 確認收藏狀態
+  const [checkCollection, setCheckCollection] = useState(false); // 確認收藏狀態
   const [otherSites, setOtherSites] = useState(""); // 找尋該作者的其他景點
 
   // 顯示時間的格式調整
@@ -41,11 +41,19 @@ const SiteDetail = () => {
   };
 
   // 按讚 or 收回讚
+  const clickLike = useCallback(
+    (site_id) => {
+      return checkLike
+        ? siteService.delete_click_like(site_id)
+        : siteService.put_click_like(site_id);
+    },
+    [checkLike]
+  );
+
   const handleLike = async () => {
     try {
-      let result = await siteService.post_click_like(site_id);
-      console.log(result);
-      setCheckLike(!checkLike);
+      await clickLike(site_id);
+      navigate(0);
     } catch (e) {
       console.log(e);
       if (e.response && e.response.status === 401) {
@@ -55,11 +63,19 @@ const SiteDetail = () => {
   };
 
   // 收藏 or 移除收藏
+  const clickCollect = useCallback(
+    (site_id) => {
+      return checkCollection
+        ? siteService.delete_click_collection(site_id)
+        : siteService.put_click_collection(site_id);
+    },
+    [checkCollection]
+  );
+
   const handleCollect = async () => {
     try {
-      let result = await siteService.post_click_collect(site_id);
-      console.log(result);
-      setCheckCollect(!checkCollect);
+      await clickCollect(site_id);
+      navigate(0);
     } catch (e) {
       console.log(e);
       if (e.response && e.response.status === 401) {
@@ -86,10 +102,10 @@ const SiteDetail = () => {
         }
       });
     siteService
-      .get_site_like_and_collect(site_id)
+      .get_site_like_and_collection(site_id)
       .then((data) => {
         setCheckLike(data.data.like);
-        setCheckCollect(data.data.collect);
+        setCheckCollection(data.data.collection);
       })
       .catch((e) => {
         console.log(e);
@@ -152,7 +168,7 @@ const SiteDetail = () => {
             <hr />
             <div className="d-flex flex-wrap justify-content-between mt-2">
               <div className="text-start">
-                {site.num_of_like}人按讚，{site.num_of_collect}人收藏
+                {site.num_of_like}人按讚，{site.num_of_collection}人收藏
               </div>
               <div className="text-end">
                 最後更新時間：{handleTime(site.updateDate)}
@@ -172,7 +188,7 @@ const SiteDetail = () => {
                 className="btn btn-outline-danger"
                 onClick={handleCollect}
               >
-                {checkCollect && "移除"}收藏
+                {checkCollection && "移除"}收藏
               </button>
             </div>
             <hr />

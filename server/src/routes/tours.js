@@ -670,7 +670,7 @@ router.post(
       });
 
       await Promise.all([tour.save(), tourist.save()]);
-      return res.send("資料儲存完畢");
+      return res.status(201).send("資料儲存完畢");
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
@@ -708,7 +708,7 @@ router.post(
         redisClient.del(`Tour:${_id}`), // 刪快取
       ]);
 
-      return res.send("已新增景點");
+      return res.status(201).send("已新增景點");
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
@@ -770,7 +770,7 @@ router.post(
       });
 
       await Promise.all([tourist.save(), redisClient.del(`Tour:${tour_id}`)]); // 刪快取
-      return res.send("您已成功發出申請");
+      return res.status(201).send("您已成功發出申請");
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
@@ -822,7 +822,7 @@ router.post(
         TourSite.insertMany(site_arr),
       ]);
 
-      return res.send("成功複製");
+      return res.status(201).send("成功複製");
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");

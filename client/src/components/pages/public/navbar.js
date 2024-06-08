@@ -12,10 +12,9 @@ const Navbar = ({ auth }) => {
 
   return (
     <nav
-      className="navbar navbar-expand-lg"
+      className="navbar navbar-expand-lg sticky-top"
       style={{
         backgroundColor: "rgb(90, 178, 255)",
-        opacity: "0.8",
       }}
     >
       <div className="container-fluid">
@@ -24,7 +23,7 @@ const Navbar = ({ auth }) => {
           to="/"
           style={{ color: "black", fontWeight: "700" }}
         >
-          首頁
+          Pick&Go
         </Link>
         <button
           className="navbar-toggler"

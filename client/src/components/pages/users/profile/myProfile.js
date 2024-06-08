@@ -9,12 +9,8 @@ const MyProfile = ({ currentUser, setCurrentUser }) => {
   const navigate = useNavigate();
 
   // 客製化日期
-  const timeConvert = (date) => {
-    date = new Date(date);
-    let year = date.getFullYear();
-    let month = date.getMonth() + 1;
-    let day = date.getDate();
-    return `${year}-${month}-${day}`;
+  const timeConvert = (string) => {
+    return string.match(/\d+-\d+-\d+/);
   };
 
   useEffect(() => {
@@ -58,55 +54,67 @@ const MyProfile = ({ currentUser, setCurrentUser }) => {
         </Link>
       </div>
       <hr />
-      <table className="table" style={{ marginBottom: "0" }}>
-        <thead>
-          <tr>
-            <th scope="col">Email</th>
-            <th scope="col"></th>
-            <th scope="col">{currentUser && currentUser.email}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <th scope="row">暱稱</th>
-            <td></td>
-            <td>{currentUser && currentUser.username}</td>
-          </tr>
-          <tr>
-            <th scope="row">性別</th>
-            <td></td>
-            <td>{currentUser && currentUser.gender}</td>
-          </tr>
-          <tr>
-            <th scope="row">年齡</th>
-            <td></td>
-            <td>{currentUser && currentUser.age}</td>
-          </tr>
-          <tr>
-            <th scope="row">帳號創建於</th>
-            <td></td>
-            <td>{currentUser && timeConvert(currentUser.createdDate)}</td>
-          </tr>
-          <tr>
-            <th scope="row">Email認證</th>
-            <td></td>
-            <td>
-              {currentUser &&
-                (currentUser.email_verified ? "以認證" : "尚未認證")}
-            </td>
-          </tr>
-          <tr style={{ borderBottom: "white" }}>
-            <th scope="row">自我簡介</th>
-            <td></td>
-            <td></td>
-          </tr>
-        </tbody>
-      </table>
-      <div>
-        <div style={{ margin: "0.5rem", whiteSpace: "pre-line" }}>
-          {currentUser && currentUser.description}
+      {currentUser && (
+        <div>
+          <div className="d-flex flex-wrap justify-content-center border">
+            {currentUser.photo.url && (
+              <div className="me-4 border" style={{ flex: "0 1 250px" }}>
+                <img
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  src={currentUser.photo.url}
+                  alt={currentUser.photo.photoName}
+                />
+              </div>
+            )}
+            <table
+              className="table fw-bold align-middle"
+              style={{
+                flex: "1 1 300px",
+                margin: "0",
+              }}
+            >
+              <tbody>
+                <tr>
+                  <th>Email</th>
+                  <th></th>
+                  <th>{currentUser.email}</th>
+                </tr>
+                <tr>
+                  <th>暱稱</th>
+                  <td></td>
+                  <td>{currentUser.username}</td>
+                </tr>
+                <tr>
+                  <th>性別</th>
+                  <td></td>
+                  <td>{currentUser.gender}</td>
+                </tr>
+                <tr>
+                  <th>年齡</th>
+                  <td></td>
+                  <td>{currentUser.age}</td>
+                </tr>
+                <tr>
+                  <th>狀態</th>
+                  <td></td>
+                  <td>{currentUser.public ? "公開" : "不公開"}</td>
+                </tr>
+                <tr style={{ borderBottom: "white" }}>
+                  <th>帳號創建於</th>
+                  <td></td>
+                  <td>{timeConvert(currentUser.createdDate)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div className="ms-2 my-4 fw-bold">自我簡介：</div>
+            <div style={{ margin: "0.5rem", whiteSpace: "pre-line" }}>
+              {currentUser.description}
+            </div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

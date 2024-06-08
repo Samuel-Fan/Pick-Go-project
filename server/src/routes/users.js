@@ -4,7 +4,24 @@ const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const valid = require("../controllers/validation");
 const bcrypt = require("bcrypt");
-const reditClient = require("../config/redis");
+const multer = require("multer");
+const path = require("path");
+const imgurClient = require("../config/imgur");
+const redisClient = require("../config/redis");
+
+// 照片檔案上傳格式設定
+const upload = multer({
+  limits: {
+    fileSize: 2.5 * 1024 * 1024,
+  },
+  fileFilter(req, file, cb) {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (ext !== ".jpg" && ext !== ".png" && ext !== ".jpeg") {
+      cb({ message: '"檔案格式錯誤，僅限上傳 jpg、jpeg 與 png 格式。"' });
+    }
+    cb(null, true);
+  },
+}).any();
 
 router.use((req, res, next) => {
   console.log("正在接收一個跟'使用者'有關的請求");
@@ -39,15 +56,45 @@ router.get(
 router.get("/profile/:_id", async (req, res) => {
   let { _id } = req.params;
   try {
+    // 先找快取;
+    let cacheData = await redisClient.get(`public_user_${_id}`);
+    if (cacheData) {
+      switch (cacheData) {
+        case "400":
+          return res.status(400).send("找不到使用者");
+        case "403":
+          return res.status(403).send("該使用者不公開資料");
+        default:
+          return res.send(cacheData);
+      }
+    }
+
+    // 快取找不到，則搜尋資料庫
     let foundUser = await User.findOne({ _id })
-      .select(["username", "email", "gender", "age", "description"])
+      .select({ password: 0 })
       .lean()
       .exec();
 
     // 若搜尋不到使用者
     if (!foundUser) {
+      redisClient.set(`public_user_${_id}`, "400", {
+        EX: 24 * 60 * 1,
+      });
       return res.status(400).send("找不到使用者");
     }
+
+    // 若不公開
+    if (!foundUser.public) {
+      redisClient.set(`public_user_${_id}`, "403", {
+        EX: 24 * 60 * 1,
+      });
+      return res.status(403).send("該使用者不公開資料");
+    }
+
+    // 若有找到又有公開，先存入快取
+    redisClient.set(`public_user_${_id}`, JSON.stringify(foundUser), {
+      EX: 24 * 60 * 1,
+    });
 
     return res.send(foundUser);
   } catch (e) {
@@ -161,7 +208,7 @@ router.post("/register", async (req, res) => {
     });
 
     let savedUser = await newUser.save();
-    return res.send({ message: "使用者資料儲存完畢", savedUser });
+    return res.status(201).send({ message: "使用者資料儲存完畢", savedUser });
   } catch (e) {
     console.log(e);
     return res.status(500).send("儲存資料時發生錯誤:" + e.message);
@@ -181,23 +228,75 @@ router.patch(
         return res.status(400).send("無搜尋到此用戶");
       }
 
-      // 驗證填入資料的正確性，如果不合規範則 return 錯誤
-      let { error } = valid.editBasicValidation(req.body); // req.body 應有 username, age, gender, description
-      if (error) {
-        console.log(error);
-        return res.status(400).send(error.details[0].message);
-      }
+      upload(req, res, async (err) => {
+        // req.files 包含 圖片檔案
+        // req.body 包含 key-value 資料
 
-      let [data, _reditDel] = await Promise.all([
-        User.findOneAndUpdate({ _id }, req.body, {
-          // 更新資料
-          new: true,
-          runValidators: true,
-        }),
-        reditClient.del(`User:${_id}`), // 刪掉快取
-      ]);
+        // 如圖片規格不符 multer 設定(大小、格式)，則返回 error 訊息
+        if (err) {
+          console.log(err);
+          return res.status(400).send(err.message);
+        }
 
-      return res.send(data);
+        // 驗證填入資料的正確性，如果不合規範則 return 錯誤
+        let { error } = valid.editBasicValidation(req.body); // req.body 應有 username, age, gender, description, public, removeOriginPhoto
+        if (error) {
+          console.log(error);
+          return res.status(400).send(error.details[0].message);
+        }
+
+        let { removeOriginPhoto, public } = req.body;
+
+        // 新圖片上傳 imgur ，取得 url 及 deleteHash
+        let url;
+        let deletehash;
+        let photoName;
+
+        // 若要求刪除舊照片 or 有更新成新照片
+        if (removeOriginPhoto === "true") {
+          await imgurClient.deleteImage(foundUser.photo.deletehash);
+        }
+
+        if (req.files.length !== 0) {
+          // 如果原本有圖片，先把舊的刪掉，再更新成新的
+
+          const response = await imgurClient.upload({
+            image: req.files[0].buffer.toString("base64"),
+            type: "base64",
+            album: process.env.IMGUR_ALBUM_ID,
+          });
+
+          url = response.data.link;
+          deletehash = response.data.deletehash;
+          photoName = req.files[0].originalname;
+        }
+
+        let newPhoto =
+          req.files.length !== 0
+            ? { photo: { url, deletehash, photoName } }
+            : removeOriginPhoto === "true"
+            ? { photo: { url: "", deletehash: "", photoName: "" } }
+            : {};
+
+        // 將景點資訊儲存至資料庫
+        let newData = Object.assign({}, req.body, newPhoto, {
+          public: public === "true" ? true : false,
+        });
+
+        console.log(newData);
+
+        let [data, _reditDel] = await Promise.all([
+          User.findOneAndUpdate({ _id }, newData, {
+            // 更新資料
+            new: true,
+            runValidators: true,
+          }),
+          redisClient.del(`User:${_id}`), // 刪掉快取
+          redisClient.del(`public_user_${_id}`),
+        ]);
+
+        return res.send(data);
+      });
     } catch (e) {
       console.log(e);
       return res.status(500).send(e.message);
@@ -242,7 +341,8 @@ router.patch(
       foundUser.password = password;
       await Promise.all([
         foundUser.save(), // 更新資料
-        reditClient.del(`User:${_id}`), // 刪掉快取
+        redisClient.del(`User:${_id}`), // 刪掉快取
+        redisClient.del(`public_user_${_id}`),
       ]);
 
       return res.send("成功更新資料");

@@ -105,7 +105,7 @@ const MySiteDetail = () => {
             <hr />
             <div className="d-flex flex-wrap justify-content-between mt-2">
               <div className="text-start">
-                {site.num_of_like}人按讚，{site.num_of_collect}人收藏
+                {site.num_of_like}人按讚，{site.num_of_collection}人收藏
               </div>
               <div className="text-end">
                 最後更新時間：{handleTime(site.updateDate)}

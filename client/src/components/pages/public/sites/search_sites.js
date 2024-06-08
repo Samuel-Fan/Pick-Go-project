@@ -100,7 +100,7 @@ const SearchSites = () => {
   }, [orderBy, page, numberPerPage, query, navigate]);
 
   return (
-    <div className="container d-flex flex-column align-items-center my-3">
+    <div className="d-flex flex-column align-items-center my-3 mx-5">
       <div className="d-flex align-items-center">
         {/* 簡易搜尋介面 */}
         {simpleSearch && (
@@ -324,7 +324,7 @@ const SearchSites = () => {
         </button>
       </div>
 
-      <div>
+      <div className="mx-4">
         <hr
           className="mx-4"
           style={{ border: "2px solid rgb(90, 178, 255)", opacity: "1" }}
