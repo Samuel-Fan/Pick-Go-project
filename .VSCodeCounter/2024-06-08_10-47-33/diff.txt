@@ -1,0 +1,130 @@
+Date : 2024-06-08 10:47:33
+Directory : d:\code\myProject\pick_and_go_project\server
+Total : 72 files,  -18326 codes, 8 comments, -197 blanks, all -18515 lines
+
+Languages
++------------+------------+------------+------------+------------+------------+
+| language   | files      | code       | comment    | blank      | total      |
++------------+------------+------------+------------+------------+------------+
+| XML        |          1 |         -1 |          0 |          0 |         -1 |
+| HTML       |          1 |        -36 |        -10 |         -1 |        -47 |
+| Markdown   |          1 |        -38 |          0 |        -33 |        -71 |
+| CSS        |          2 |        -89 |          0 |        -22 |       -111 |
+| JavaScript |         63 |     -2,405 |         18 |       -141 |     -2,528 |
+| JSON       |          4 |    -15,757 |          0 |          0 |    -15,757 |
++------------+------------+------------+------------+------------+------------+
+
+Directories
++--------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| path                                                                                                   | files      | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| .                                                                                                      |         72 |    -18,326 |          8 |       -197 |    -18,515 |
+| . (Files)                                                                                              |          4 |      2,328 |          2 |         15 |      2,345 |
+| ..                                                                                                     |         51 |    -22,952 |       -189 |       -507 |    -23,648 |
+| ..\client                                                                                              |         51 |    -22,952 |       -189 |       -507 |    -23,648 |
+| ..\client (Files)                                                                                      |          3 |    -18,066 |          0 |        -35 |    -18,101 |
+| ..\client\public                                                                                       |          2 |       -119 |        -10 |         -1 |       -130 |
+| ..\client\src                                                                                          |         46 |     -4,767 |       -179 |       -471 |     -5,417 |
+| ..\client\src (Files)                                                                                  |          6 |       -250 |          0 |        -37 |       -287 |
+| ..\client\src\components                                                                               |         37 |     -4,304 |       -127 |       -373 |     -4,804 |
+| ..\client\src\components\btn                                                                           |          1 |        -68 |         -1 |         -4 |        -73 |
+| ..\client\src\components\card                                                                          |          5 |       -500 |        -12 |        -36 |       -548 |
+| ..\client\src\components\error                                                                         |          2 |        -24 |         -2 |         -8 |        -34 |
+| ..\client\src\components\modal                                                                         |          3 |       -292 |         -8 |        -26 |       -326 |
+| ..\client\src\components\pages                                                                         |         26 |     -3,420 |       -104 |       -299 |     -3,823 |
+| ..\client\src\components\pages\public                                                                  |         10 |     -1,226 |        -28 |        -95 |     -1,349 |
+| ..\client\src\components\pages\public (Files)                                                          |          3 |       -149 |          0 |        -11 |       -160 |
+| ..\client\src\components\pages\public\auth                                                             |          3 |       -270 |         -5 |        -26 |       -301 |
+| ..\client\src\components\pages\public\sites                                                            |          2 |       -556 |        -12 |        -32 |       -600 |
+| ..\client\src\components\pages\public\tours                                                            |          2 |       -251 |        -11 |        -26 |       -288 |
+| ..\client\src\components\pages\users                                                                   |         16 |     -2,194 |        -76 |       -204 |     -2,474 |
+| ..\client\src\components\pages\users (Files)                                                           |          2 |        -86 |          0 |         -7 |        -93 |
+| ..\client\src\components\pages\users\profile                                                           |          3 |       -355 |         -9 |        -25 |       -389 |
+| ..\client\src\components\pages\users\site                                                              |          5 |       -954 |        -34 |        -85 |     -1,073 |
+| ..\client\src\components\pages\users\tour                                                              |          6 |       -799 |        -33 |        -87 |       -919 |
+| ..\client\src\service                                                                                  |          3 |       -213 |        -52 |        -61 |       -326 |
+| src                                                                                                    |         17 |      2,298 |        195 |        295 |      2,788 |
+| src\config                                                                                             |          4 |        110 |          6 |         17 |        133 |
+| src\controllers                                                                                        |          1 |        154 |          6 |         14 |        174 |
+| src\models                                                                                             |          8 |        114 |          7 |         27 |        148 |
+| src\routes                                                                                             |          4 |      1,920 |        176 |        237 |      2,333 |
++--------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+
+Files
++--------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| filename                                                                                               | language   | code       | comment    | blank      | total      |
++--------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+
+| d:\code\myProject\pick_and_go_project\client\README.md                                                 | Markdown   |        -38 |          0 |        -33 |        -71 |
+| d:\code\myProject\pick_and_go_project\client\package-lock.json                                         | JSON       |    -17,987 |          0 |         -1 |    -17,988 |
+| d:\code\myProject\pick_and_go_project\client\package.json                                              | JSON       |        -41 |          0 |         -1 |        -42 |
+| d:\code\myProject\pick_and_go_project\client\public\env.js                                             | JavaScript |        -83 |          0 |          0 |        -83 |
+| d:\code\myProject\pick_and_go_project\client\public\index.html                                         | HTML       |        -36 |        -10 |         -1 |        -47 |
+| d:\code\myProject\pick_and_go_project\client\src\App.css                                               | CSS        |        -89 |          0 |        -21 |       -110 |
+| d:\code\myProject\pick_and_go_project\client\src\App.js                                                | JavaScript |       -127 |          0 |        -10 |       -137 |
+| d:\code\myProject\pick_and_go_project\client\src\AppExample.js                                         | JavaScript |        -23 |          0 |         -3 |        -26 |
+| d:\code\myProject\pick_and_go_project\client\src\components\btn\pageChoose.js                          | JavaScript |        -68 |         -1 |         -4 |        -73 |
+| d:\code\myProject\pick_and_go_project\client\src\components\card\siteCard.js                           | JavaScript |       -118 |         -2 |         -8 |       -128 |
+| d:\code\myProject\pick_and_go_project\client\src\components\card\tourCard.js                           | JavaScript |       -138 |         -4 |        -11 |       -153 |
+| d:\code\myProject\pick_and_go_project\client\src\components\card\tourSiteCard.js                       | JavaScript |        -89 |          0 |         -4 |        -93 |
+| d:\code\myProject\pick_and_go_project\client\src\components\card\tourTableCard.js                      | JavaScript |        -71 |         -2 |         -5 |        -78 |
+| d:\code\myProject\pick_and_go_project\client\src\components\card\touristCard.js                        | JavaScript |        -84 |         -4 |         -8 |        -96 |
+| d:\code\myProject\pick_and_go_project\client\src\components\error\noAuth.js                            | JavaScript |         -5 |         -1 |         -4 |        -10 |
+| d:\code\myProject\pick_and_go_project\client\src\components\error\notFound.js                          | JavaScript |        -19 |         -1 |         -4 |        -24 |
+| d:\code\myProject\pick_and_go_project\client\src\components\modal\delete.js                            | JavaScript |        -89 |         -4 |        -10 |       -103 |
+| d:\code\myProject\pick_and_go_project\client\src\components\modal\participants.js                      | JavaScript |       -102 |         -2 |         -8 |       -112 |
+| d:\code\myProject\pick_and_go_project\client\src\components\modal\profile.js                           | JavaScript |       -101 |         -2 |         -8 |       -111 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\Layout.js                     | JavaScript |        -12 |          0 |         -3 |        -15 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\auth\googleLogin.js           | JavaScript |        -28 |         -1 |         -5 |        -34 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\auth\login.js                 | JavaScript |       -105 |         -1 |         -9 |       -115 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\auth\signup.js                | JavaScript |       -137 |         -3 |        -12 |       -152 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\home.js                       | JavaScript |         -5 |          0 |         -3 |         -8 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\navbar.js                     | JavaScript |       -132 |          0 |         -5 |       -137 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\sites\search_sites.js         | JavaScript |       -363 |         -8 |        -16 |       -387 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\sites\siteDetail.js           | JavaScript |       -193 |         -4 |        -16 |       -213 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\tours\search_tours.js         | JavaScript |       -137 |         -4 |        -11 |       -152 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\public\tours\tourDetail.js           | JavaScript |       -114 |         -7 |        -15 |       -136 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\MyPageLayout.js                | JavaScript |        -18 |          0 |         -3 |        -21 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\profile\editPassword.js        | JavaScript |        -93 |         -2 |         -9 |       -104 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\profile\editProfile.js         | JavaScript |       -157 |         -4 |         -9 |       -170 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\profile\myProfile.js           | JavaScript |       -105 |         -3 |         -7 |       -115 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\sidebar.js                     | JavaScript |        -68 |          0 |         -4 |        -72 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\site\addNewSite.js             | JavaScript |       -255 |         -7 |        -15 |       -277 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\site\editSite.js               | JavaScript |       -356 |        -16 |        -29 |       -401 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\site\myCollectSites.js         | JavaScript |        -93 |         -4 |        -12 |       -109 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\site\mySiteDetail.js           | JavaScript |       -127 |         -2 |        -11 |       -140 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\site\mySitesOverview.js        | JavaScript |       -123 |         -5 |        -18 |       -146 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\tour\addNewParticipant.js      | JavaScript |        -72 |         -2 |        -11 |        -85 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\tour\addNewTour.js             | JavaScript |        -95 |         -5 |        -10 |       -110 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\tour\addSiteToATour.js         | JavaScript |       -172 |         -7 |        -19 |       -198 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\tour\myAppliedToursOverview.js | JavaScript |        -83 |         -3 |         -8 |        -94 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\tour\myTourDetail.js           | JavaScript |       -101 |         -6 |        -16 |       -123 |
+| d:\code\myProject\pick_and_go_project\client\src\components\pages\users\tour\myToursOverview.js        | JavaScript |       -276 |        -10 |        -23 |       -309 |
+| d:\code\myProject\pick_and_go_project\client\src\index.css                                             | CSS        |          0 |          0 |         -1 |         -1 |
+| d:\code\myProject\pick_and_go_project\client\src\index.js                                              | JavaScript |        -10 |          0 |         -2 |        -12 |
+| d:\code\myProject\pick_and_go_project\client\src\logo.svg                                              | XML        |         -1 |          0 |          0 |         -1 |
+| d:\code\myProject\pick_and_go_project\client\src\service\auth.js                                       | JavaScript |        -39 |         -9 |        -14 |        -62 |
+| d:\code\myProject\pick_and_go_project\client\src\service\site.js                                       | JavaScript |        -86 |        -20 |        -22 |       -128 |
+| d:\code\myProject\pick_and_go_project\client\src\service\tour.js                                       | JavaScript |        -88 |        -23 |        -25 |       -136 |
+| d:\code\myProject\pick_and_go_project\server\index.js                                                  | JavaScript |         53 |          2 |         10 |         65 |
+| d:\code\myProject\pick_and_go_project\server\package-lock.json                                         | JSON       |      2,240 |          0 |          1 |      2,241 |
+| d:\code\myProject\pick_and_go_project\server\package.json                                              | JSON       |         31 |          0 |          1 |         32 |
+| d:\code\myProject\pick_and_go_project\server\src\config\email.js                                       | JavaScript |         23 |          0 |          4 |         27 |
+| d:\code\myProject\pick_and_go_project\server\src\config\imgur.js                                       | JavaScript |          8 |          0 |          3 |         11 |
+| d:\code\myProject\pick_and_go_project\server\src\config\passport.js                                    | JavaScript |         69 |          6 |          7 |         82 |
+| d:\code\myProject\pick_and_go_project\server\src\config\redis.js                                       | JavaScript |         10 |          0 |          3 |         13 |
+| d:\code\myProject\pick_and_go_project\server\src\controllers\validation.js                             | JavaScript |        154 |          6 |         14 |        174 |
+| d:\code\myProject\pick_and_go_project\server\src\models\collect-model.js                               | JavaScript |          7 |          1 |          4 |         12 |
+| d:\code\myProject\pick_and_go_project\server\src\models\index.js                                       | JavaScript |          9 |          0 |          1 |         10 |
+| d:\code\myProject\pick_and_go_project\server\src\models\like-model.js                                  | JavaScript |          7 |          1 |          4 |         12 |
+| d:\code\myProject\pick_and_go_project\server\src\models\site-model.js                                  | JavaScript |         21 |          0 |          3 |         24 |
+| d:\code\myProject\pick_and_go_project\server\src\models\tour-model.js                                  | JavaScript |         17 |          0 |          3 |         20 |
+| d:\code\myProject\pick_and_go_project\server\src\models\tourSite-model.js                              | JavaScript |          8 |          0 |          3 |         11 |
+| d:\code\myProject\pick_and_go_project\server\src\models\tourist-model.js                               | JavaScript |          8 |          0 |          3 |         11 |
+| d:\code\myProject\pick_and_go_project\server\src\models\user-model.js                                  | JavaScript |         37 |          5 |          6 |         48 |
+| d:\code\myProject\pick_and_go_project\server\src\routes\index.js                                       | JavaScript |          5 |          0 |          1 |          6 |
+| d:\code\myProject\pick_and_go_project\server\src\routes\sites.js                                       | JavaScript |        802 |         64 |         88 |        954 |
+| d:\code\myProject\pick_and_go_project\server\src\routes\tours.js                                       | JavaScript |        894 |         87 |        114 |      1,095 |
+| d:\code\myProject\pick_and_go_project\server\src\routes\users.js                                       | JavaScript |        219 |         25 |         34 |        278 |
+| d:\code\myProject\pick_and_go_project\server\test.js                                                   | JavaScript |          4 |          0 |          3 |          7 |
+| Total                                                                                                  |            |    -18,326 |          8 |       -197 |    -18,515 |
++--------------------------------------------------------------------------------------------------------+------------+------------+------------+------------+------------+

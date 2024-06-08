@@ -312,18 +312,12 @@ router.get(
     let { _id } = req.params;
     console.log(_id);
     try {
-      // 先搜尋快取中有無數據;
-      // let dataFromRedis = await redisClient.get(`Tour:${_id}`);
-      // if (dataFromRedis === "404") {
-      //   console.log("利用快取返回404 error");
-      //   return res.status(404).send("錯誤");
-      // }
-
-      // if (dataFromRedis) {
-      //   dataFromRedis;
-      //   console.log("利用快取提供景點資料");
-      //   return res.send(dataFromRedis);
-      // }
+      // 先搜尋快取中有無數據(只確認是否為404);
+      let dataFromRedis = await redisClient.get(`Tour:${_id}`);
+      if (dataFromRedis === "404") {
+        console.log("利用快取返回404 error");
+        return res.status(404).send("錯誤");
+      }
 
       // // 若找不到則搜尋資料庫
       console.log("利用資料庫提取旅程資料");
@@ -413,14 +407,14 @@ router.get(
         return res.status(404).send("無此資料");
       }
 
-      // 若景點不公開
-      if (foundTour.status === "不公開") {
-        let checkAuth = foundTour.participants.filter((tourist) => {
-          return tourist.user_id.equals(req.user._id);
-        });
-        if (checkAuth.length === 0) {
-          return res.status(403).send("您無查看權限");
-        }
+      // 景點不對主辦者或參加者以外的人開放
+      let checkAuth = foundTour.participants.filter((tourist) => {
+        return tourist.user_id.equals(req.user._id);
+      });
+
+      console.log(checkAuth);
+      if (checkAuth.length === 0) {
+        return res.status(403).send("您無查看權限");
       }
 
       // 若景點公開，則存入快取
@@ -452,6 +446,11 @@ router.get("/detail/:_id", async (req, res) => {
     if (dataFromRedis === "404") {
       console.log("利用快取返回404 error");
       return res.status(404).send("錯誤");
+    }
+
+    if (dataFromRedis === "403") {
+      console.log("利用快取返回403 error");
+      return res.status(403).send("錯誤");
     }
 
     if (dataFromRedis) {

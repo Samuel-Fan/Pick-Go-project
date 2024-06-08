@@ -1,32 +1,32 @@
 import "./App.css";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
-import Layout from "./components/homePageComponents/Layout";
-import Home from "./components/homePageComponents/home-component";
-import SearchSites from "./components/homePageComponents/search-sites-component";
-import SiteDetail from "./components/homePageComponents/siteDetail-component";
-import SearchTours from "./components/homePageComponents/search-tours-component";
-import TourDetail from "./components/homePageComponents/tourDetail-component";
-import Login from "./components/homePageComponents/login-component";
-import Signup from "./components/homePageComponents/signup-component";
-import GoogleLogin from "./components/homePageComponents/googleLogin";
-import MyPageLayout from "./components/myPageComponents/MyPageLayout";
-import MyProfile from "./components/myPageComponents/profile/myProfile-component";
-import EditProfile from "./components/myPageComponents/profile/editProfile-component";
-import EditPassword from "./components/myPageComponents/profile/editPassword-component";
-import MySites from "./components/myPageComponents/site/mySites-component";
-import MyCollectSites from "./components/myPageComponents/site/myCollectSites-component";
-import MySiteDetail from "./components/myPageComponents/site/mySiteDetail-component";
-import AddNewSite from "./components/myPageComponents/site/addNewSite-component";
-import EditSite from "./components/myPageComponents/site/editSite-component";
-import MyTours from "./components/myPageComponents/tour/myTours-component";
-import MyApplied from "./components/myPageComponents/tour/myApplied-component";
-import AddNewTour from "./components/myPageComponents/tour/addNewTour-component";
-import AddSiteToATour from "./components/myPageComponents/tour/addSiteToATour-component";
-import AddNewParticipant from "./components/myPageComponents/tour/addNewParticipant-component";
-import NoAuth from "./components/myPageComponents/noAuth-component";
-import NotFound from "./components/homePageComponents/notFound";
-import MyTourDetail from "./components/myPageComponents/tour/myTourDetail-component";
+import Layout from "./components/pages/public/Layout.js";
+import Home from "./components/pages/public/home.js";
+import SearchSites from "./components/pages/public/sites/search_sites.js";
+import SiteDetail from "./components/pages/public/sites/siteDetail.js";
+import SearchTours from "./components/pages/public/tours/search_tours.js";
+import TourDetail from "./components/pages/public/tours/tourDetail.js";
+import Login from "./components/pages/public/auth/login.js";
+import Signup from "./components/pages/public/auth/signup.js";
+import GoogleLogin from "./components/pages/public/auth/googleLogin.js";
+import MyPageLayout from "./components/pages/users/MyPageLayout.js";
+import MyProfile from "./components/pages/users/profile/myProfile.js";
+import EditProfile from "./components/pages/users/profile/editProfile.js";
+import EditPassword from "./components/pages/users/profile/editPassword.js";
+import MySitesOverview from "./components/pages/users/site/mySitesOverview.js";
+import MyCollectSites from "./components/pages/users/site/myCollectSites.js";
+import MySiteDetail from "./components/pages/users/site/mySiteDetail.js";
+import AddNewSite from "./components/pages/users/site/addNewSite.js";
+import EditSite from "./components/pages/users/site/editSite.js";
+import MyTours from "./components/pages/users/tour/myToursOverview.js";
+import MyTourDetail from "./components/pages/users/tour/myTourDetail.js";
+import MyApplied from "./components/pages/users/tour/myAppliedToursOverview.js";
+import AddNewTour from "./components/pages/users/tour/addNewTour.js";
+import AddSiteToATour from "./components/pages/users/tour/addSiteToATour.js";
+import AddNewParticipant from "./components/pages/users/tour/addNewParticipant.js";
+import NoAuth from "./components/error/noAuth.js";
+import NotFound from "./components/error/notFound.js";
 
 function App() {
   let [auth, setAuth] = useState(JSON.parse(localStorage.getItem("auth"))); // 確認登入狀態
@@ -84,7 +84,7 @@ function App() {
           {/* 景點建立、修改、瀏覽 */}
           <Route
             path="/users/sites/overview/mine"
-            element={<MySites />}
+            element={<MySitesOverview />}
           ></Route>
           <Route
             path="/users/sites/overview/collections"

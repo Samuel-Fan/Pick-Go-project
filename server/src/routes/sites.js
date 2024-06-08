@@ -428,11 +428,49 @@ router.get(
     let { _id } = req.user;
     let { page, numberPerPage } = req.query;
     try {
-      let foundSite = await Site.find({ author: _id })
-        .skip((page - 1) * numberPerPage)
-        .limit(numberPerPage)
-        .lean()
-        .exec();
+      let foundSite = await Site.aggregate([
+        { $match: { author: new ObjectId(_id) } },
+        {
+          $lookup: {
+            from: "likes",
+            localField: "_id",
+            foreignField: "site_id",
+            as: "likes",
+          },
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "author",
+            foreignField: "_id",
+            as: "author",
+            pipeline: [
+              {
+                $project: {
+                  username: 1,
+                },
+              },
+            ],
+          },
+        },
+        { $unwind: "$author" },
+        {
+          $project: {
+            title: 1,
+            country: 1,
+            region: 1,
+            content: 1,
+            status: 1,
+            photo: 1,
+            updateDate: 1,
+            "author._id": 1,
+            "author.username": 1,
+            num_of_like: { $size: "$likes" },
+          },
+        },
+        { $skip: (page - 1) * numberPerPage },
+        { $limit: Number(numberPerPage) },
+      ]);
 
       return res.send(foundSite);
     } catch (e) {
@@ -532,6 +570,20 @@ router.get(
           },
         },
         {
+          $lookup: {
+            from: "users",
+            localField: "site.author",
+            foreignField: "_id",
+            as: "site.author",
+            pipeline: [
+              {
+                $project: { username: 1 },
+              },
+            ],
+          },
+        },
+        { $unwind: "$site.author" },
+        {
           $project: {
             num_of_like: { $size: "$like" },
             _id: "$site._id",
@@ -542,6 +594,7 @@ router.get(
             content: "$site.content",
             photo: "$site.photo",
             updateDate: "$site.updateDate",
+            author: "$site.author",
           },
         },
         { $skip: (page - 1) * numberPerPage },
