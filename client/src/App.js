@@ -27,6 +27,11 @@ import AddSiteToATour from "./components/pages/users/tour/addSiteToATour.js";
 import AddNewParticipant from "./components/pages/users/tour/addNewParticipant.js";
 import NoAuth from "./components/error/noAuth.js";
 import NotFound from "./components/error/notFound.js";
+import AdminSearchUsers from "./components/pages/admin/search_users.js";
+import AdminSearchSites from "./components/pages/admin/search_sites.js";
+import AdminSiteDetail from "./components/pages/admin/siteDetail.js";
+import AdminSearchTours from "./components/pages/admin/search_tours.js";
+import AdminTourDetail from "./components/pages/admin/tourDetail.js";
 
 function App() {
   let [auth, setAuth] = useState(JSON.parse(localStorage.getItem("auth"))); // 確認登入狀態
@@ -118,6 +123,21 @@ function App() {
           <Route
             path="/users/tours/:tour_id/participants"
             element={<AddNewParticipant />}
+          ></Route>
+        </Route>
+
+        {/* 後台 */}
+        <Route path="/admin" element={<Layout auth={auth} />}>
+          <Route path="/admin/users" element={<AdminSearchUsers />}></Route>
+          <Route path="/admin/sites" element={<AdminSearchSites />}></Route>
+          <Route
+            path="/admin/site/:site_id"
+            element={<AdminSiteDetail />}
+          ></Route>
+          <Route path="/admin/tours" element={<AdminSearchTours />}></Route>
+          <Route
+            path="/admin/tour/:tour_id"
+            element={<AdminTourDetail />}
           ></Route>
         </Route>
 

@@ -7,7 +7,7 @@ const valid = require("../controllers/validation");
 const multer = require("multer");
 const path = require("path");
 const imgurClient = require("../config/imgur");
-const redisClient = require("../config/redis");
+const redisClient = require("../config/redis").redisClient_other;
 const passport = require("passport");
 const hash = require("object-hash");
 
@@ -208,21 +208,6 @@ router.get(
   async (req, res) => {
     let { _id } = req.params;
     try {
-      // 先搜尋快取中有無數據
-      let dataFromRedis = await redisClient.get(`Site:${_id}`);
-      if (dataFromRedis === "404") {
-        console.log("利用快取返回404 error");
-        return res.status(404).send("錯誤");
-      }
-
-      if (dataFromRedis && dataFromRedis !== "403") {
-        console.log("利用快取提供景點資料");
-        return res.send(dataFromRedis);
-      }
-
-      // 若找不到則搜尋資料庫
-      console.log("利用資料庫提取景點資料");
-
       let foundSite = await Site.aggregate([
         {
           $match: {
@@ -721,7 +706,7 @@ router.put(
       // 先從快取中找景點
       let dataFromRedis = await redisClient.get(`Site:${site_id}`);
       if (dataFromRedis === "404") {
-        return res.status(400).send("此景點不存在");
+        return res.status(404).send("此景點不存在");
       }
 
       // 若快取沒有則找資料庫
@@ -732,7 +717,7 @@ router.put(
 
       // 若景點不存在，返回錯誤
       if (!dataFromRedis && !dataFromDatabase) {
-        return res.status(400).send("此景點不存在");
+        return res.status(404).send("此景點不存在");
       }
 
       // 存入資料庫
@@ -761,7 +746,7 @@ router.put(
       // 先從快取中找景點
       let dataFromRedis = await redisClient.get(`Site:${site_id}`);
       if (dataFromRedis === "404") {
-        return res.status(400).send("此景點不存在");
+        return res.status(404).send("此景點不存在");
       }
 
       // 若快取沒有則找資料庫
@@ -772,7 +757,7 @@ router.put(
 
       // 若景點不存在，返回錯誤
       if (!dataFromRedis && !dataFromDatabase) {
-        return res.status(400).send("此景點不存在");
+        return res.status(404).send("此景點不存在");
       }
 
       // 存入資料庫

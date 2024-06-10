@@ -10,6 +10,7 @@ require("./src/config/passport");
 const userRoute = require("./src/routes").users;
 const siteRoute = require("./src/routes").sites;
 const tourRoute = require("./src/routes").tours;
+const adminRoute = require("./src/routes").admin;
 
 // 連線資料庫
 const mongoose = require("mongoose");
@@ -23,11 +24,22 @@ mongoose
   });
 
 // 連線 redis (快取)
-const client = require("./src/config/redis");
-client
+const client_user = require("./src/config/redis").redisClient_user;
+client_user
   .connect()
   .then(() => {
-    console.log("redis已連線");
+    console.log("redis(處理user)_已連線");
+  })
+  .catch((e) => {
+    console.log(e);
+    console.log("無法連線至redis");
+  });
+
+const client_other = require("./src/config/redis").redisClient_other;
+client_other
+  .connect()
+  .then(() => {
+    console.log("redis(處理user以外的)已連線");
   })
   .catch((e) => {
     console.log("無法連線至redis");
@@ -58,6 +70,11 @@ app.use(passport.session());
 app.use("/api/users", userRoute);
 app.use("/api/sites", siteRoute);
 app.use("/api/tours", tourRoute);
+app.use(
+  "/api/admin",
+  passport.authenticate("jwt", { session: false }),
+  adminRoute
+);
 
 app.listen(process.env.PORT || 8080, () => {
   console.log("伺服器正在運行中");

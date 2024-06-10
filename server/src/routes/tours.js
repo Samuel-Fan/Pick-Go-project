@@ -4,9 +4,8 @@ const TourSite = require("../models").tourSite;
 const Tourist = require("../models").tourist;
 const passport = require("passport");
 const valid = require("../controllers/validation");
-const { tourSite } = require("../models");
 const ObjectId = require("mongoose").Types.ObjectId;
-const redisClient = require("../config/redis");
+const redisClient = require("../config/redis").redisClient_other;
 const hash = require("object-hash");
 
 // 測試tourist資料
@@ -28,7 +27,6 @@ router.get("/test", async (req, res) => {
 router.get("/search", async (req, res) => {
   try {
     let { title, username, status, page, numberPerPage } = req.query;
-    console.log(req.query);
     // 先搜尋快取中有沒有
     let queryHash = hash.sha1(req.query);
     let dataFromRedis = await redisClient.get(`tours_search_hash:${queryHash}`);
@@ -45,8 +43,6 @@ router.get("/search", async (req, res) => {
       username && { "author.username": { $regex: username, $options: "i" } },
       status === "true" ? { status: "找旅伴" } : { status: { $ne: "不公開" } }
     );
-
-    console.log(searchObj);
 
     foundTour = await Tour.aggregate([
       {
@@ -109,7 +105,6 @@ router.get("/search", async (req, res) => {
 // 公開旅程資料數(用來計算頁數)
 router.get("/count", async (req, res) => {
   try {
-    console.log(req.query);
     // 先搜尋快取中有沒有
     let queryHash = hash.sha1(req.query);
     let dataFromRedis = await redisClient.get(
@@ -366,7 +361,7 @@ router.get(
         ]);
 
       let query2 = () =>
-        tourSite.aggregate([
+        TourSite.aggregate([
           {
             $match: {
               tour_id: new ObjectId(_id),
@@ -507,7 +502,7 @@ router.get("/detail/:_id", async (req, res) => {
 
     // 旅程每日景點資訊
     let query2 = () =>
-      tourSite.aggregate([
+      TourSite.aggregate([
         {
           $match: {
             tour_id: new ObjectId(_id),
@@ -646,6 +641,14 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
+      // 每人限建立5個旅程
+      let count = await Tour.find({
+        author: new ObjectId(req.user._id),
+      }).count();
+      if (count >= 5) {
+        return res.status(400).send("每人只能建立5個旅程!(目前)");
+      }
+
       // 如旅程規格不符，則返回客製化錯誤訊息
       let { error } = valid.toursValidation(req.body); // req.body 含 title, description, status, limit, days
       if (error) {
@@ -786,6 +789,15 @@ router.post(
     let { tour_id } = req.params;
     let user_id = req.user._id;
     try {
+      // 每人限建立5個旅程
+      let count = await Tour.find({ author: new ObjectId(user_id) })
+        .count()
+        .exec();
+      console.log(count);
+      if (count >= 5) {
+        return res.status(400).send("每人只能建立5個旅程!(目前)");
+      }
+
       let foundTour = await Tour.findOne({ _id: tour_id }).lean().exec();
       let foundSites = await TourSite.find({ tour_id })
         .select(["site_id", "day"])

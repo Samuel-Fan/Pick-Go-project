@@ -6,4 +6,5 @@ module.exports = {
   tour: require("./tour-model"),
   tourist: require("./tourist-model"),
   tourSite: require("./tourSite-model"),
+  admin: require("./admin-model"),
 };

@@ -51,7 +51,7 @@ class TourService {
     );
   }
 
-  // 查詢景點詳細資訊(公開版)
+  // 查詢旅程詳細資訊(公開版)
   get_tour_detail(tour_id) {
     return axios.get(apiURL + "/api/tours/detail/" + tour_id);
   }

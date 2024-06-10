@@ -7,7 +7,7 @@ const bcrypt = require("bcrypt");
 const multer = require("multer");
 const path = require("path");
 const imgurClient = require("../config/imgur");
-const redisClient = require("../config/redis");
+const redisClient = require("../config/redis").redisClient_user;
 
 // 照片檔案上傳格式設定
 const upload = multer({
@@ -27,16 +27,6 @@ router.use((req, res, next) => {
   console.log("正在接收一個跟'使用者'有關的請求");
   next();
 });
-
-// test
-router.get(
-  "/test",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    let user = await User.find({ _id: req.user._id }).populate("mySite").exec();
-    return res.send(user);
-  }
-);
 
 // 得到使用者資料
 router.get(
@@ -283,8 +273,6 @@ router.patch(
           public: public === "true" ? true : false,
         });
 
-        console.log(newData);
-
         let [data, _reditDel] = await Promise.all([
           User.findOneAndUpdate({ _id }, newData, {
             // 更新資料
@@ -318,12 +306,10 @@ router.patch(
       }
 
       let { oldPassword, password, confirmPassword } = req.body;
-      console.log(req.body);
       // 比較舊密碼
       if (foundUser.password) {
         // Google註冊的沒有舊密碼
         let result = await bcrypt.compare(oldPassword, foundUser.password);
-        console.log(foundUser.password);
         if (!result) {
           return res.status(400).send("舊密碼輸入不正確!");
         }
@@ -360,7 +346,6 @@ router.delete(
     let { _id } = req.user;
     try {
       // 確認有無此人
-      console.log(_id);
       let foundUser = await User.findOne({ _id }).exec();
       if (!foundUser) {
         return res.status(400).send("無搜尋到此用戶");
