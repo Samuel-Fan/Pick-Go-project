@@ -3,7 +3,7 @@ const { Schema } = mongoose;
 
 const tourSchema = new Schema({
   title: { type: String },
-  description: { type: String, maxLength: 100 },
+  description: { type: String, maxLength: 500 },
   author: { type: Schema.Types.ObjectId, ref: "User", index: true }, // User 的 primary key
   limit: { type: Number, default: 1 }, // 限制參加人數
   totalDays: { type: Number, default: 1 }, // 旅行有幾天

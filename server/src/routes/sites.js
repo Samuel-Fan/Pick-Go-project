@@ -487,6 +487,20 @@ router.get("/other", async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "author",
+          foreignField: "_id",
+          as: "author",
+          pipeline: [
+            {
+              $project: { username: 1 },
+            },
+          ],
+        },
+      },
+      { $unwind: "$author" },
+      {
         $project: {
           title: 1,
           country: 1,
@@ -495,6 +509,7 @@ router.get("/other", async (req, res) => {
           content: 1,
           photo: 1,
           updateDate: 1,
+          author: 1,
           num_of_like: { $size: "$like" },
         },
       },
@@ -636,14 +651,7 @@ router.post(
         }
 
         // 如景點規格不符，則返回客製化錯誤訊息
-        let { title, country, region, type, content } = req.body;
-        let { error } = valid.sitesValidation({
-          title,
-          country,
-          region,
-          type,
-          content,
-        });
+        let { error } = valid.sitesValidation(req.body); // title、country、region、type、content、public
         if (error) {
           console.log("資料", error);
           return res.status(400).send(error.details[0].message);
@@ -666,19 +674,17 @@ router.post(
         }
 
         // 將景點資訊儲存至資料庫
-        let site = new Site({
-          title,
-          country,
-          region,
-          type,
-          content,
-          author: req.user._id,
-          photo: {
-            url,
-            deletehash,
-            photoName,
-          },
-        });
+        let site = new Site(
+          Object.assign({}, req.body, {
+            public: req.body.public === "true" ? true : false,
+            author: req.user._id,
+            photo: {
+              url,
+              deletehash,
+              photoName,
+            },
+          })
+        );
 
         let savedResult = await site.save();
 

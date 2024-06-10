@@ -81,12 +81,12 @@ const AddNewTour = () => {
           </select>
         </div>
         <div className="mb-3">
-          <label className="mb-3">說明(最多100字)</label>
+          <label className="mb-3">說明</label>
           <textarea
             className="form-control"
             style={{ whiteSpace: "pre-line", height: "200px" }}
             name="description"
-            maxlength="100"
+            maxlength="500"
           ></textarea>
         </div>
 

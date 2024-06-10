@@ -230,7 +230,7 @@ const MyToursOverview = () => {
                 <td>
                   <textarea
                     rows="5"
-                    maxLength="100"
+                    maxLength="500"
                     name="description"
                     style={{ width: "100%" }}
                     defaultValue={edit.description}

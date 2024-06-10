@@ -24,7 +24,8 @@ const EditProfile = () => {
       formData.append("removeOriginPhoto", removeOriginPhoto);
     }
 
-    // loading中禁用submit按鈕
+    // loading中禁用submit按鈕，設定游標
+    document.body.style.cursor = "wait";
     document.querySelector("#edit-user-submit-button").disabled = true;
 
     try {

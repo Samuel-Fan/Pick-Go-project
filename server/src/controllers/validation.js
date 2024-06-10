@@ -68,8 +68,8 @@ const editBasicValidation = (data) => {
       "number.min": "年齡須介於0-120歲",
       "number.max": "年齡須介於0-120歲",
     }),
-    description: Joi.string().allow(null, "").max(550).messages({
-      "string.max": "'自我介紹'最長長度為 50 個字",
+    description: Joi.string().allow(null, "").max(200).messages({
+      "string.max": "'自我介紹'最長長度為 200 個字",
     }),
     public: Joi.boolean(),
     removeOriginPhoto: Joi.boolean(),
@@ -123,9 +123,9 @@ const sitesValidation = (data) => {
         "any.required": "'類型'為必須填寫的項目",
         "any.only": "類型必須為餐廳、景點、購物或其他",
       }),
-    content: Joi.string().max(300).required().allow(null, "").messages({
+    content: Joi.string().max(500).required().allow(null, "").messages({
       "any.required": "'內容'為必須填寫的項目",
-      "string.max": "'內容'最長長度為 300 個字",
+      "string.max": "'內容'最長長度為 500 個字",
     }),
     public: Joi.boolean(),
     removeOriginPhoto: Joi.boolean(),
@@ -142,9 +142,9 @@ const toursValidation = (data) => {
       "string.empty": "'標題'為必須填寫的項目",
       "string.max": "'標題'最長長度為 20 個字",
     }),
-    description: Joi.string().max(100).required().allow(null, "").messages({
+    description: Joi.string().max(500).required().allow(null, "").messages({
       "any.required": "'簡介'為必須填寫的項目",
-      "string.max": "'簡介'最長為 100字",
+      "string.max": "'簡介'最長為 500字",
     }),
     status: Joi.string().valid("不公開", "純分享", "找旅伴").messages({
       "any.only": "類別必須為不公開、純分享、找旅伴",

@@ -5,11 +5,8 @@ import notFound from "../../images/404.jpg";
 
 const NotFound = () => {
   return (
-    <div
-      className="d-flex justify-content-center align-items-center"
-      style={{ marginTop: "10px" }}
-    >
-      <div style={{ height: "600px", width: "600px" }}>
+    <div className="d-flex justify-content-center align-items-center">
+      <div style={{ width: "600px" }}>
         <img
           src={notFound}
           alt="404_not_Found"

@@ -9,12 +9,14 @@ const AddNewSite = () => {
   const navigate = useNavigate();
 
   const [country, setCountry] = useState("");
+  const [sitePublic, setSitePublic] = useState(false);
   const [message, setMessage] = useState("");
 
   const handleAddSite = async (e) => {
     e.preventDefault();
     // 處理form data
     const formData = new FormData(e.currentTarget);
+    formData.append("public", sitePublic);
 
     // loading中禁用submit按鈕
     document.querySelector("#add-new-site-button").disabled = true;
@@ -42,9 +44,15 @@ const AddNewSite = () => {
     }
   };
 
+  // 用來設定region選項
   const handleCountry = (e) => {
     setCountry(e.target.value);
     document.querySelector("#region_site_add").value = "";
+  };
+
+  // 資料公開不公開
+  const handlePublic = () => {
+    setSitePublic(!sitePublic);
   };
 
   const handleImage = (e) => {
@@ -257,6 +265,18 @@ const AddNewSite = () => {
             name="photo"
             onChange={handleImage}
           />
+        </div>
+        <div className="form-check form-switch">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            role="switch"
+            id="publicButton"
+            onChange={handlePublic}
+          />
+          <label className="form-check-label" htmlFor="publicButton">
+            {sitePublic ? "公開" : "不公開"}
+          </label>
         </div>
         <div className="small mb-2 pb-lg-2">
           {message && (

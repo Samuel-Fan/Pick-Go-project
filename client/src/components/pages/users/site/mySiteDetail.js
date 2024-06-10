@@ -78,14 +78,14 @@ const MySiteDetail = () => {
               flex: "0 1 450px",
             }}
           >
-            <div style={{ height: "300px" }}>
+            <div style={{ height: "400px" }}>
               {site.photo.url ? (
                 <img
                   src={site.photo.url}
                   alt={site.photo.photoName}
                   className="img-fluid"
                   style={{
-                    objectFit: "cover",
+                    objectFit: "contain",
                     width: "100%",
                     height: "100%",
                   }}

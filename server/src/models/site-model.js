@@ -7,7 +7,7 @@ const siteSchema = new Schema({
   country: { type: String, enum: ["日本", "臺灣"] }, // 之後可以再新增
   region: { type: String },
   type: { type: String, enum: ["餐廳", "景點", "購物", "其他"] },
-  content: { type: String, maxLength: 300 },
+  content: { type: String, maxLength: 500 },
   author: { type: Schema.Types.ObjectId, ref: "User", index: true }, // User 的 primary key
   photo: {
     url: { type: String, default: "" },

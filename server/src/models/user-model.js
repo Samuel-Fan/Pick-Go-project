@@ -21,7 +21,7 @@ const userSchema = new Schema({
   },
   age: { type: Number, min: 0, max: 120 },
   googleID: { type: String },
-  description: { type: String, maxLength: 500 },
+  description: { type: String, maxLength: 200 },
   createdDate: { type: Date, default: Date.now },
   public: { type: Boolean, default: false },
   photo: {

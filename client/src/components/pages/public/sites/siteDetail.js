@@ -53,7 +53,7 @@ const SiteDetail = () => {
   const handleLike = async () => {
     try {
       await clickLike(site_id);
-      navigate(0);
+      setCheckLike(!checkLike);
     } catch (e) {
       console.log(e);
       if (e.response && e.response.status === 401) {
@@ -75,7 +75,7 @@ const SiteDetail = () => {
   const handleCollect = async () => {
     try {
       await clickCollect(site_id);
-      navigate(0);
+      setCheckCollection(!checkCollection);
     } catch (e) {
       console.log(e);
       if (e.response && e.response.status === 401) {
@@ -117,6 +117,7 @@ const SiteDetail = () => {
       siteService
         .get_other_sites(site.author._id, site_id)
         .then((data) => {
+          console.log(data.data);
           setOtherSites(data.data);
         })
         .catch((e) => {
@@ -141,14 +142,14 @@ const SiteDetail = () => {
               flex: "0 1 450px",
             }}
           >
-            <div style={{ height: "300px" }}>
+            <div style={{ height: "400px" }}>
               {site.photo.url ? (
                 <img
                   src={site.photo.url}
                   alt={site.photo.photoName}
                   className="img-fluid"
                   style={{
-                    objectFit: "cover",
+                    objectFit: "contain",
                     width: "100%",
                     height: "100%",
                   }}
@@ -219,7 +220,11 @@ const SiteDetail = () => {
       </div>
       <div className="d-flex flex-wrap justify-content-center">
         {/* 景點圖卡 */}
-        <SiteCard sites={otherSites} />
+        <SiteCard
+          sites={otherSites}
+          sitePublic={true}
+          handleDelete={() => {}}
+        />
       </div>
     </div>
   );
