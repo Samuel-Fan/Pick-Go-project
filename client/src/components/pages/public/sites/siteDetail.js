@@ -56,8 +56,17 @@ const SiteDetail = () => {
       setCheckLike(!checkLike);
     } catch (e) {
       console.log(e);
-      if (e.response && e.response.status === 401) {
-        alert("您需要先登入");
+      if (e.response) {
+        switch (e.response.status) {
+          case 401:
+            alert("您需要先登入");
+            break;
+          default:
+            alert(e.response.data);
+            break;
+        }
+      } else {
+        alert("伺服器發生問題");
       }
     }
   };
@@ -92,13 +101,23 @@ const SiteDetail = () => {
         setSite(data.data);
       })
       .catch((e) => {
-        if (e.response && e.response.status === 403) {
-          navigate("/noAuth");
-        } else if (e.response && e.response.status === 401) {
-          alert("請先登入");
-          navigate("/login");
-        } else if (e.response && e.response.status === 404) {
-          navigate("/404");
+        if (e.response) {
+          switch (e.response.status) {
+            case 401:
+              navigate("/login");
+              break;
+            case 403:
+              navigate("/noAuth");
+              break;
+            case 404:
+              navigate("/404");
+              break;
+            default:
+              alert(e.response.data);
+              break;
+          }
+        } else {
+          alert("伺服器發生問題");
         }
       });
     siteService

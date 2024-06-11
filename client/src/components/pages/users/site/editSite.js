@@ -160,7 +160,20 @@ const EditSite = () => {
         document.body.style.cursor = "default";
         document.querySelector("#edit-site-submit-button").disabled = false;
       })
-      .catch((e) => console.log(e));
+      .catch((e) => {
+        if (e.response) {
+          switch (e.response.status) {
+            case 401:
+              alert("您需要先登入");
+              break;
+            default:
+              alert(e.response.data);
+              break;
+          }
+        } else {
+          alert("伺服器發生問題");
+        }
+      });
   }, [navigate, site_id]);
 
   return (

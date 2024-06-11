@@ -37,8 +37,18 @@ const EditPassword = ({ currentUser, setCurrentUser }) => {
         setCurrentUser(user);
       })
       .catch((e) => {
-        navigate("/login");
-        navigate(0);
+        if (e.response) {
+          switch (e.response.status) {
+            case 401:
+              alert("您需要先登入");
+              break;
+            default:
+              alert(e.response.data);
+              break;
+          }
+        } else {
+          alert("伺服器發生問題");
+        }
       });
   }, [navigate, setCurrentUser]);
 

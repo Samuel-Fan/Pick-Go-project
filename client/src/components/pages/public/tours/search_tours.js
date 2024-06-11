@@ -45,11 +45,7 @@ const SearchTours = () => {
         }
       })
       .catch((e) => {
-        if (e.response) {
-          alert(e.response.data);
-        } else {
-          alert("伺服器發生問題");
-        }
+        console.log(e);
       });
   }, [status, numberPerPage, query, navigate]);
 

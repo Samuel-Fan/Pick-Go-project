@@ -98,10 +98,20 @@ const AddSiteToATour = () => {
         setSites(result);
       })
       .catch((e) => {
-        if (e.response && e.response.status === 401) {
-          localStorage.removeItem("auth");
-          navigate("/login");
-          navigate(0);
+        if (e.response) {
+          switch (e.response.status) {
+            case 401:
+              alert("請重新登入");
+              localStorage.removeItem("auth");
+              navigate("/login");
+              navigate(0);
+              break;
+            default:
+              alert(e.response.data);
+              break;
+          }
+        } else {
+          alert("伺服器發生問題");
         }
       });
   }, [fetchSites, navigate]);

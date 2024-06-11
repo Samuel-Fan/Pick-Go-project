@@ -16,7 +16,6 @@ const TourDetail = () => {
   const [tour, setTour] = useState(""); // 景點詳細資料
   const [sites, setSites] = useState(""); // 每天行程
   const [days, setDays] = useState([""]); // 設定每天格式用
-  const [tourist_id, setTourist_id] = useState(""); // 使用者於此行程的參加id
 
   // 參加者查看簡易個人頁面
   const [checkParticipants, setCheckParticipants] = useState("");

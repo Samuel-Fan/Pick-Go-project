@@ -72,11 +72,7 @@ const SearchSites = () => {
         }
       })
       .catch((e) => {
-        if (e.response) {
-          alert(e.response.data);
-        } else {
-          alert("伺服器發生問題");
-        }
+        console.log(e);
       });
   }, [numberPerPage, query, navigate]);
 

@@ -22,9 +22,21 @@ const MyProfile = ({ currentUser, setCurrentUser }) => {
         setCurrentUser(user);
       })
       .catch((e) => {
-        localStorage.removeItem("auth");
-        navigate("/login");
-        navigate(0);
+        if (e.response) {
+          switch (e.response.status) {
+            case 401:
+              alert("您需要先登入");
+              localStorage.removeItem("auth");
+              navigate("/login");
+              navigate(0);
+              break;
+            default:
+              alert(e.response.data);
+              break;
+          }
+        } else {
+          alert("伺服器發生問題");
+        }
       });
   }, [navigate, setCurrentUser]);
 

@@ -40,10 +40,23 @@ const TourDetail = () => {
         setDays(array.map((n, i) => i + 1));
       })
       .catch((e) => {
-        if (e.response && e.response.status === 403) {
-          navigate("/noAuth");
-        } else if (e.response && e.response.status === 404) {
-          navigate("/404");
+        if (e.response) {
+          switch (e.response.status) {
+            case 401:
+              navigate("/login");
+              break;
+            case 403:
+              navigate("/noAuth");
+              break;
+            case 404:
+              navigate("/404");
+              break;
+            default:
+              alert(e.response.data);
+              break;
+          }
+        } else {
+          alert("伺服器發生問題");
         }
       });
   }, [navigate, tour_id]);
