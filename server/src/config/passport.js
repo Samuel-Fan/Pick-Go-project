@@ -5,13 +5,13 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const redisClient = require("./redis").redisClient_user;
 const User = require("../models/index").user;
 
+// 以下兩個是給google登入用的
+
 passport.serializeUser(function (user, done) {
-  console.log("serializeUser");
   done(null, user._id);
 });
 
 passport.deserializeUser(async function (_id, done) {
-  console.log("deserializeUser");
   let foundUser = await User.findOne({ _id }).exec();
   done(null, foundUser);
 });
@@ -28,13 +28,11 @@ passport.use(
       // 先找尋快取中有沒有
       foundUser = await redisClient.get(`User:${jwt_payload._id}`);
       if (foundUser) {
-        console.log("使用快取找到使用者");
         return done(null, JSON.parse(foundUser));
       }
 
       // 若沒有找到快取，則從資料庫搜尋，並存入快取
       foundUser = await User.findOne({ _id: jwt_payload._id }).exec();
-      console.log("使用資料庫找到使用者");
       if (foundUser) {
         await redisClient.set(
           `User:${jwt_payload._id}`,
@@ -62,6 +60,7 @@ passport.use(
     async function (accessToken, refreshToken, profile, cb) {
       try {
         let googleID = profile.id;
+
         // 確認資料庫有無此人
         let foundUser = await User.findOne({ googleID }).exec();
         if (foundUser) {
@@ -70,6 +69,7 @@ passport.use(
 
         let username = profile.displayName || "";
         let email = profile.emails[0] ? profile.emails[0].value || "" : "";
+
         let newUser = new User({ googleID, username, email });
         let savedUser = await newUser.save();
         return cb(null, savedUser);

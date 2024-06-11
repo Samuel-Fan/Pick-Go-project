@@ -9,7 +9,6 @@ class IPLimiter {
 
   limiter = async (req, res, next) => {
     let record = await redisClient.get(`IP:${req.ip}`);
-    console.log(record);
     if (record === "lock") {
       return res.status(429).send("Too many requests");
     } else {
@@ -64,7 +63,6 @@ class RateLimiter {
   tokenBucket = (req, res, next) => {
     if (this.tokens > 0) {
       this.tokens -= 1;
-      console.log(this.tokens);
       next();
     } else {
       return res.status(429).send("Too many requests");
@@ -75,7 +73,6 @@ class RateLimiter {
     setInterval(() => {
       if (this.tokens < this.maxTokens) {
         this.tokens += this.refillRate;
-        console.log("refill", this.tokens);
       } else {
         this.tokens = this.maxTokens;
       }

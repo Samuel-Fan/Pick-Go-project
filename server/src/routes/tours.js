@@ -8,35 +8,19 @@ const ObjectId = require("mongoose").Types.ObjectId;
 const redisClient = require("../config/redis").redisClient_other;
 const hash = require("object-hash");
 
-// 測試tourist資料
-router.get("/test", async (req, res) => {
-  try {
-    let foundTour = await TourSite.find()
-      .populate("tour_id", ["title", "author"])
-      .populate("site_id", ["title"])
-      .exec();
-
-    return res.send(foundTour);
-  } catch (e) {
-    console.log(e);
-    return res.status(500).send("伺服器發生問題");
-  }
-});
-
 // 以關鍵字搜尋旅程
 router.get("/search", async (req, res) => {
   try {
     let { title, username, status, page, numberPerPage } = req.query;
     // 先搜尋快取中有沒有
     let queryHash = hash.sha1(req.query);
-    let dataFromRedis = await redisClient.get(`tours_search_hash:${queryHash}`);
-    if (dataFromRedis) {
-      console.log("利用快取給予搜尋資料");
-      return res.send(dataFromRedis);
+    let cacheData = await redisClient.get(`tours_search_hash:${queryHash}`);
+    if (cacheData) {
+      return res.send(cacheData);
     }
 
     // 若快取沒有，則搜尋資料庫
-
+    // 建立搜尋關鍵字
     let searchObj = Object.assign(
       {},
       title && { title: { $regex: title, $options: "i" } },
@@ -44,7 +28,8 @@ router.get("/search", async (req, res) => {
       status === "true" ? { status: "找旅伴" } : { status: { $ne: "不公開" } }
     );
 
-    foundTour = await Tour.aggregate([
+    // 搜尋
+    let foundTour = await Tour.aggregate([
       {
         $lookup: {
           from: "users",
@@ -84,8 +69,6 @@ router.get("/search", async (req, res) => {
       { $limit: Number(numberPerPage) },
     ]);
 
-    console.log("利用資料庫提供搜尋資料");
-
     // 存入快取，過期時間先設定短一點(方便展示project用)
     await redisClient.set(
       `tours_search_hash:${queryHash}`,
@@ -107,12 +90,11 @@ router.get("/count", async (req, res) => {
   try {
     // 先搜尋快取中有沒有
     let queryHash = hash.sha1(req.query);
-    let dataFromRedis = await redisClient.get(
+    let cacheData = await redisClient.get(
       `tours_search_count_hash:${queryHash}`
     );
-    if (dataFromRedis) {
-      console.log("利用快取搜尋頁數");
-      return res.send(dataFromRedis);
+    if (cacheData) {
+      return res.send(cacheData);
     }
 
     let { title, username, status } = req.query;
@@ -205,7 +187,7 @@ router.get(
   }
 );
 
-// 計算使用者的tours總數
+// 計算使用者建立的旅程總數(用來計算頁數)
 router.get(
   "/myTour/count",
   passport.authenticate("jwt", { session: false }),
@@ -290,7 +272,6 @@ router.get(
           },
         },
       ]);
-      console.log(foundTour);
       return res.send(foundTour);
     } catch (e) {
       console.log(e);
@@ -299,24 +280,22 @@ router.get(
   }
 );
 
-// 得到特定旅程(私人)
+// 得到單一旅程詳細資訊(私人 -- 主辦者、參加者可看)
 router.get(
   "/myTour/detail/:_id",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     let { _id } = req.params;
-    console.log(_id);
+
     try {
-      // 先搜尋快取中有無數據(只確認是否為404);
-      let dataFromRedis = await redisClient.get(`Tour:${_id}`);
-      if (dataFromRedis === "404") {
-        console.log("利用快取返回404 error");
+      // 先確認快取有無存為404 error
+      let cacheData = await redisClient.get(`Tour:${_id}`);
+      if (cacheData === "404") {
         return res.status(404).send("錯誤");
       }
 
-      // // 若找不到則搜尋資料庫
-      console.log("利用資料庫提取旅程資料");
-
+      // 搜尋資料庫
+      // 旅程文字資料
       let query1 = () =>
         Tour.aggregate([
           {
@@ -360,6 +339,7 @@ router.get(
           },
         ]);
 
+      // 旅程景點資料
       let query2 = () =>
         TourSite.aggregate([
           {
@@ -393,21 +373,10 @@ router.get(
 
       foundTour = foundTour[0];
 
-      // 若沒找到資料
-      if (!foundTour) {
-        // 找不到資料也存進快取，防快取穿透 Cache Penetration
-        await redisClient.set(`Tour:${_id}`, "404", {
-          EX: 60 * 60 * 1,
-        });
-        return res.status(404).send("無此資料");
-      }
-
       // 景點不對主辦者或參加者以外的人開放
       let checkAuth = foundTour.participants.filter((tourist) => {
         return tourist.user_id.equals(req.user._id);
       });
-
-      console.log(checkAuth);
       if (checkAuth.length === 0) {
         return res.status(403).send("您無查看權限");
       }
@@ -432,30 +401,22 @@ router.get(
   }
 );
 
-// 得到特定旅程(公開)
+// 得到特定旅程詳細資訊(公開)
 router.get("/detail/:_id", async (req, res) => {
   let { _id } = req.params;
   try {
     // 先搜尋快取中有無數據;
-    let dataFromRedis = await redisClient.get(`Tour:${_id}`);
-    if (dataFromRedis === "404") {
-      console.log("利用快取返回404 error");
-      return res.status(404).send("錯誤");
+    let cacheData = await redisClient.get(`Tour:${_id}`);
+    if (cacheData) {
+      switch (cacheData) {
+        case "404":
+          return res.status(404).send("無此景點存在");
+        case "403":
+          return res.status(403).send("作者不公開相關頁面");
+        default:
+          return res.send(cacheData);
+      }
     }
-
-    if (dataFromRedis === "403") {
-      console.log("利用快取返回403 error");
-      return res.status(403).send("錯誤");
-    }
-
-    if (dataFromRedis) {
-      dataFromRedis;
-      console.log("利用快取提供景點資料");
-      return res.send(dataFromRedis);
-    }
-
-    // // 若找不到則搜尋資料庫
-    console.log("利用資料庫提取旅程資料");
 
     // 旅程詳細資訊
     let query1 = () =>
@@ -586,11 +547,11 @@ router.get(
         .exec();
 
       // 若搜尋不到
-      if (!myType) {
+      if (myType) {
+        return res.send(myType);
+      } else {
         return res.send({ type: "無" });
       }
-
-      return res.send(myType);
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
@@ -613,18 +574,18 @@ router.get(
 
       // 找不到相關資訊
       if (!tourists) {
-        return res.status(400).send("找不到相關資訊");
+        return res.status(404).send("找不到相關資訊");
       }
-      console.log(tourists);
+
       let checkAuth = tourists.filter(
         (tourist) =>
           tourist.user_id._id.equals(req.user._id) &&
           (tourist.type === "主辦者" || tourist.type === "參加者")
       );
 
-      // 若非作者本人操作
+      // 若非主辦者或參加者操作
       if (checkAuth.length === 0) {
-        return res.status(403).send("只有作者才能操作");
+        return res.status(403).send("只有主辦者或參加者才能取得資訊");
       }
 
       return res.send(tourists);
@@ -665,6 +626,7 @@ router.post(
         author: req.user._id,
       });
 
+      // 創立旅程時，同時將自己設為主辦者
       let tour_id = tour._id;
       let tourist = new Tourist({
         user_id: req.user._id,
@@ -689,15 +651,14 @@ router.post(
     let { _id } = req.params;
     // 確認本人編輯
     let foundTour = await Tour.findOne({ _id }).select("author").lean().exec();
-    console.log(foundTour);
     if (!foundTour) {
-      return res.status(400).send("找不到相關旅程");
+      return res.status(404).send("找不到相關旅程");
     }
 
     if (!foundTour.author.equals(req.user._id)) {
       return res.status(403).send("本人才能編輯");
     }
-    console.log(req.body);
+
     let site_arr = req.body;
     try {
       if (site_arr.length === 0) {
@@ -735,7 +696,7 @@ router.post(
 
       // 若找不到相關旅程
       if (!foundTour) {
-        return res.status(400).send("找不到相關旅程");
+        return res.status(404).send("找不到相關旅程");
       }
 
       // 若旅程並非找尋旅伴中
@@ -760,7 +721,7 @@ router.post(
       })
         .count()
         .exec();
-      console.log("count", count);
+
       if (count >= foundTour.limit) {
         return res.status(403).send("人數已達上限");
       }
@@ -793,7 +754,7 @@ router.post(
       let count = await Tour.find({ author: new ObjectId(user_id) })
         .count()
         .exec();
-      console.log(count);
+
       if (count >= 5) {
         return res.status(400).send("每人只能建立5個旅程!(目前)");
       }
@@ -806,7 +767,7 @@ router.post(
 
       // 若無搜尋到旅程
       if (!foundTour) {
-        return res.status(400).send("無找到相關旅程");
+        return res.status(404).send("無找到相關旅程");
       }
 
       let { title, description, totalDays } = foundTour;
@@ -856,11 +817,13 @@ router.patch(
     }
 
     try {
+      // 確認有無旅程存在
       let foundTour = await Tour.findOne({ _id }).lean().exec();
       if (!foundTour) {
-        return res.status(400).send("找不到相關旅程");
+        return res.status(404).send("找不到相關旅程");
       }
 
+      // 只有該旅程作者才能編輯
       if (!foundTour.author.equals(req.user._id)) {
         return res.status(403).send("必須本人才能編輯");
       }
@@ -889,17 +852,21 @@ router.patch(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
-      let { _id } = req.params;
+      let { _id } = req.params; // tourist_id
 
       // 確認有無該申請者
       let applicant = await Tourist.findOne({ _id })
         .populate("tour_id", ["author", "limit"])
         .exec();
 
-      console.log(applicant);
+      // 確認有無該申請者
+      if (!applicant) {
+        return res.status(404).send("無找到相關申請者");
+      }
+
       // 若找不到相關旅程
       if (!applicant.tour_id) {
-        return res.status(400).send("找不到相關旅程");
+        return res.status(404).send("找不到相關旅程");
       }
 
       // 若非作者本人操作
@@ -907,13 +874,8 @@ router.patch(
         return res.status(403).send("只有作者才能操作");
       }
 
-      // 確認有無該申請者
-      if (!applicant) {
-        return res.status(400).send("無找到相關申請者");
-      }
-
       // 確認是否已參加
-      if (applicant.type !== "申請者") {
+      if (applicant.type === "主辦者" || applicant.type === "參加者") {
         return res.status(400).send("此人已參加旅行團");
       }
 
@@ -931,12 +893,12 @@ router.patch(
       }
 
       // 若以上都沒問題，則設定為參加者
-
       applicant.type = "參加者";
+
       await Promise.all([
         applicant.save(),
-        redisClient.del(`Tour:${applicant.tour_id._id}`),
-      ]); // 刪快取
+        redisClient.del(`Tour:${applicant.tour_id._id}`), // 刪快取
+      ]);
       return res.send("已成功加入該成員");
     } catch (e) {
       console.log(e);
@@ -955,7 +917,7 @@ router.delete(
       let foundTour = await Tour.findOne({ _id }).lean().exec();
       // 若無相關旅程
       if (!foundTour) {
-        return res.status(400).send("無搜尋到相關旅程");
+        return res.status(404).send("無搜尋到相關旅程");
       }
 
       // 若非本人刪除
@@ -993,7 +955,7 @@ router.delete(
 
       // 若找不到景點，返回錯誤
       if (!foundSite) {
-        return res.status(400).send("找不到相關景點");
+        return res.status(404).send("找不到相關景點");
       }
 
       // 非本人編輯，返回錯誤
@@ -1015,7 +977,7 @@ router.delete(
   }
 );
 
-// 刪某旅程限制天數外的行程
+// 刪某旅程限制天數外的行程 (如 5 -> 3天， 刪掉 4、5天的景點)
 router.delete(
   "/over_totalDays/:_id/:day",
   passport.authenticate("jwt", { session: false }),
@@ -1030,7 +992,7 @@ router.delete(
 
       // 若找不到景點，返回錯誤
       if (!foundSite) {
-        return res.status(400).send("找不到相關行程");
+        return res.status(404).send("找不到相關行程");
       }
 
       // 天數沒給
@@ -1059,7 +1021,7 @@ router.delete(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
-      let { _id } = req.params;
+      let { _id } = req.params; // tourist_id
 
       let info = await Tourist.findOne({ _id })
         .populate("tour_id", ["author"])
@@ -1068,23 +1030,23 @@ router.delete(
 
       // 確認有無該申請者/參加者
       if (!info) {
-        return res.status(400).send("無找到相關參加者");
+        return res.status(404).send("無找到相關參加者");
       }
 
       // 若該旅程不存在
       if (!info.tour_id) {
-        return res.status(400).send("該旅程不存在");
+        return res.status(404).send("該旅程不存在");
       }
 
-      // 若非本人或旅程主辦人本人操作
+      // 若非本人或旅程主辦者本人操作
       if (
         !info.user_id.equals(req.user._id) &&
         !info.tour_id.author.equals(req.user._id)
       ) {
-        return res.status(403).send("只有作者才能操作");
+        return res.status(403).send("只有本人或主辦者才能操作");
       }
 
-      // 確認該人非主辦者本人
+      // 主辦者無法被刪掉
       if (info.tour_id.author.equals(info.user_id)) {
         return res.status(400).send("不可以刪掉主辦人");
       }

@@ -23,11 +23,6 @@ const upload = multer({
   },
 }).any();
 
-router.use((req, res, next) => {
-  console.log("正在接收一個跟'使用者'有關的請求");
-  next();
-});
-
 // 得到使用者資料
 router.get(
   "/",
@@ -50,8 +45,8 @@ router.get("/profile/:_id", async (req, res) => {
     let cacheData = await redisClient.get(`public_user_${_id}`);
     if (cacheData) {
       switch (cacheData) {
-        case "400":
-          return res.status(400).send("找不到使用者");
+        case "404":
+          return res.status(404).send("找不到使用者");
         case "403":
           return res.status(403).send("該使用者不公開資料");
         default:
@@ -70,7 +65,7 @@ router.get("/profile/:_id", async (req, res) => {
       redisClient.set(`public_user_${_id}`, "400", {
         EX: 24 * 60 * 1,
       });
-      return res.status(400).send("找不到使用者");
+      return res.status(404).send("找不到使用者");
     }
 
     // 若不公開
@@ -113,7 +108,7 @@ router.get(
 // google登入後，清除session，轉用jwt儲存
 router.get("/auth/google/setJwt", (req, res) => {
   if (!req.user) {
-    return res.status(400).send("無使用者儲存");
+    return res.status(400).send("無使用者登入");
   }
 
   const tokenObject = { _id: req.user._id, email: req.user.email };
@@ -121,7 +116,7 @@ router.get("/auth/google/setJwt", (req, res) => {
     tokenObject,
     process.env.JWT_SECRET || "happycodingjwtyeah!",
     {
-      expiresIn: "1h",
+      expiresIn: "4h",
     }
   );
 
@@ -147,7 +142,10 @@ router.post("/login", async (req, res) => {
   let { email, password } = req.body;
   try {
     // 用email找尋使用者
-    const foundUser = await User.findOne({ email }).exec();
+    const foundUser = await User.findOne({ email })
+      .select(["password", "username"])
+      .lean()
+      .exec();
     if (!foundUser) {
       return res.status(400).send("此email無人註冊過");
     }
@@ -158,6 +156,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).send("帳號或密碼錯誤");
     }
 
+    // 回傳 JWT
     const tokenObject = { _id: foundUser._id, email: foundUser.email };
     const token = jwt.sign(
       tokenObject,
@@ -185,7 +184,7 @@ router.post("/register", async (req, res) => {
 
   try {
     // 查看 email 是否已經註冊過
-    let isExisted = await User.findOne({ email }).exec();
+    let isExisted = await User.findOne({ email }).select("_id").lean().exec();
     if (isExisted) {
       return res.status(400).send("此帳號已註冊過");
     }
@@ -197,7 +196,7 @@ router.post("/register", async (req, res) => {
       username,
     });
 
-    let savedUser = await newUser.save();
+    let savedUser = await newUser.save(); // save時自動 hash 密碼
     return res.status(201).send({ message: "使用者資料儲存完畢", savedUser });
   } catch (e) {
     console.log(e);
@@ -213,11 +212,12 @@ router.patch(
     let { _id } = req.user;
     try {
       // 確認有無此人
-      let foundUser = await User.findOne({ _id }).exec();
+      let foundUser = await User.findOne({ _id }).select("_id").lean().exec();
       if (!foundUser) {
-        return res.status(400).send("無搜尋到此用戶");
+        return res.status(404).send("無搜尋到此用戶");
       }
 
+      // 上傳格式formData
       upload(req, res, async (err) => {
         // req.files 包含 圖片檔案
         // req.body 包含 key-value 資料
@@ -247,9 +247,9 @@ router.patch(
           await imgurClient.deleteImage(foundUser.photo.deletehash);
         }
 
+        let newPhoto;
+        // 上傳新照片
         if (req.files.length !== 0) {
-          // 如果原本有圖片，先把舊的刪掉，再更新成新的
-
           const response = await imgurClient.upload({
             image: req.files[0].buffer.toString("base64"),
             type: "base64",
@@ -259,21 +259,22 @@ router.patch(
           url = response.data.link;
           deletehash = response.data.deletehash;
           photoName = req.files[0].originalname;
-        }
 
-        let newPhoto =
-          req.files.length !== 0
-            ? { photo: { url, deletehash, photoName } }
-            : removeOriginPhoto === "true"
-            ? { photo: { url: "", deletehash: "", photoName: "" } }
-            : {};
+          newPhoto = { photo: { url, deletehash, photoName } };
+        } else {
+          if (removeOriginPhoto === "true") {
+            newPhoto = { photo: { url: "", deletehash: "", photoName: "" } };
+          } else {
+            newPhoto = {};
+          }
+        }
 
         // 將景點資訊儲存至資料庫
         let newData = Object.assign({}, req.body, newPhoto, {
           public: public === "true" ? true : false,
         });
 
-        let [data, _reditDel] = await Promise.all([
+        let [data] = await Promise.all([
           User.findOneAndUpdate({ _id }, newData, {
             // 更新資料
             new: true,
@@ -302,7 +303,7 @@ router.patch(
       // 確認有無此人
       let foundUser = await User.findOne({ _id }).exec();
       if (!foundUser) {
-        return res.status(400).send("無搜尋到此用戶");
+        return res.status(404).send("無搜尋到此用戶");
       }
 
       let { oldPassword, password, confirmPassword } = req.body;
@@ -328,7 +329,7 @@ router.patch(
       await Promise.all([
         foundUser.save(), // 更新資料
         redisClient.del(`User:${_id}`), // 刪掉快取
-        redisClient.del(`public_user_${_id}`),
+        redisClient.del(`public_user_${_id}`), // 刪掉快取
       ]);
 
       return res.send("成功更新資料");
@@ -338,7 +339,7 @@ router.patch(
   }
 );
 
-// 刪除會員
+// 刪除會員 (目前無開放)
 router.delete(
   "/",
   passport.authenticate("jwt", { session: false }),

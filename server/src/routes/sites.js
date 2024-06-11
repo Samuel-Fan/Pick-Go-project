@@ -25,28 +25,7 @@ const upload = multer({
   },
 }).any();
 
-// <<測試用>> 得到全部景點
-router.get("/all", async (req, res) => {
-  let foundSite = await Site.find({})
-    .populate("author", ["username"])
-    .lean()
-    .exec();
-  return res.send(foundSite);
-});
-
-// <<測試用>> 得到全部景點
-router.get("/test", (req, res) => {
-  Site.find({ author: req.user._id })
-    .explain("executionStats")
-    .then((res) => {
-      console.log(res);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-});
-
-// 以關鍵字搜尋景點
+// 以關鍵字搜尋景點(公開)
 router.get("/search", async (req, res) => {
   try {
     let {
@@ -62,13 +41,13 @@ router.get("/search", async (req, res) => {
 
     // 先搜尋快取中有沒有
     let queryHash = hash.sha1(req.query);
-    let dataFromRedis = await redisClient.get(`sites_search_hash:${queryHash}`);
-    if (dataFromRedis) {
-      console.log("利用快取給予搜尋資料");
-      return res.send(dataFromRedis);
+    let cacheData = await redisClient.get(`sites_search_hash:${queryHash}`);
+    if (cacheData) {
+      return res.send(cacheData);
     }
 
     // 若快取沒有，則搜尋資料庫
+    // 設定搜尋條件
     let searchObj = Object.assign(
       {},
       country && { country },
@@ -86,7 +65,8 @@ router.get("/search", async (req, res) => {
       sortObj = { num_of_like: -1, updateDate: -1 };
     }
 
-    foundSite = await Site.aggregate([
+    // 搜尋
+    let foundSite = await Site.aggregate([
       {
         $lookup: {
           from: "users",
@@ -126,7 +106,6 @@ router.get("/search", async (req, res) => {
       { $skip: (page - 1) * numberPerPage },
       { $limit: Number(numberPerPage) },
     ]);
-    console.log("利用資料庫提供搜尋資料");
 
     // 存入快取，過期時間先設定短一點(方便展示project用)
     await redisClient.set(
@@ -148,12 +127,9 @@ router.get("/search", async (req, res) => {
 router.get("/count", async (req, res) => {
   // 先搜尋快取中有沒有
   let queryHash = hash.sha1(req.query);
-  let dataFromRedis = await redisClient.get(
-    `sites_search_count_hash:${queryHash}`
-  );
-  if (dataFromRedis) {
-    console.log("利用快取搜尋頁數");
-    return res.send(dataFromRedis);
+  let cacheData = await redisClient.get(`sites_search_count_hash:${queryHash}`);
+  if (cacheData) {
+    return res.send(cacheData);
   }
 
   let { title, country, region, type, username } = req.query;
@@ -201,7 +177,7 @@ router.get("/count", async (req, res) => {
   }
 });
 
-// 找尋單個景點詳細資訊 (非公開頁面)
+// 找尋自己建立的單一景點詳細資訊 (非公開頁面)
 router.get(
   "/mySite/detail/:_id",
   passport.authenticate("jwt", { session: false }),
@@ -260,15 +236,6 @@ router.get(
 
       foundSite = foundSite[0];
 
-      // 若沒找到資料
-      if (!foundSite) {
-        // 找不到資料也存進快取，防快取穿透 Cache Penetration
-        await redisClient.set(`Site:${_id}`, "404", {
-          EX: 60 * 60 * 1,
-        });
-        return res.status(404).send("無此資料");
-      }
-
       // 若site是公開，則存入快取，時間設定 30-60 分鐘
       let randomTime = Math.floor(Math.random() * 31) + 30; // 使用隨機數，防快取雪崩 Cache Avalanche
       if (foundSite.public) {
@@ -290,24 +257,20 @@ router.get("/detail/:_id", async (req, res) => {
   let { _id } = req.params;
   try {
     // 先搜尋快取中有無數據
-    let dataFromRedis = await redisClient.get(`Site:${_id}`);
-    if (dataFromRedis) {
-      if (dataFromRedis === "404") {
-        console.log("利用快取返回404 error");
-        return res.status(404).send("錯誤");
+    // 先找快取;
+    let cacheData = await redisClient.get(`Site:${_id}`);
+    if (cacheData) {
+      switch (cacheData) {
+        case "404":
+          return res.status(404).send("無此景點存在");
+        case "403":
+          return res.status(403).send("作者不公開相關頁面");
+        default:
+          return res.send(cacheData);
       }
-
-      if (dataFromRedis === "403") {
-        console.log("快取中發現此資料不公開");
-        return res.status(403).send("作者不公開相關頁面");
-      }
-      console.log("利用快取提供景點資料");
-      return res.send(dataFromRedis);
     }
 
     // 若找不到則搜尋資料庫
-    console.log("利用資料庫提取景點資料");
-
     let foundSite = await Site.aggregate([
       { $match: { _id: new ObjectId(_id) } },
       {
@@ -373,7 +336,7 @@ router.get("/detail/:_id", async (req, res) => {
       return res.status(403).send("作者不公開相關頁面");
     }
 
-    // 若site是公開，則存入快取，時間設定 10 分鐘
+    // 若景點是公開，則存入快取，時間設定 10 分鐘
     if (foundSite.public) {
       await redisClient.set(`Site:${_id}`, JSON.stringify(foundSite), {
         EX: 10 * 60 * 1,
@@ -386,24 +349,6 @@ router.get("/detail/:_id", async (req, res) => {
     return res.status(500).send("伺服器發生問題");
   }
 });
-
-// 計算使用者的sites總數
-router.get(
-  "/mySite/count",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    let { _id } = req.user;
-    try {
-      let count = await Site.find({ author: new ObjectId(_id) })
-        .count()
-        .exec();
-      return res.send({ count });
-    } catch (e) {
-      console.log(e);
-      return res.status(500).send("伺服器發生問題");
-    }
-  }
-);
 
 // 找尋登入使用者建立的景點
 router.get(
@@ -458,6 +403,24 @@ router.get(
       ]);
 
       return res.send(foundSite);
+    } catch (e) {
+      console.log(e);
+      return res.status(500).send("伺服器發生問題");
+    }
+  }
+);
+
+// 計算使用者的sites總數(用來計算頁數)
+router.get(
+  "/mySite/count",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    let { _id } = req.user;
+    try {
+      let count = await Site.find({ author: new ObjectId(_id) })
+        .count()
+        .exec();
+      return res.send({ count });
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
@@ -522,25 +485,6 @@ router.get("/other", async (req, res) => {
     return res.status(500).send("伺服器發生問題");
   }
 });
-
-// 計算使用者收藏的sites總數
-router.get(
-  "/myCollection/count",
-  passport.authenticate("jwt", { session: false }),
-  async (req, res) => {
-    try {
-      let count = await Collection.find({
-        user_id: new ObjectId(req.user._id),
-      })
-        .count()
-        .exec();
-      return res.send({ count });
-    } catch (e) {
-      console.log(e);
-      return res.status(500).send("伺服器發生問題");
-    }
-  }
-);
 
 // 找到使用者收藏的景點
 router.get(
@@ -609,6 +553,25 @@ router.get(
   }
 );
 
+// 計算使用者收藏的sites總數
+router.get(
+  "/myCollection/count",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res) => {
+    try {
+      let count = await Collection.find({
+        user_id: new ObjectId(req.user._id),
+      })
+        .count()
+        .exec();
+      return res.send({ count });
+    } catch (e) {
+      console.log(e);
+      return res.status(500).send("伺服器發生問題");
+    }
+  }
+);
+
 // 確認有無點過讚或收藏
 router.get(
   "/like_collection/:_id",
@@ -618,10 +581,11 @@ router.get(
     let user_id = req.user._id;
 
     try {
-      let like = await Like.findOne({ user_id, site_id }).lean().exec();
-      let collection = await Collection.findOne({ user_id, site_id })
-        .lean()
-        .exec();
+      let [like, collection] = await Promise.all([
+        Like.findOne({ user_id, site_id }).lean().exec(),
+        Collection.findOne({ user_id, site_id }).lean().exec(),
+      ]);
+
       let result = {
         like: like ? true : false,
         collection: collection ? true : false,
@@ -710,19 +674,19 @@ router.put(
     try {
       // 確認景點是否存在
       // 先從快取中找景點
-      let dataFromRedis = await redisClient.get(`Site:${site_id}`);
-      if (dataFromRedis === "404") {
+      let cacheData = await redisClient.get(`Site:${site_id}`);
+      if (cacheData === "404") {
         return res.status(404).send("此景點不存在");
       }
 
       // 若快取沒有則找資料庫
       let dataFromDatabase;
-      if (!dataFromRedis) {
+      if (!cacheData) {
         dataFromDatabase = await Site.findOne({ _id: site_id }).lean().exec();
       }
 
       // 若景點不存在，返回錯誤
-      if (!dataFromRedis && !dataFromDatabase) {
+      if (!dataFromRedis && !cacheData) {
         return res.status(404).send("此景點不存在");
       }
 
@@ -750,19 +714,19 @@ router.put(
     try {
       // 確認景點是否存在
       // 先從快取中找景點
-      let dataFromRedis = await redisClient.get(`Site:${site_id}`);
-      if (dataFromRedis === "404") {
+      let cacheData = await redisClient.get(`Site:${site_id}`);
+      if (cacheData === "404") {
         return res.status(404).send("此景點不存在");
       }
 
       // 若快取沒有則找資料庫
       let dataFromDatabase;
-      if (!dataFromRedis) {
+      if (!cacheData) {
         dataFromDatabase = await Site.findOne({ _id: site_id }).lean().exec();
       }
 
       // 若景點不存在，返回錯誤
-      if (!dataFromRedis && !dataFromDatabase) {
+      if (!dataFromRedis && !cacheData) {
         return res.status(404).send("此景點不存在");
       }
 
@@ -829,9 +793,9 @@ router.patch(
           await imgurClient.deleteImage(foundSite.photo.deletehash);
         }
 
+        let newPhoto;
+        // 上傳新照片
         if (req.files.length !== 0) {
-          // 如果原本有圖片，先把舊的刪掉，再更新成新的
-
           const response = await imgurClient.upload({
             image: req.files[0].buffer.toString("base64"),
             type: "base64",
@@ -841,14 +805,15 @@ router.patch(
           url = response.data.link;
           deletehash = response.data.deletehash;
           photoName = req.files[0].originalname;
-        }
 
-        let newPhoto =
-          req.files.length !== 0
-            ? { photo: { url, deletehash, photoName } }
-            : removeOriginPhoto === "true"
-            ? { photo: { url: "", deletehash: "", photoName: "" } }
-            : {};
+          newPhoto = { photo: { url, deletehash, photoName } };
+        } else {
+          if (removeOriginPhoto === "true") {
+            newPhoto = { photo: { url: "", deletehash: "", photoName: "" } };
+          } else {
+            newPhoto = {};
+          }
+        }
 
         // 將景點資訊儲存至資料庫
         let newData = Object.assign({}, req.body, newPhoto, {
@@ -864,7 +829,7 @@ router.patch(
           redisClient.del(`Site:${_id}`), // 刪快取
         ]);
 
-        return res.send({ message: "成功更新資料" });
+        return res.send("成功更新資料");
       });
     } catch (e) {
       console.log(e);
@@ -884,7 +849,7 @@ router.delete(
 
       // 確認有無此景點
       if (!foundSite) {
-        return res.status(400).send("無此景點存在");
+        return res.status(404).send("無此景點存在");
       }
 
       let author = foundSite.author;
