@@ -4,6 +4,8 @@ require("dotenv").config();
 
 const api = supertest(process.env.SERVER_URI + "/api");
 
+console.log("!!!注意---測試前請先把流量限制關掉!!!");
+
 let testRandom = Math.floor(Math.random() * 1000000).toString();
 
 // 註冊、登入取得JWT token、使用者相關操作

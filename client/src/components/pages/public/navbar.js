@@ -42,10 +42,20 @@ const Navbar = ({ auth }) => {
               <Link
                 className="nav-link"
                 aria-current="page"
+                to="/about"
+                style={{ color: "black", fontWeight: "700" }}
+              >
+                關於此網站
+              </Link>
+            </li>
+            <li className="nav-item custom-nav-hover">
+              <Link
+                className="nav-link"
+                aria-current="page"
                 to="/tours"
                 style={{ color: "black", fontWeight: "700" }}
               >
-                旅程規劃瀏覽
+                旅程規劃
               </Link>
             </li>
             <li className="nav-item custom-nav-hover">
@@ -54,7 +64,7 @@ const Navbar = ({ auth }) => {
                 to="/sites"
                 style={{ color: "black", fontWeight: "700" }}
               >
-                單一景點瀏覽
+                尋找景點
               </Link>
             </li>
           </ul>

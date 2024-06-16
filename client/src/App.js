@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import Layout from "./components/pages/public/Layout.js";
 import Home from "./components/pages/public/home.js";
+import About from "./components/pages/public/about.js";
 import SearchSites from "./components/pages/public/sites/search_sites.js";
 import SiteDetail from "./components/pages/public/sites/siteDetail.js";
 import SearchTours from "./components/pages/public/tours/search_tours.js";
@@ -25,13 +26,13 @@ import MyApplied from "./components/pages/users/tour/myAppliedToursOverview.js";
 import AddNewTour from "./components/pages/users/tour/addNewTour.js";
 import AddSiteToATour from "./components/pages/users/tour/addSiteToATour.js";
 import AddNewParticipant from "./components/pages/users/tour/addNewParticipant.js";
-import NoAuth from "./components/error/noAuth.js";
-import NotFound from "./components/error/notFound.js";
 import AdminSearchUsers from "./components/pages/admin/search_users.js";
 import AdminSearchSites from "./components/pages/admin/search_sites.js";
 import AdminSiteDetail from "./components/pages/admin/siteDetail.js";
 import AdminSearchTours from "./components/pages/admin/search_tours.js";
 import AdminTourDetail from "./components/pages/admin/tourDetail.js";
+import NoAuth from "./components/error/noAuth.js";
+import NotFound from "./components/error/notFound.js";
 
 function App() {
   let [auth, setAuth] = useState(JSON.parse(localStorage.getItem("auth"))); // 確認登入狀態
@@ -43,6 +44,7 @@ function App() {
         {/* 首頁 (不須登入即可瀏覽的頁面) */}
         <Route path="/" element={<Layout auth={auth} />}>
           <Route index element={<Home auth={auth} />}></Route>
+          <Route path="/about" element={<About />}></Route>
           <Route path="/tours" element={<SearchTours />}></Route>
           <Route path="tour/:tour_id" element={<TourDetail />}></Route>
           <Route path="/sites" element={<SearchSites />}></Route>
