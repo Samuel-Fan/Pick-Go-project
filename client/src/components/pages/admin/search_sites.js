@@ -77,7 +77,6 @@ const SearchSites = () => {
     adminService
       .get_sites_count(query)
       .then((data) => {
-        console.log(data.data.count);
         if (data.data.count === 0) {
           setCount("無");
         } else {
@@ -105,12 +104,10 @@ const SearchSites = () => {
 
   // 每次切換頁面讀取一次
   useEffect(() => {
-    console.log(query);
     adminService
       .get_sites(query, numberPerPage, page, orderBy)
       .then((data) => {
         let result = data.data;
-        console.log(data.data);
         setSites(result);
       })
       .catch((e) => {

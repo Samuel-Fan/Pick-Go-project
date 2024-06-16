@@ -30,7 +30,6 @@ const AddNewParticipant = () => {
     tourService
       .get_myTour_tourist(tour_id)
       .then((data) => {
-        console.log(data.data);
         setParticipant(data.data.filter((user) => user.type !== "申請者"));
         setApplicant(data.data.filter((user) => user.type === "申請者"));
       })

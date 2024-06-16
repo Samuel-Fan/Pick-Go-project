@@ -75,8 +75,6 @@ const AddSiteToATour = () => {
   useEffect(() => {
     fetchCount()
       .then((data) => {
-        console.log(data.data);
-        console.log("讀取sites總數");
         setCount(Math.ceil(data.data.count / numberPerPage));
       })
       .catch((e) => {
@@ -93,8 +91,6 @@ const AddSiteToATour = () => {
     fetchSites()
       .then((data) => {
         let result = data.data;
-        console.log("讀取sites詳細資料");
-        console.log(result);
         setSites(result);
       })
       .catch((e) => {

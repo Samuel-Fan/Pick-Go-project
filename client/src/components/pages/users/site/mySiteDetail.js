@@ -39,14 +39,13 @@ const MySiteDetail = () => {
     siteService
       .get_mySite_detail(site_id)
       .then((data) => {
-        console.log(data.data);
         setSite(data.data);
       })
       .catch((e) => {
         if (e.response) {
           switch (e.response.status) {
             case 401:
-              alert('請重新登入')
+              alert("請重新登入");
               navigate("/login");
               break;
             case 403:

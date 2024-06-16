@@ -64,7 +64,6 @@ const MyToursOverview = () => {
       // 處理錯誤訊息
       console.log(e);
       if (e.response) {
-        console.log(e.response.data);
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");
@@ -89,8 +88,6 @@ const MyToursOverview = () => {
     tourService
       .get_myTour_count()
       .then((data) => {
-        console.log(data.data);
-        console.log("讀取sites總數");
         setCount(Math.ceil(data.data.count / numberPerPage));
       })
       .catch((e) => {
@@ -118,8 +115,6 @@ const MyToursOverview = () => {
       .get_myTour(page, numberPerPage)
       .then((data) => {
         let result = data.data;
-        console.log(result);
-        console.log("讀取tours詳細資料");
         setTours(result);
       })
       .catch((e) => {

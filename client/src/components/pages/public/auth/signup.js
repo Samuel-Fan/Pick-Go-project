@@ -13,7 +13,6 @@ const Signup = () => {
     e.preventDefault();
     let form = new FormData(e.currentTarget);
     let data = Object.fromEntries(form.entries());
-    console.log(form.entries());
     try {
       await authService.post_signup(data);
       alert("成功註冊");

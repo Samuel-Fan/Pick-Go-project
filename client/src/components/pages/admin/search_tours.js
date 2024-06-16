@@ -50,7 +50,6 @@ const SearchTours = () => {
     adminService
       .get_tours_count(query, status)
       .then((data) => {
-        console.log(data.data.count);
         if (data.data.count === 0) {
           setCount("無");
         } else {
@@ -78,12 +77,10 @@ const SearchTours = () => {
 
   // 每次切換頁面讀取一次
   useEffect(() => {
-    console.log(query);
     adminService
       .get_tours(query, numberPerPage, page, status)
       .then((data) => {
         let result = data.data;
-        console.log(result);
         setTours(result);
       })
       .catch((e) => {

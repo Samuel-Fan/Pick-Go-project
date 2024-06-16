@@ -22,8 +22,6 @@ const MyAppliedToursOverview = () => {
     tourService
       .get_myTour_count()
       .then((data) => {
-        console.log(data.data);
-        console.log("讀取sites總數");
         setCount(Math.ceil(data.data.count / numberPerPage));
       })
       .catch((e) => {
@@ -41,8 +39,6 @@ const MyAppliedToursOverview = () => {
       .get_myApplied(page, numberPerPage)
       .then((data) => {
         let result = data.data;
-        console.log(result);
-        console.log("讀取tours詳細資料");
         setTours(result);
       })
       .catch((e) => {

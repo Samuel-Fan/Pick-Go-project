@@ -136,7 +136,6 @@ const SiteDetail = () => {
       siteService
         .get_other_sites(site.author._id, site_id)
         .then((data) => {
-          console.log(data.data);
           setOtherSites(data.data);
         })
         .catch((e) => {

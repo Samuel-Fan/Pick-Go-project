@@ -32,7 +32,6 @@ const TourDetail = () => {
     tourService
       .get_tour_detail(tour_id)
       .then((data) => {
-        console.log(data.data);
         setTour(data.data.foundTour);
         setSites(data.data.dayPlan);
 
@@ -66,7 +65,6 @@ const TourDetail = () => {
     tourService
       .get_myType(tour_id)
       .then((data) => {
-        console.log(data.data);
         setType(data.data.type);
         setTourist_id(data.data._id);
       })

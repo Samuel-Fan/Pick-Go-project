@@ -27,8 +27,6 @@ const MyCollectSites = () => {
     siteService
       .get_myCollection_count()
       .then((data) => {
-        console.log(data.data);
-        console.log("讀取sites總數");
         setCount(Math.ceil(data.data.count / numberPerPage));
       })
       .catch((e) => {
@@ -56,8 +54,6 @@ const MyCollectSites = () => {
     siteService
       .get_myCollection(page, numberPerPage)
       .then((data) => {
-        console.log(data.data);
-        console.log("讀取sites詳細資料");
         setSites(data.data);
       })
       .catch((e) => {

@@ -64,7 +64,6 @@ const EditSite = () => {
       let file = e.target.files[0];
       let size = file.size;
       let type = file.type;
-      console.log(file);
 
       if (
         type !== "image/jpeg" &&

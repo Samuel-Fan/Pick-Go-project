@@ -59,7 +59,6 @@ const EditProfile = () => {
       let file = e.target.files[0];
       let size = file.size;
       let type = file.type;
-      console.log(file);
 
       if (
         type !== "image/jpeg" &&
@@ -105,7 +104,6 @@ const EditProfile = () => {
       .get_auth_user()
       .then((data) => {
         let user = data.data;
-        console.log(data.data);
         setUser(user);
 
         setUserPublic(user.public ? true : false);

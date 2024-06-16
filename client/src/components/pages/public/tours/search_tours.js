@@ -37,7 +37,6 @@ const SearchTours = () => {
     tourService
       .get_tours_count(query, status)
       .then((data) => {
-        console.log(data.data.count);
         if (data.data.count === 0) {
           setCount("無");
         } else {
@@ -51,7 +50,6 @@ const SearchTours = () => {
 
   // 每次切換頁面讀取一次
   useEffect(() => {
-    console.log(query);
     tourService
       .get_search_tours(query, numberPerPage, page, status)
       .then((data) => {

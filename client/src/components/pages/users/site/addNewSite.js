@@ -24,7 +24,6 @@ const AddNewSite = () => {
     try {
       document.body.style.cursor = "wait";
       let result = await siteService.post_new_site(formData);
-      console.log(result);
       alert("新增完成");
       navigate("/users/sites/overview/mine");
       navigate(0);
@@ -36,7 +35,6 @@ const AddNewSite = () => {
       // 處理錯誤訊息
       console.log(e);
       if (e.response) {
-        console.log(e.response.data);
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");
@@ -60,7 +58,6 @@ const AddNewSite = () => {
       let file = e.target.files[0];
       let size = file.size;
       let type = file.type;
-      console.log(file);
 
       if (
         type !== "image/jpeg" &&

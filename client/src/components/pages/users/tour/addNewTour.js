@@ -21,7 +21,6 @@ const AddNewTour = () => {
     try {
       document.body.style.cursor = "wait";
       let result = await tourService.post_new_tour(data);
-      console.log(result);
       alert("新增完成");
       navigate("/users/tours/overview");
       navigate(0);
@@ -33,7 +32,6 @@ const AddNewTour = () => {
       // 處理錯誤訊息
       console.log(e);
       if (e.response) {
-        console.log(e.response.data);
         setMessage(e.response.data);
       } else {
         setMessage("伺服器發生問題，請稍後再試");
