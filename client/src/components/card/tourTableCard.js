@@ -35,14 +35,18 @@ const TourTableCard = ({ tours, setUser_id, tourPublic }) => {
               <tr key={tour._id} style={{ height: "5rem" }}>
                 <th>{tour.title}</th>
                 <td>
-                  <button
-                    className="custom-botton-link"
-                    onClick={() => {
-                      setUser_id(tour.author._id);
-                    }}
-                  >
-                    {tour.author.username}
-                  </button>
+                  {tour.author ? (
+                    <button
+                      className="custom-botton-link"
+                      onClick={() => {
+                        setUser_id(tour.author._id);
+                      }}
+                    >
+                      {tour.author.username}
+                    </button>
+                  ) : (
+                    "使用者已被刪除"
+                  )}
                 </td>
                 <td style={{ wordWrap: "break-word", maxWidth: "9rem" }}>
                   {handleDescription(tour.description)}

@@ -590,8 +590,6 @@ router.get(
         Collection.findOne({ user_id, site_id }).lean().exec(),
       ]);
 
-      console.log(like, collection);
-
       let result = {
         like: like ? true : false,
         collection: collection ? true : false,

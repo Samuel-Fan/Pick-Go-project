@@ -102,7 +102,7 @@ class TourService {
 
   // 編輯景點
   patch_edit_tour(_id, data) {
-    return axios.patch(apiURL + "/api/tours/modify/" + _id, data);
+    return axios.patch(apiURL + "/api/tours/" + _id, data);
   }
 
   // 將申請者更新成參加者

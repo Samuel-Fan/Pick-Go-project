@@ -573,7 +573,7 @@ router.get(
         .exec();
 
       // 找不到相關資訊
-      if (!tourists) {
+      if (tourists.length === 0) {
         return res.status(404).send("找不到相關資訊");
       }
 
@@ -611,7 +611,7 @@ router.post(
       }
 
       // 如旅程規格不符，則返回客製化錯誤訊息
-      let { error } = valid.toursValidation(req.body); // req.body 含 title, description, status, limit, days
+      let { error } = valid.toursValidation(req.body); // req.body 含 title, description, status, limit, totalDays
       if (error) {
         return res.status(400).send(error.details[0].message);
       }
@@ -649,6 +649,7 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     let { _id } = req.params;
+
     // 確認本人編輯
     let foundTour = await Tour.findOne({ _id }).select("author").lean().exec();
     if (!foundTour) {
@@ -805,7 +806,7 @@ router.post(
 
 // 修改旅程
 router.patch(
-  "/modify/:_id",
+  "/:_id",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     let { _id } = req.params;
