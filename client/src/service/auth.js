@@ -43,12 +43,12 @@ class AuthService {
 
   // 更改用戶資料
   patch_modify(data) {
-    return axios.patch(apiURL + "/api/users/modify/basic", data);
+    return axios.patch(apiURL + "/api/users/basic", data);
   }
 
   // 更改用戶密碼
   patch_modify_password(data) {
-    return axios.patch(apiURL + "/api/users/modify/password", data);
+    return axios.patch(apiURL + "/api/users/password", data);
   }
 
   get_auth_test() {

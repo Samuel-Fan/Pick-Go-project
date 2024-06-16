@@ -196,8 +196,8 @@ router.post("/register", async (req, res) => {
       username,
     });
 
-    let savedUser = await newUser.save(); // save時自動 hash 密碼
-    return res.status(201).send({ message: "使用者資料儲存完畢", savedUser });
+    await newUser.save(); // save時自動 hash 密碼
+    return res.status(201).send("使用者資料儲存完畢");
   } catch (e) {
     console.log(e);
     return res.status(500).send("儲存資料時發生錯誤:" + e.message);
@@ -206,7 +206,7 @@ router.post("/register", async (req, res) => {
 
 // 修改會員資料(密碼以外)
 router.patch(
-  "/modify/basic",
+  "/basic",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     let { _id } = req.user;
@@ -295,7 +295,7 @@ router.patch(
 
 // 修改會員密碼
 router.patch(
-  "/modify/password",
+  "/password",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     let { _id } = req.user;

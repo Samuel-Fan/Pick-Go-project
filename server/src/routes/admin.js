@@ -126,7 +126,7 @@ router.get("/sites", async (req, res) => {
           as: "author",
         },
       },
-      { $unwind: "$author" },
+      { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
       { $match: searchObj },
       {
         $lookup: {
@@ -187,7 +187,7 @@ router.get("/sites/count", async (req, res) => {
           as: "author",
         },
       },
-      { $unwind: "$author" },
+      { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
       { $match: searchObj },
       { $count: "count" },
     ]);
@@ -235,7 +235,7 @@ router.get("/site/:_id", async (req, res) => {
           as: "author",
         },
       },
-      { $unwind: "$author" },
+      { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
       {
         $project: {
           num_of_like: { $size: "$like" },
@@ -289,7 +289,7 @@ router.get("/tours", async (req, res) => {
           pipeline: [{ $project: { username: 1 } }],
         },
       },
-      { $unwind: "$author" },
+      { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
       { $match: searchObj },
       {
         $lookup: {
@@ -346,7 +346,7 @@ router.get("/tours/count", async (req, res) => {
           pipeline: [{ $project: { username: 1 } }],
         },
       },
-      { $unwind: "$author" },
+      { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
       { $match: searchObj },
       { $count: "count" },
     ]);
@@ -391,7 +391,7 @@ router.get("/tour/:_id", async (req, res) => {
             as: "author",
           },
         },
-        { $unwind: "$author" },
+        { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
         {
           $project: {
             num_of_participants: { $size: "$participants" },

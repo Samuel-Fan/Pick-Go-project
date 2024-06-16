@@ -110,7 +110,7 @@ class SiteService {
 
   // 編輯景點
   patch_edit_site(_id, data) {
-    return axios.patch(apiURL + "/api/sites/modify/" + _id, data, {
+    return axios.patch(apiURL + "/api/sites/" + _id, data, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

@@ -188,7 +188,6 @@ router.get(
         {
           $match: {
             _id: new ObjectId(_id),
-            author: new ObjectId(req.user._id),
           },
         },
         {
@@ -235,6 +234,11 @@ router.get(
       ]);
 
       foundSite = foundSite[0];
+
+      // 需作者本人才能查
+      if (!foundSite.author._id.equals(req.user._id)) {
+        return res.status(403).send("只有作者才能看");
+      }
 
       // 若site是公開，則存入快取，時間設定 30-60 分鐘
       let randomTime = Math.floor(Math.random() * 31) + 30; // 使用隨機數，防快取雪崩 Cache Avalanche
@@ -586,6 +590,8 @@ router.get(
         Collection.findOne({ user_id, site_id }).lean().exec(),
       ]);
 
+      console.log(like, collection);
+
       let result = {
         like: like ? true : false,
         collection: collection ? true : false,
@@ -652,9 +658,6 @@ router.post(
 
         let savedResult = await site.save();
 
-        // 將快取刪掉
-        await redisClient.del(`Site_of_author:${req.user._id}`);
-
         return res.status(201).send(savedResult);
       });
     } catch (e) {
@@ -686,7 +689,7 @@ router.put(
       }
 
       // 若景點不存在，返回錯誤
-      if (!dataFromRedis && !cacheData) {
+      if (!dataFromDatabase && !cacheData) {
         return res.status(404).send("此景點不存在");
       }
 
@@ -726,7 +729,7 @@ router.put(
       }
 
       // 若景點不存在，返回錯誤
-      if (!dataFromRedis && !cacheData) {
+      if (!dataFromDatabase && !cacheData) {
         return res.status(404).send("此景點不存在");
       }
 
@@ -746,7 +749,7 @@ router.put(
 
 // 更新景點
 router.patch(
-  "/modify/:_id",
+  "/:_id",
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     let { _id } = req.params; // 景點id
