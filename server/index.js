@@ -3,6 +3,7 @@ const cors = require("cors");
 const app = express();
 const passport = require("passport");
 const session = require("express-session");
+const path = require("path");
 
 require("dotenv").config();
 require("./src/config/passport");
@@ -82,6 +83,16 @@ app.use(
   passport.authenticate("jwt", { session: false }),
   adminRoute
 );
+
+if (process.env.STATUS === "production") {
+  app.use(express.static("../client/build"));
+
+  app.get("*", (req, res) => {
+    res.sendFile(
+      path.resolve(__dirname, "..", "client", "build", "index.html")
+    );
+  });
+}
 
 app.listen(process.env.PORT || 8080, () => {
   console.log("伺服器正在運行中");
