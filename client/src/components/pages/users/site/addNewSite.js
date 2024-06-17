@@ -23,7 +23,7 @@ const AddNewSite = () => {
 
     try {
       document.body.style.cursor = "wait";
-      let result = await siteService.post_new_site(formData);
+      await siteService.post_new_site(formData);
       alert("新增完成");
       navigate("/users/sites/overview/mine");
       navigate(0);

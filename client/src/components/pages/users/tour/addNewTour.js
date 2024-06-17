@@ -20,7 +20,7 @@ const AddNewTour = () => {
 
     try {
       document.body.style.cursor = "wait";
-      let result = await tourService.post_new_tour(data);
+      await tourService.post_new_tour(data);
       alert("新增完成");
       navigate("/users/tours/overview");
       navigate(0);

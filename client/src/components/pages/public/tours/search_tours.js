@@ -54,7 +54,6 @@ const SearchTours = () => {
       .get_search_tours(query, numberPerPage, page, status)
       .then((data) => {
         let result = data.data;
-        console.log(result);
         setTours(result);
       })
       .catch((e) => {

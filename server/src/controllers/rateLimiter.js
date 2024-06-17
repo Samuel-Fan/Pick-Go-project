@@ -1,23 +1,34 @@
 const redisClient = require("../config/redis").redisClient_user;
+const mutex = require("./lock");
 
 // 單一IP限流
 class IPLimiter {
   constructor(maxLimit, interval) {
     this.maxLimit = maxLimit;
     this.interval = interval;
+    this.banList = {};
   }
 
-  limiter = async (req, res, next) => {
-    let record = await redisClient.get(`IP:${req.ip}`);
-    if (record === "lock") {
-      return res.status(429).send("Too many requests");
+  limiter = (req, res, next) => {
+    if (this.banList[req.ip]) {
+      // 確認 ban 的時間是否過10分鐘
+      console.log(Date.now() - this.banList[req.ip]);
+      if (Date.now() - this.banList[req.ip] > 60 * 1000) {
+        delete this.banList[req.ip];
+        next();
+      } else {
+        return res.status(429).send("Too many requests");
+      }
     } else {
-      this.count(req.ip, record);
+      this.count(req.ip);
       next();
     }
   };
 
-  count = async (ip, record) => {
+  count = async (ip) => {
+    // 為避免 race condition，先用 mutex 鎖住
+    let unlock = await mutex.locked();
+    let record = await redisClient.get(`IP:${ip}`);
     // 若有紀錄，則增加計數
     if (record) {
       record = 1 + Number(record);
@@ -26,20 +37,19 @@ class IPLimiter {
       });
       this.checkLimit(ip, record);
     } else {
-      // 若無紀錄，開始計算
-      await redisClient.set(`IP:${ip}`, 0, {
+      // 若無紀錄，開始計算，計時1分後刪掉
+      redisClient.set(`IP:${ip}`, 0, {
         EX: 1 * 60 * 1,
       });
       this.setClear(ip);
     }
+    unlock();
   };
 
-  checkLimit = async (ip, record) => {
+  checkLimit = (ip, record) => {
     if (record >= this.maxLimit) {
-      await redisClient.set(`IP:${ip}`, "lock", {
-        EX: 1 * 60 * 1,
-      });
-      console.log("ip:" + ip + "因流量過高遭到鎖定");
+      this.banList[ip] = Date.now();
+      console.log("ip:" + ip + "因流量過高遭到鎖定, ban 1分鐘");
     }
   };
 

@@ -81,7 +81,6 @@ const SearchSites = () => {
       .get_search_sites(query, numberPerPage, page, orderBy)
       .then((data) => {
         let result = data.data;
-        console.log(data.data);
         setSites(result);
       })
       .catch((e) => {
