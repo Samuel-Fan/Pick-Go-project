@@ -212,7 +212,7 @@ router.patch(
     let { _id } = req.user;
     try {
       // 確認有無此人
-      let foundUser = await User.findOne({ _id }).select("_id").lean().exec();
+      let foundUser = await User.findOne({ _id }).select("photo").lean().exec();
       if (!foundUser) {
         return res.status(404).send("無搜尋到此用戶");
       }
@@ -241,6 +241,8 @@ router.patch(
         let url;
         let deletehash;
         let photoName;
+
+        console.log(foundUser);
 
         // 若要求刪除舊照片 or 有更新成新照片
         if (removeOriginPhoto === "true") {
