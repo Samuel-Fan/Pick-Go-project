@@ -109,7 +109,7 @@ With this website, you can:
 * Redis - In-memory database for server side cache and rateLimit
 * Object-hash - Generate hashes for query
 
-#### Unit-test
+#### Testing
 * Mocha - JS test framework for quality assurance
 * Chai - Assertion library
 * SuperTest - JS library for testing RESTful APIs
