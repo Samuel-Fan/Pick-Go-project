@@ -62,6 +62,8 @@
 ### Overview
 Traveling is a ubiquitous part of human life, offering a chance to unwind and recharge. However, planning a trip thoroughly can be quite challenging. I've often wished for a tool that could streamline the planning process, so I've taken it upon myself to create one.
 
+This project is a "Travel Planning Website" developed using front-end and back-end technologies. Users can share their travel experiences, save and like attractions posted by others, and use these attractions to plan their trips. Additionally, users can find travel companions through the website.
+
 I've completed the essential features that I designed for the project, but it's still in its early stages of development. Therefore, feel free to share any feedback or suggestions you may have. I hope you enjoy using it!
 
 ### Demo
@@ -107,7 +109,7 @@ With this website, you can:
 * Redis - In-memory database for server side cache and rateLimit
 * Object-hash - Generate hashes for query
 
-#### Unit-test
+#### Testing
 * Mocha - JS test framework for quality assurance
 * Chai - Assertion library
 * SuperTest - JS library for testing RESTful APIs
