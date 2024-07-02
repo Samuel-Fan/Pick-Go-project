@@ -32,6 +32,7 @@ const ApplyBtn = ({
     try {
       await tourService.delete_tourist(tourist_id);
       navigate(`/tour/${tour_id}`);
+      navigate(0);
     } catch (e) {
       if (e.response) {
         setMessage(e.response.data);
