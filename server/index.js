@@ -71,7 +71,6 @@ app.use(passport.session());
 // 限流設定
 const rateLimiter = require("./src/controllers/rateLimiter");
 
-rateLimiter.totalRateLimiter.refill();
 app.use(rateLimiter.singleIPLimiter.limiter);
 app.use(rateLimiter.totalRateLimiter.tokenBucket);
 

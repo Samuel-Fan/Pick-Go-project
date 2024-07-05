@@ -24,24 +24,7 @@ opts.secretOrKey = process.env.JWT_SECRET;
 passport.use(
   new JwtStrategy(opts, async function (jwt_payload, done) {
     try {
-      let foundUser;
-      // 先找尋快取中有沒有
-      foundUser = await redisClient.get(`User:${jwt_payload._id}`);
-      if (foundUser) {
-        return done(null, JSON.parse(foundUser));
-      }
-
-      // 若沒有找到快取，則從資料庫搜尋，並存入快取
-      foundUser = await User.findOne({ _id: jwt_payload._id }).exec();
-      if (foundUser) {
-        await redisClient.set(
-          `User:${jwt_payload._id}`,
-          JSON.stringify(foundUser)
-        );
-        return done(null, foundUser);
-      } else {
-        return done(null, false);
-      }
+      return done(null, { _id: jwt_payload._id });
     } catch (e) {
       return done(e, false);
     }

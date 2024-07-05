@@ -62,15 +62,16 @@ class IPLimiter {
 
 // 總限流設定
 class RateLimiter {
-  constructor(maxTokens, refillRate, interval) {
+  constructor(maxTokens, refillRate) {
     this.maxTokens = maxTokens;
     this.tokens = maxTokens;
-    this.refillRate = refillRate;
-    this.interval = interval;
+    this.refillRate = refillRate; // 每秒補充多少個 token
+    this.timeStamp = Date.now();
   }
 
   // 每分鐘總限流
   tokenBucket = (req, res, next) => {
+    this.refill();
     if (this.tokens > 0) {
       this.tokens -= 1;
       next();
@@ -80,17 +81,19 @@ class RateLimiter {
   };
 
   refill = () => {
-    setInterval(() => {
-      if (this.tokens < this.maxTokens) {
-        this.tokens += this.refillRate;
-      } else {
+    let timeDifference = Math.floor((Date.now() - this.timeStamp) / 1000); // 與上一個 timeStamp 差幾秒
+    if (timeDifference >= 60) {
+      this.tokens += timeDifference * this.refillRate;
+      this.timeStamp = Date.now();
+
+      if (this.tokens >= this.maxTokens) {
         this.tokens = this.maxTokens;
       }
-    }, this.interval);
+    }
   };
 }
 
-const singleIPLimiter = new IPLimiter(100, 1 * 60 * 1000); // 單IP每分鐘限100次
-const totalRateLimiter = new RateLimiter(5000, 100, 1 * 60 * 1000);
+const singleIPLimiter = new IPLimiter(200, 1 * 60 * 1000); // 單IP每分鐘限200次
+const totalRateLimiter = new RateLimiter(5000, 2); // 每分鐘補充 60 * 2 個tokens
 
 module.exports = { singleIPLimiter, totalRateLimiter };

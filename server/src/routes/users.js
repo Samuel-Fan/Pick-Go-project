@@ -29,7 +29,8 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   async (req, res) => {
     try {
-      return res.send(req.user);
+      let foundUser = await User.findOne({ _id: req.user._id }).lean().exec();
+      return res.send(foundUser);
     } catch (e) {
       console.log(e);
       return res.status(500).send("伺服器發生問題");
@@ -157,7 +158,7 @@ router.post("/login", async (req, res) => {
     }
 
     // 回傳 JWT
-    const tokenObject = { _id: foundUser._id, email: foundUser.email };
+    const tokenObject = { _id: foundUser._id };
     const token = jwt.sign(
       tokenObject,
       process.env.JWT_SECRET || "happycodingjwtyeah!",
@@ -282,7 +283,6 @@ router.patch(
             new: true,
             runValidators: true,
           }),
-          redisClient.del(`User:${_id}`), // 刪掉快取
           redisClient.del(`public_user_${_id}`),
         ]);
 
@@ -330,7 +330,6 @@ router.patch(
       foundUser.password = password;
       await Promise.all([
         foundUser.save(), // 更新資料
-        redisClient.del(`User:${_id}`), // 刪掉快取
         redisClient.del(`public_user_${_id}`), // 刪掉快取
       ]);
 
