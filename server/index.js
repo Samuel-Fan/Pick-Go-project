@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const helmet = require("helmet");
 const passport = require("passport");
 const session = require("express-session");
 const path = require("path");
@@ -64,6 +65,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(helmet());
 
 app.use(passport.initialize());
 app.use(passport.session());
