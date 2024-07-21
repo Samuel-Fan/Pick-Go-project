@@ -7,7 +7,6 @@ const multer = require("multer");
 const path = require("path");
 const imgurClient = require("../config/imgur");
 const redisClient = require("../config/redis").redisClient_other;
-const passport = require("passport");
 const hash = require("object-hash");
 
 // 照片檔案上傳格式設定

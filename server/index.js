@@ -79,11 +79,7 @@ app.use(rateLimiter.totalRateLimiter.tokenBucket);
 app.use("/api/users", userRoute);
 app.use("/api/sites", siteRoute);
 app.use("/api/tours", tourRoute);
-app.use(
-  "/api/admin",
-  passport.authenticate("jwt", { session: false }),
-  adminRoute
-);
+app.use("/api/admin", adminRoute);
 
 if (process.env.STATUS === "production") {
   app.use(express.static("../client/build"));
