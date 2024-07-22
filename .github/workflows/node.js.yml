@@ -5,15 +5,14 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
-
     runs-on: self-hosted
-    defaults: 
+    defaults:
       run:
         working-directory: ./server/
     strategy:
@@ -22,13 +21,38 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-        cache-dependency-path: './server/package-lock.json'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: "./server/package-lock.json"
+      - name: cd server & npm i
+        run: |
+          cd /home/ubuntu/actions-runner/_work/Pick-Go-project/Pick-Go-project/server
+          npm i
+      - name: cd client & npm i
+        run: |
+          cd /home/ubuntu/actions-runner/_work/Pick-Go-project/Pick-Go-project/client
+          npm i
+      - name: set .env
+        run: |
+          cp /home/ubuntu/server.env /home/ubuntu/actions-runner/_work/Pick-Go-project/Pick-Go-project/server/.env
+          cp /home/ubuntu/client.env /home/ubuntu/actions-runner/_work/Pick-Go-project/Pick-Go-project/client/.env
+      - name: cd client & npm run build
+        run: |
+          cd /home/ubuntu/actions-runner/_work/Pick-Go-project/Pick-Go-project/client
+          npm run build
+      - name: stop nginx
+        run: sudo service nginx stop
+      - name: rm /var/www/html, mv build & grep
+        run: |
+          sudo rm -rf /var/www/html
+          cd /home/ubuntu/actions-runner/_work/Pick-Go-project/Pick-Go-project/client
+          sudo mv build /var/www/html
+      - name: restart pm2 & nginx
+        run: |
+          cd /home/ubuntu/actions-runner/_work/Pick-Go-project/Pick-Go-project
+          pm2 restart all
+          sudo service nginx restart

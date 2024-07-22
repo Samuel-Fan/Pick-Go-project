@@ -89,15 +89,15 @@ app.use("/api/sites", siteRoute);
 app.use("/api/tours", tourRoute);
 app.use("/api/admin", adminRoute);
 
-if (process.env.STATUS === "production") {
-  app.use(express.static("../client/build"));
+// if (process.env.STATUS === "production") {
+//   app.use(express.static("../client/build"));
 
-  app.get("*", (req, res) => {
-    res.sendFile(
-      path.resolve(__dirname, "..", "client", "build", "index.html")
-    );
-  });
-}
+//   app.get("*", (req, res) => {
+//     res.sendFile(
+//       path.resolve(__dirname, "..", "client", "build", "index.html")
+//     );
+//   });
+// }
 
 app.listen(process.env.PORT || 8080, () => {
   console.log("伺服器正在運行中");
