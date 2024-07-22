@@ -18,7 +18,6 @@ const MyProfile = ({ currentUser, setCurrentUser }) => {
     authService
       .get_auth_user()
       .then((data) => {
-        console.log(data.data);
         setCurrentUser(data.data);
       })
       .catch((e) => {

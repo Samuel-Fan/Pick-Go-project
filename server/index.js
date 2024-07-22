@@ -66,6 +66,14 @@ app.use(
   })
 );
 app.use(helmet());
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      scriptSrc: ["'self'", "cdn.jsdelivr.net"],
+      imgSrc: ["'self'", "*", "data:"],
+    },
+  })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
