@@ -101,6 +101,8 @@ app.use("/api/admin", adminRoute);
 
 // 測試 CI/CD
 
+// CI 測試
+
 app.listen(process.env.PORT || 8080, () => {
   console.log("伺服器正在運行中");
 });
