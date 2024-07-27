@@ -1,5 +1,5 @@
 const redisClient = require("../config/redis").redisClient_user;
-const mutex = require("./lock");
+const mutex = require("../controllers/otherController/lock");
 
 // 單一IP限流
 class IPLimiter {

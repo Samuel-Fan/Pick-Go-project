@@ -1,10 +1,10 @@
 module.exports = {
-  user: require("./user-model"),
-  site: require("./site-model"),
-  like: require("./like-model"),
-  collection: require("./collection-model"),
-  tour: require("./tour-model"),
-  tourist: require("./tourist-model"),
-  tourSite: require("./tourSite-model"),
-  admin: require("./admin-model"),
+  User: require("./user-model"),
+  Site: require("./site-model"),
+  Like: require("./like-model"),
+  Collection: require("./collection-model"),
+  Tour: require("./tour-model"),
+  Tourist: require("./tourist-model"),
+  TourSite: require("./tourSite-model"),
+  Admin: require("./admin-model"),
 };

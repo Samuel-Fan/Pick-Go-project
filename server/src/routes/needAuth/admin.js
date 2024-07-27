@@ -1,11 +1,6 @@
 const router = require("express").Router();
-const passport = require("passport");
-const adminController = require("../controllers/admin");
-
-router.use(passport.authenticate("jwt", { session: false }));
-
-// 管理員身分驗證;
-router.use(adminController.checkAuth);
+const adminController = require("../../controllers/adminController");
+const handleError = require("../../middlewares/handleError");
 
 // 使用者列表
 router.get("/users", adminController.getUser);
@@ -42,5 +37,8 @@ router.delete("/site/:_id", adminController.deleteSite);
 
 // 刪除一個旅程以及他的所有相關物
 router.delete("/tour/:_id", adminController.deleteTour);
+
+// 處理系統錯誤
+router.use(handleError);
 
 module.exports = router;

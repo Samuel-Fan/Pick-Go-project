@@ -4,15 +4,19 @@ const app = express();
 const helmet = require("helmet");
 const passport = require("passport");
 const session = require("express-session");
-const path = require("path");
 
 require("dotenv").config();
 require("./src/config/passport");
 
-const userRoute = require("./src/routes").users;
-const siteRoute = require("./src/routes").sites;
-const tourRoute = require("./src/routes").tours;
-const adminRoute = require("./src/routes").admin;
+const userRoute = require("./src/routes/needAuth").users;
+const userPublicRoute = require("./src/routes/public").users;
+const siteRoute = require("./src/routes/needAuth").sites;
+const sitePublicRoute = require("./src/routes/public").sites;
+const tourRoute = require("./src/routes/needAuth").tours;
+const tourPublicRoute = require("./src/routes/public").tours;
+const adminRoute = require("./src/routes/needAuth").admin;
+const authCheck = require("./src/middlewares/authCheck");
+const adminAuthCheck = require("./src/middlewares/adminAuthCheck");
 
 // 連線資料庫
 const mongoose = require("mongoose");
@@ -79,25 +83,18 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // 限流設定
-const rateLimiter = require("./src/controllers/rateLimiter");
+const rateLimiter = require("./src/middlewares/rateLimiter");
 
 app.use(rateLimiter.singleIPLimiter.limiter);
 app.use(rateLimiter.totalRateLimiter.tokenBucket);
 
-app.use("/api/users", userRoute);
-app.use("/api/sites", siteRoute);
-app.use("/api/tours", tourRoute);
-app.use("/api/admin", adminRoute);
-
-// if (process.env.STATUS === "production") {
-//   app.use(express.static("../client/build"));
-
-//   app.get("*", (req, res) => {
-//     res.sendFile(
-//       path.resolve(__dirname, "..", "client", "build", "index.html")
-//     );
-//   });
-// }
+app.use("/api/users", userPublicRoute);
+app.use("/api/users", authCheck, userRoute);
+app.use("/api/sites", sitePublicRoute);
+app.use("/api/sites", authCheck, siteRoute);
+app.use("/api/tours", tourPublicRoute);
+app.use("/api/tours", authCheck, tourRoute);
+app.use("/api/admin", authCheck, adminAuthCheck, adminRoute);
 
 app.listen(process.env.PORT || 8080, () => {
   console.log("伺服器正在運行中");
